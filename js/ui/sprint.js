@@ -1,5 +1,7 @@
 // Sprint: planificar con la capacidad del equipo, trabajar en un tablero y cerrar con burndown y velocidad.
 import { h, campo } from './dom.js';
+import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
+import { listaVerificacion } from './historia.js';
 import {
   nuevoSprint, sugerirSprint, resumenSprint, burndown, cerrarSprint, cambiarEstado, velocidad, puntosDe, ESTADOS,
 } from '../nucleo/proyecto.js';
@@ -80,7 +82,9 @@ function planificar(app, sprint) {
       candidatas.length ? h('ul', { class: 'lista-elegir' }, candidatas.map((x) => h('li', {},
         h('label', {},
           h('input', { type: 'checkbox', checked: x.sprintId === sprint.id, onchange: (e) => alternar(x.id, e.target.checked) }),
-          h('span', {}, x.titulo), h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar'))))) : h('p', { class: 'vacio' }, 'El backlog está vacío.')),
+          h('span', {}, x.titulo),
+          h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar',
+            avance(x, definicionesDe(p).ready, 'ready').completa ? '' : h('span', { class: 'chip chip--aviso', title: 'No cumple la Definition of Ready' }, ' no lista')))))) : h('p', { class: 'vacio' }, 'El backlog está vacío.')),
     h('div', { class: 'acciones' },
       h('button', {
         type: 'button', class: 'btn btn--cobre', disabled: !resumen.historias,
@@ -106,7 +110,13 @@ function tablero(app, sprint) {
   const resumen = resumenSprint(sprint, p.historias);
   const hoy = new Date().toISOString().slice(0, 10);
   const restantes = Math.max(0, Math.round((new Date(sprint.fin) - new Date(hoy)) / 86400000));
-  const moverA = (id, estado) => app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === id ? cambiarEstado(y, estado) : y)) }));
+  const dod = definicionesDe(p).done;
+  const moverA = (id, estado) => {
+    const historia = p.historias.find((y) => y.id === id);
+    app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === id ? cambiarEstado(y, estado) : y)) }));
+    const faltan = estado === 'done' && historia ? avance(historia, dod, 'done').faltan.length : 0;
+    if (faltan) app.avisar(`"${historia.titulo}" pasó a Hecho, pero le faltan ${faltan} puntos de la Definition of Done.`, 'error');
+  };
 
   const columna = (estado) => {
     const hs = p.historias.filter((x) => x.sprintId === sprint.id && x.estado === estado);
@@ -123,6 +133,9 @@ function tablero(app, sprint) {
       ondragstart: (e) => { arrastrando = x.id; e.dataTransfer.effectAllowed = 'move'; },
     },
     h('span', { class: 'ficha-titulo' }, x.titulo),
+    estado !== 'todo' ? listaVerificacion(x, dod, 'done', (item, valor) => app.cambiar((y) => ({
+      ...y, historias: y.historias.map((z) => (z.id === x.id ? marcar(z, 'done', item, valor) : z)),
+    }), { redibujar: false })) : null,
     h('span', { class: 'ficha-pie' },
       h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar'),
       h('span', { class: 'tarjeta-mover' },
@@ -146,7 +159,7 @@ function tablero(app, sprint) {
         onclick: () => {
           const pendientes = p.historias.filter((x) => x.sprintId === sprint.id && x.estado !== 'done').length;
           const extra = pendientes ? ` ${pendientes} sin terminar volvieron al inicio del backlog.` : '';
-          app.cambiarConDeshacer(`${sprint.nombre} cerrado: ${resumen.hechos} puntos terminados.${extra}`, (x) => cerrarSprint(x, sprint.id));
+          app.cambiarConDeshacer(`${sprint.nombre} cerrado: ${resumen.hechos} puntos terminados.${extra} Buen momento para la retrospectiva.`, (x) => cerrarSprint(x, sprint.id));
         },
       }, 'Cerrar sprint')));
 }

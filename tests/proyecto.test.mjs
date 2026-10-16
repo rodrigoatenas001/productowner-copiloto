@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { notasAHistorias } from '../js/nucleo/historias.js';
 import {
   nuevoProyecto, nuevoSprint, normalizarProyecto, mover, cambiarEstado, velocidad, sugerirSprint,
-  burndown, resumenSprint, cerrarSprint, necesitaRespaldo, resumenEpicas,
+  burndown, resumenSprint, cerrarSprint, necesitaRespaldo, resumenEpicas, mapaHistorias, moverEnMapa,
 } from '../js/nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, celdaCsv, nombreArchivo } from '../js/nucleo/exportar.js';
 
@@ -109,10 +109,18 @@ test('CSV escapa comillas, saltos y fórmulas', () => {
   assert.equal(csv.split('\r\n').length, 5);
 });
 
-test('Jira CSV usa columnas estándar y etiqueta la épica', () => {
-  const csv = aJiraCsv(proyectoDeEjemplo());
-  assert.ok(csv.startsWith('Summary,Description,Issue Type,Story Points,Priority,Labels'));
-  assert.ok(csv.includes(',Story,5,High,pagos'));
+test('Jira CSV: épicas como incidencias, historias enlazadas por Parent ID y sprint', () => {
+  const p = proyectoDeEjemplo();
+  const s = nuevoSprint(p);
+  p.sprints.push(s);
+  p.historias[0].sprintId = s.id;
+  const filas = aJiraCsv(p).split('\r\n');
+  assert.equal(filas[0], 'Issue ID,Parent ID,Summary,Description,Issue Type,Story Points,Priority,Labels,Sprint');
+  assert.ok(filas[1].startsWith('1,,Pagos,'));
+  assert.ok(filas[1].includes(',Epic,'));
+  assert.ok(filas[2].startsWith('2,1,'), 'la primera historia apunta a la épica 1');
+  assert.ok(filas[2].endsWith(',Story,5,High,pagos,Sprint 1'));
+  assert.equal(filas.length, 1 + 1 + 4);
 });
 
 test('Markdown agrupa por épica con criterios como casillas', () => {
@@ -151,4 +159,19 @@ test('resumenEpicas mide el avance en puntos y respeta el orden del backlog', ()
   assert.equal(pagos.avance, 28);
   assert.equal(reportes.sinEstimar, 1);
   assert.equal(reportes.avance, 0);
+});
+
+test('mapa de historias: épicas como columnas, prioridades como versiones', () => {
+  const p = proyectoDeEjemplo(); // 4 historias de Pagos, todas "should"
+  p.historias.push(...notasAHistorias('- sin épica'));
+  p.historias[0].prioridad = 'must';
+  const m = mapaHistorias(p);
+  assert.deepEqual(m.epicas, ['Pagos', '']);
+  assert.equal(m.filas[0].celdas.Pagos.length, 1);
+  assert.equal(m.filas[0].puntos, 5);
+  assert.equal(m.filas[1].celdas.Pagos.length, 3);
+  assert.equal(m.filas[1].celdas[''].length, 1);
+
+  const movidas = moverEnMapa(p.historias, p.historias[4].id, 'Pagos', 'could');
+  assert.deepEqual([movidas[4].epica, movidas[4].prioridad], ['Pagos', 'could']);
 });

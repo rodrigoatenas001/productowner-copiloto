@@ -1,9 +1,10 @@
 // Ajustes: proyecto, IA opcional, respaldo y exportaciones.
 import { h, campo, selector, descargar } from './dom.js';
 import { normalizarProyecto } from '../nucleo/proyecto.js';
-import { aCsv, aJiraCsv, aMarkdown, nombreArchivo } from '../nucleo/exportar.js';
+import { aCsv, aJiraCsv, aMarkdown, nombreArchivo, GUIA_JQL } from '../nucleo/exportar.js';
 import { PROVEEDORES, probarConexion } from '../ia.js';
 import { importarCsv } from '../nucleo/importar.js';
+import { definicionesDe, listaDesdeTexto, NOMBRES, DEFINICIONES_INICIALES } from '../nucleo/definiciones.js';
 
 export function vistaAjustes(app) {
   const p = app.proyecto;
@@ -12,6 +13,7 @@ export function vistaAjustes(app) {
       h('p', { class: 'eyebrow' }, p.nombre),
       h('h1', {}, 'Ajustes')),
     seccionProyecto(app),
+    seccionDefiniciones(app),
     seccionRespaldo(app),
     seccionIa(app),
     seccionAcerca());
@@ -76,7 +78,19 @@ function seccionRespaldo(app) {
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'md'), aMarkdown(p), 'text/markdown') }, 'Markdown'),
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'csv'), aCsv(p), 'text/csv') }, 'CSV (Excel)'),
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'jira.csv'), aJiraCsv(p), 'text/csv') }, 'CSV para Jira')),
-    h('p', { class: 'ayuda' }, 'En Jira: Configuración del sistema → Importación externa → CSV. Las columnas se reconocen solas.'));
+    h('p', { class: 'ayuda' }, 'En Jira: Configuración del sistema → Importación externa → CSV. Asocia "Issue ID" y "Parent ID" para que las historias queden dentro de sus épicas. El sprint solo se asigna si ya existe uno con ese nombre en Jira; si no, deja esa columna sin mapear.'),
+    h('details', { class: 'guia-jql' },
+      h('summary', {}, 'Guía rápida de JQL'),
+      h('p', { class: 'ayuda' }, 'Pégalas en la búsqueda avanzada de Jira. Cambia PROJ-123 y los usuarios por los tuyos.'),
+      h('ul', {}, GUIA_JQL.map((q) => h('li', {},
+        h('span', { class: 'guia-para' }, q.para),
+        h('code', {}, q.jql),
+        h('button', {
+          type: 'button', class: 'btn-texto',
+          onclick: async () => {
+            try { await navigator.clipboard.writeText(q.jql); app.avisar('Consulta copiada.'); } catch { app.avisar('No se pudo copiar; selecciónala a mano.', 'error'); }
+          },
+        }, 'Copiar'))))));
 }
 
 function seccionIa(app) {
@@ -167,4 +181,21 @@ function entradaCsv(app) {
   });
   return h('div', { class: 'acciones' }, entrada,
     h('label', { for: 'importar-csv', class: 'btn btn--secundario', tabindex: '0', onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); entrada.click(); } } }, 'Importar CSV'));
+}
+
+function seccionDefiniciones(app) {
+  const d = definicionesDe(app.proyecto);
+  const editor = (tipo, ayuda) => campo(NOMBRES[tipo], h('textarea', {
+    rows: 6,
+    onchange: (e) => {
+      const lista = listaDesdeTexto(e.target.value);
+      app.cambiar((x) => ({ ...x, definiciones: { ...definicionesDe(x), [tipo]: lista.length ? lista : DEFINICIONES_INICIALES[tipo] } }));
+    },
+  }, d[tipo].join('\n')), ayuda);
+  return h('section', { class: 'panel', 'aria-labelledby': 'aj-definiciones' },
+    h('h2', { id: 'aj-definiciones' }, 'Definiciones del equipo'),
+    h('p', { class: 'ayuda' }, 'Un punto por línea. Acuérdenlas en equipo y revísenlas en las retrospectivas.'),
+    h('div', { class: 'editor-fila' },
+      editor('ready', 'Lo que debe cumplir una historia para entrar a un sprint. Se marca en el backlog.'),
+      editor('done', 'Lo que debe cumplir para considerarse terminada. Se marca en el tablero del sprint.')));
 }

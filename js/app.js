@@ -8,11 +8,13 @@ import { vistaBacklog } from './ui/backlog.js';
 import { vistaSprint } from './ui/sprint.js';
 import { vistaAjustes } from './ui/ajustes.js';
 import { vistaTaller } from './ui/taller.js';
+import { vistaRetro } from './ui/retro.js';
 
 const VISTAS = {
   notas: { titulo: 'Notas', render: vistaNotas },
   backlog: { titulo: 'Backlog', render: vistaBacklog },
   sprint: { titulo: 'Sprint', render: vistaSprint },
+  retro: { titulo: 'Retro', render: vistaRetro },
   taller: { titulo: 'Taller', render: vistaTaller },
   ajustes: { titulo: 'Ajustes', render: vistaAjustes },
 };

@@ -1,13 +1,14 @@
 // Backlog priorizado: el orden es la prioridad. Se reordena arrastrando o con los botones.
 import { h, selector } from './dom.js';
-import { mover, puntosDe, resumenEpicas } from '../nucleo/proyecto.js';
+import { mover, puntosDe, resumenEpicas, mapaHistorias, moverEnMapa } from '../nucleo/proyecto.js';
 import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest } from '../nucleo/historias.js';
 import { iaConfigurada, criteriosConIa, dividirConIa } from '../ia.js';
-import { editorHistoria, insigniaCalidad } from './historia.js';
+import { editorHistoria, insigniaCalidad, listaVerificacion } from './historia.js';
+import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
 
 const filtros = { texto: '', epica: '' };
-let modo = 'lista'; // 'lista' | 'epicas' | 'estimar'
+let modo = 'lista'; // 'lista' | 'epicas' | 'mapa' | 'estimar'
 let abierta = null;
 let arrastrando = null;
 
@@ -65,6 +66,9 @@ export function vistaBacklog(app) {
         insignia.replaceChildren(insigniaCalidad(actual));
         zonaIa.replaceChildren(...accionesInteligentes(app, actual));
       }, { epicas }),
+      listaVerificacion(historia, definicionesDe(app.proyecto).ready, 'ready', (item, valor) => app.cambiar((x) => ({
+        ...x, historias: x.historias.map((y) => (y.id === historia.id ? marcar(y, 'ready', item, valor) : y)),
+      }), { redibujar: false })),
       h('div', { class: 'acciones' },
         zonaIa,
         sprintAbierto ? h('button', {
@@ -94,12 +98,13 @@ export function vistaBacklog(app) {
       h('h1', {}, 'Backlog'),
       h('p', { class: 'bajada' }, 'Arriba lo más importante. Arrastra para reordenar o usa las flechas.')),
     h('div', { class: 'pestanas', role: 'tablist', 'aria-label': 'Vista del backlog' },
-      Object.entries({ lista: 'Lista priorizada', epicas: 'Épicas', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
+      Object.entries({ lista: 'Lista priorizada', epicas: 'Épicas', mapa: 'Mapa', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
         type: 'button', role: 'tab', 'aria-selected': String(modo === m), class: 'pestana',
         onclick: () => { modo = m; app.render(); },
       }, texto))),
     modo === 'epicas' ? vistaEpicas(app) : null,
     modo === 'estimar' ? vistaEstimar(app) : null,
+    modo === 'mapa' ? vistaMapa(app) : null,
     modo !== 'lista' ? null : h('dl', { class: 'cifras' },
       cifra('Historias', backlog.length),
       cifra('Puntos estimados', puntosDe(backlog)),
@@ -206,4 +211,38 @@ function vistaEpicas(app) {
     h('p', { class: 'tarjeta-meta' },
       `${e.hechas} de ${e.historias} historias · ${e.puntosHechos} de ${e.puntos} pts`,
       e.sinEstimar ? ` · ${e.sinEstimar} sin estimar` : ''))));
+}
+
+/** Mapa de historias: arrastra una tarjeta a otra celda para cambiar su épica o su versión. */
+function vistaMapa(app) {
+  const { epicas, filas } = mapaHistorias(app.proyecto);
+  if (!app.proyecto.historias.length) return h('p', { class: 'vacio' }, 'Aún no hay historias.');
+  let arrastrada = null;
+
+  const celda = (fila, epica) => h('td', {
+    class: 'mapa-celda',
+    ondragover: (e) => { if (arrastrada) { e.preventDefault(); e.currentTarget.classList.add('is-destino'); } },
+    ondragleave: (e) => e.currentTarget.classList.remove('is-destino'),
+    ondrop: (e) => {
+      e.preventDefault();
+      const id = arrastrada;
+      arrastrada = null;
+      if (id) app.cambiar((x) => ({ ...x, historias: moverEnMapa(x.historias, id, epica, fila.prioridad) }));
+    },
+  }, fila.celdas[epica].map((x) => h('button', {
+    type: 'button', draggable: 'true',
+    class: `mapa-tarjeta${x.estado === 'done' ? ' is-hecha' : ''}`,
+    title: 'Arrastra para cambiar épica o versión; clic para editar',
+    ondragstart: (e) => { arrastrada = x.id; e.dataTransfer.effectAllowed = 'move'; },
+    onclick: () => { abierta = x.id; modo = 'lista'; filtros.texto = ''; filtros.epica = ''; app.render(); },
+  }, x.titulo, x.puntos ? h('span', { class: 'tarjeta-meta' }, ` · ${x.puntos}`) : null)));
+
+  return h('div', { class: 'mapa-contenedor' },
+    h('p', { class: 'ayuda' }, 'Cada columna es una épica y cada fila una versión. La primera fila es lo mínimo para salir: si no cabe en un sprint o dos, recórtala. Arrastra tarjetas para mover; clic para editar.'),
+    h('div', { class: 'mapa-scroll' },
+      h('table', { class: 'mapa' },
+        h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, ''), epicas.map((e) => h('th', { scope: 'col' }, e || 'Sin épica')))),
+        h('tbody', {}, filas.map((fila) => h('tr', { class: `mapa-fila mapa-fila--${fila.prioridad}` },
+          h('th', { scope: 'row' }, fila.nombre, h('span', { class: 'tarjeta-meta' }, `${fila.puntos} pts pendientes`)),
+          epicas.map((e) => celda(fila, e))))))));
 }

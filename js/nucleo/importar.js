@@ -47,6 +47,9 @@ const COLUMNAS = {
   prioridad: ['priority', 'prioridad'],
   epica: ['epic', 'epica', 'epic name', 'epic link', 'labels', 'etiquetas', 'parent summary'],
   estado: ['status', 'estado'],
+  tipo: ['issue type', 'tipo de incidencia', 'tipo', 'type'],
+  id: ['issue id', 'id de incidencia', 'issue key', 'clave', 'key'],
+  padre: ['parent id', 'parent', 'id principal', 'parent key'],
 };
 
 export function mapearColumnas(encabezados) {
@@ -99,8 +102,17 @@ export function importarCsv(texto, { rolPorDefecto = 'usuario' } = {}) {
   let omitidas = 0;
   let sinTitulo = 0;
   const celda = (fila, campo) => (mapa[campo] === undefined ? '' : String(fila[mapa[campo]] ?? '').trim());
+  const tipoDe = (fila) => sinAcentos(celda(fila, 'tipo'));
+
+  // Las épicas del archivo no se importan como historias: dan nombre a la épica de sus hijas
+  const epicasPorId = {};
+  for (const fila of filas.slice(1)) {
+    if (tipoDe(fila) === 'epic' || tipoDe(fila) === 'epica') epicasPorId[celda(fila, 'id')] = celda(fila, 'titulo');
+  }
 
   for (const fila of filas.slice(1, 2001)) {
+    const tipo = tipoDe(fila);
+    if (tipo === 'epic' || tipo === 'epica' || tipo.startsWith('sub')) continue;
     if (HECHO.includes(sinAcentos(celda(fila, 'estado')))) { omitidas++; continue; }
 
     const titulo = celda(fila, 'titulo');
@@ -114,7 +126,7 @@ export function importarCsv(texto, { rolPorDefecto = 'usuario' } = {}) {
       : aHistoria({ texto: titulo || enunciado }, { rolPorDefecto });
 
     const criterios = extraerCriterios(celda(fila, 'criterios') || resto.join('\n'));
-    const epica = celda(fila, 'epica').split(/[,;]/)[0].trim();
+    const epica = epicasPorId[celda(fila, 'padre')] || celda(fila, 'epica').split(/[,;]/)[0].trim();
 
     historias.push({
       ...base,

@@ -1,5 +1,7 @@
 // Modelo de proyecto, sprints y métricas. Puro y serializable a JSON.
 import { nuevoId, ESCALA_PUNTOS, PRIORIDADES } from './historias.js';
+import { normalizarRetros } from './retro.js';
+import { DEFINICIONES_INICIALES, normalizarDefiniciones, normalizarChecks } from './definiciones.js';
 
 export const VERSION_DATOS = 1;
 export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', done: 'Hecho' };
@@ -14,6 +16,8 @@ export function nuevoProyecto(nombre = 'Mi proyecto') {
     notas: '',
     historias: [],
     sprints: [],
+    retros: [],
+    definiciones: structuredClone(DEFINICIONES_INICIALES),
     respaldado: null,
     creado: ahora,
     actualizado: ahora,
@@ -92,6 +96,7 @@ export function normalizarProyecto(datos) {
     notaOriginal: texto(h.notaOriginal, 2000),
     creada: texto(h.creada, 40) || new Date().toISOString(),
     terminada: texto(h.terminada, 40) || null,
+    checks: normalizarChecks(h.checks),
   }));
 
   return {
@@ -102,6 +107,8 @@ export function normalizarProyecto(datos) {
     notas: texto(datos.notas, 100000),
     historias,
     sprints,
+    retros: normalizarRetros(datos.retros, idsSprint),
+    definiciones: normalizarDefiniciones(datos.definiciones),
     respaldado: texto(datos.respaldado, 40) || null,
     creado: texto(datos.creado, 40) || new Date().toISOString(),
     actualizado: new Date().toISOString(),
@@ -233,4 +240,31 @@ export function resumenEpicas(proyecto) {
     ...e,
     avance: e.puntos ? Math.round((e.puntosHechos / e.puntos) * 100) : (e.historias ? Math.round((e.hechas / e.historias) * 100) : 0),
   }));
+}
+
+/** Filas del mapa de historias: la prioridad funciona como versión. */
+export const VERSIONES = {
+  must: 'Versión 1 · imprescindible',
+  should: 'Versión 2 · importante',
+  could: 'Más adelante · deseable',
+  wont: 'Esta vez no',
+};
+
+/**
+ * Mapa de historias (story mapping): columnas = épicas en orden de aparición, filas = versiones.
+ * @returns {{epicas: string[], filas: {prioridad: string, nombre: string, celdas: Object<string, object[]>, puntos: number}[]}}
+ */
+export function mapaHistorias(proyecto) {
+  const epicas = [...new Set(proyecto.historias.map((h) => h.epica || ''))];
+  const filas = Object.entries(VERSIONES).map(([prioridad, nombre]) => {
+    const celdas = Object.fromEntries(epicas.map((e) => [e, []]));
+    for (const h of proyecto.historias) if (h.prioridad === prioridad) celdas[h.epica || ''].push(h);
+    return { prioridad, nombre, celdas, puntos: puntosDe(proyecto.historias.filter((h) => h.prioridad === prioridad && h.estado !== 'done')) };
+  });
+  return { epicas, filas };
+}
+
+/** Mueve una historia a otra celda del mapa. */
+export function moverEnMapa(historias, id, epica, prioridad) {
+  return historias.map((h) => (h.id === id ? { ...h, epica, prioridad } : h));
 }

@@ -1,6 +1,7 @@
 // Editor y tarjeta de una historia, compartidos por Notas (candidatas) y Backlog.
 import { h, campo, selector } from './dom.js';
 import { revisarInvest, calidad, enunciado, resumirTitulo, ESCALA_PUNTOS, PRIORIDADES } from '../nucleo/historias.js';
+import { avance, NOMBRES } from '../nucleo/definiciones.js';
 
 /** Insignia de calidad INVEST: color y texto según los avisos. */
 export function insigniaCalidad(historia) {
@@ -67,4 +68,27 @@ export function editorHistoria(historia, alCambiar, { epicas = [] } = {}) {
       ? h('p', { class: 'nota-original' }, h('span', {}, 'Nota original: '), historia.notaOriginal)
       : null,
   );
+}
+
+/** Lista de verificación (DoR o DoD) de una historia. `alMarcar(item, valor)` guarda el cambio. */
+export function listaVerificacion(historia, lista, tipo, alMarcar) {
+  const estado = avance(historia, lista, tipo);
+  const resumen = h('span', { class: `chip${estado.completa ? ' chip--ok' : ''}` }, `${estado.hechos}/${estado.total}`);
+  return h('details', { class: 'verificacion' },
+    h('summary', {}, NOMBRES[tipo], ' ', resumen),
+    h('ul', {}, lista.map((item) => h('li', {},
+      h('label', { class: 'opcion' },
+        h('input', {
+          type: 'checkbox', checked: (historia.checks?.[tipo] || []).includes(item),
+          onchange: (e) => {
+            alMarcar(item, e.target.checked);
+            const marcados = new Set(historia.checks?.[tipo] || []);
+            if (e.target.checked) marcados.add(item); else marcados.delete(item);
+            const hechos = lista.filter((x) => marcados.has(x)).length;
+            historia = { ...historia, checks: { ...(historia.checks || {}), [tipo]: [...marcados] } };
+            resumen.textContent = `${hechos}/${lista.length}`;
+            resumen.classList.toggle('chip--ok', hechos === lista.length);
+          },
+        }),
+        item)))));
 }

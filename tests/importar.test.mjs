@@ -54,3 +54,9 @@ test('rechaza archivos sin columnas útiles o vacíos', () => {
   assert.throws(() => importarCsv('A,B\n1,2'), /columna de título/);
   assert.throws(() => importarCsv('Summary'), /no tiene filas/);
 });
+
+test('las épicas del CSV agrupan a sus historias y no se importan como historias', () => {
+  const csv = 'Issue ID,Parent ID,Summary,Issue Type,Labels\n1,,Pagos en línea,Epic,pagos\n2,1,Pagar con tarjeta,Story,pagos\n3,2,Probar Visa,Sub-task,\n4,,Ver catálogo,Story,';
+  const { historias } = importarCsv(csv);
+  assert.deepEqual(historias.map((x) => [x.titulo, x.epica]), [['Pagar con tarjeta', 'Pagos en línea'], ['Ver catálogo', '']]);
+});

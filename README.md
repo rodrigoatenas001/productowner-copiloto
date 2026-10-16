@@ -13,8 +13,16 @@ Pensado para Product Owners y equipos independientes que no quieren pagar una he
 - **Sprints.** Capacidad, sugerencia automática según prioridad y capacidad, tablero Por hacer / En curso / Hecho, burndown y velocidad de los últimos sprints.
 - **Dividir y mejorar.** Las historias que piden varias cosas se dividen en un clic (por sus partes o con IA), y la IA puede proponer criterios de aceptación con casos de error.
 - **Deshacer y respaldo.** Eliminar, dividir o cerrar un sprint se puede deshacer, y el copiloto te recuerda descargar un respaldo cuando tienes trabajo sin respaldar.
-- **Importar y exportar.** Trae tu backlog desde un CSV de Jira o Excel; exporta a Markdown, CSV para Excel y CSV listo para importar en Jira. Respaldo completo en JSON.
+- **Definition of Ready y Done.** Listas del equipo, editables, que cada historia marca en el backlog y en el tablero; avisa si algo pasa a Hecho sin cumplir la DoD.
+- **Mapa de historias.** Épicas en columnas y versiones en filas; arrastra para decidir qué entra en la primera versión.
+- **Retrospectiva.** Notas anónimas en tres columnas, votos, acciones con responsable y revisión de las acciones pendientes de la retro anterior.
+- **Taller para cursos y equipos.** Trivia tipo Kahoot para proyectar (Scrum, PO, historias, estimación, Jira y agilidad; puntaje por rapidez y racha; preguntas propias por JSON) y ejercicios de historias de usuario sobre casos reales, con retroalimentación INVEST inmediata.
+- **Importar y exportar.** Trae tu backlog desde un CSV de Jira o Excel; exporta a Markdown, CSV para Excel y CSV para Jira con épicas enlazadas y sprints, más una guía rápida de JQL. Respaldo completo en JSON.
 - **IA opcional y tuya.** Funciona completo sin IA. Si quieres, conecta [Ollama](https://ollama.com) en tu equipo (gratis y privado) o tu propia clave de un servicio compatible con OpenAI o de Anthropic.
+
+## Con equipos
+
+Está pensado para una persona o para un equipo **mirando la misma pantalla** (presencial o compartiendo pantalla): planificar, estimar, la retro y la trivia funcionan así. No sincroniza entre equipos distintos porque no hay servidor; para pasar un proyecto, se descarga el respaldo y se importa en el otro navegador.
 
 ## Privacidad
 
