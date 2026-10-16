@@ -175,9 +175,18 @@ function seccionIa(app, clave = 'ia') {
 
 function seccionAcerca() {
   return h('section', { class: 'panel', 'aria-labelledby': 'aj-acerca' },
-    h('h2', { id: 'aj-acerca' }, 'Acerca del copiloto'),
+    h('h2', { id: 'aj-acerca' }, 'Acerca de Copiloto PO'),
     h('p', {}, 'Herramienta libre (licencia MIT) para Product Owners y equipos independientes. Funciona sin conexión y sin cuentas.'),
-    h('p', {}, 'Hecha por la comunidad de ', h('a', { href: 'https://productowner.cl', rel: 'noopener' }, 'ProductOwner.cl'), '.'));
+    h('h3', {}, 'Tu privacidad'),
+    h('ul', { class: 'privacidad' },
+      h('li', {}, 'Copiloto PO no recopila datos: no tiene servidor, cuentas, cookies ni analítica. Todo lo que escribes queda en este navegador.'),
+      h('li', {}, 'Si conectas una IA, tus notas van solo a ese servicio, con tu clave, cuando usas una función con IA. Con Ollama no salen de tu equipo.'),
+      h('li', {}, 'Quien publica esta página puede registrar visitas técnicas como cualquier sitio web. Para evitarlo, descárgalo y úsalo en tu equipo.')),
+    h('p', {},
+      h('a', { href: 'https://github.com/rodrigoatenas001/productowner-copiloto/releases/latest', rel: 'noopener' }, 'Descargar para usar en tu equipo'),
+      ' · ',
+      h('a', { href: 'https://github.com/rodrigoatenas001/productowner-copiloto', rel: 'noopener' }, 'Código fuente'),
+      ' · Hecha por la comunidad de ', h('a', { href: 'https://productowner.cl', rel: 'noopener' }, 'ProductOwner.cl'), '.'));
 }
 
 function entradaCsv(app) {

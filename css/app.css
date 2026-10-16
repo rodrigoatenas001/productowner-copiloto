@@ -451,3 +451,6 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; scroll-behavior: auto !important; } }
 @media print { .lateral, .acciones, .barra-filtros, .avisos { display: none; } .marco { display: block; } }
+
+/* Acerca de */
+.privacidad { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 4px; }

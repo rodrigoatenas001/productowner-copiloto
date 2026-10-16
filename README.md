@@ -33,30 +33,51 @@ Está pensado para una persona o para un equipo **mirando la misma pantalla** (p
 
 ## Privacidad
 
-- Todo se guarda en tu navegador (IndexedDB). No hay servidor, cuentas ni analítica.
-- Si conectas una IA, tus notas viajan **solo** a ese servicio y solo cuando presionas "Convertir con IA". La clave queda guardada en tu navegador.
+- **Copiloto PO no recopila datos.** No tiene servidor, cuentas, cookies ni analítica: todo lo que escribes se guarda en tu navegador (IndexedDB) y no se envía a nadie.
+- La única excepción es la IA, si tú la conectas: tus notas viajan **solo** al servicio que configuraste y solo cuando usas una función con IA. La clave queda guardada en tu navegador. Con Ollama, nada sale de tu equipo.
+- Quien publica la página (GitHub Pages, tu propio GitHub o tu servidor) puede registrar visitas técnicas, como cualquier sitio web, bajo sus propias políticas. Usarlo desde el ZIP en tu equipo evita incluso eso.
 - Los datos del navegador se pueden borrar (limpieza, otro equipo, modo privado): descarga un respaldo desde Ajustes de vez en cuando.
 
 ## Usarlo
 
-Ábrelo en **https://rodrigoatenas001.github.io/productowner-copiloto/** y, en Chrome o Edge, usa **Instalar aplicación** para tenerlo como programa y usarlo sin conexión.
+Hay tres formas; los datos son los mismos en todas: se guardan en el navegador que uses.
 
-Para correrlo en tu equipo basta un servidor estático (los módulos de JavaScript no cargan con doble clic sobre el archivo):
+### 1. En línea, sin instalar nada
 
-```bash
-python -m http.server 8080
-```
+Ábrelo en **https://rodrigoatenas001.github.io/productowner-copiloto/**. En Chrome o Edge, usa **Instalar aplicación** para tenerlo como programa y usarlo sin conexión.
 
-y abre http://localhost:8080.
+### 2. Descargado en tu equipo
+
+1. Descarga el ZIP de la última versión en [Releases](https://github.com/rodrigoatenas001/productowner-copiloto/releases/latest) y descomprímelo en una carpeta fija (por ejemplo, Documentos).
+2. Ábrelo:
+   - **Windows:** doble clic en **`Abrir Copiloto PO.bat`**. No necesita instalar nada.
+   - **Mac:** doble clic en **`abrir-copiloto.command`**. La primera vez, macOS puede pedir permiso: clic derecho → Abrir → Abrir. Usa Python 3 (si no lo tienes, el lanzador te dice cómo instalarlo).
+   - **Linux:** `sh abrir-copiloto.command`.
+3. Se abre el navegador en `http://localhost:8765`. Deja la ventana del lanzador abierta mientras lo usas.
+
+Importante: usa siempre el mismo lanzador y no cambies el puerto. El navegador guarda tus proyectos asociados a esa dirección exacta; si cambia, parecerá que desaparecieron (siguen ahí, en la dirección anterior). Para pasar tus proyectos a otra dirección o equipo, usa el respaldo de Ajustes.
+
+¿Por qué no basta con doble clic en `index.html`? Por seguridad, los navegadores no cargan módulos de JavaScript desde archivos sueltos. El lanzador levanta un servidor mínimo, solo para tu equipo.
+
+### 3. Tu propia copia en GitHub
+
+Para tener tu versión en línea, bajo tu control:
+
+1. Inicia sesión en GitHub y presiona **Fork** en este repositorio.
+2. En tu copia: **Settings → Pages**.
+3. En "Build and deployment", elige **Deploy from a branch**, rama **main** y carpeta **/ (root)**. Guarda.
+4. En uno o dos minutos estará en `https://TU-USUARIO.github.io/productowner-copiloto/`.
+
+Para recibir mejoras, en tu copia usa **Sync fork**. Es gratis para repositorios públicos.
 
 ### Usar Ollama
 
 ```bash
 ollama pull llama3.1
-OLLAMA_ORIGINS=https://la-direccion-del-copiloto ollama serve
+OLLAMA_ORIGINS=http://localhost:8765 ollama serve
 ```
 
-En Ajustes → IA elige "Ollama", deja la dirección `http://localhost:11434` y presiona "Probar conexión".
+Cambia `OLLAMA_ORIGINS` por la dirección desde donde abres Copiloto PO (por ejemplo, `https://rodrigoatenas001.github.io` si lo usas en línea). En Ajustes → IA elige "Ollama", deja la dirección `http://localhost:11434` y presiona "Probar conexión".
 
 ## Desarrollo
 
