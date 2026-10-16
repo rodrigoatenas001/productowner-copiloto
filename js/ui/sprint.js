@@ -255,7 +255,7 @@ function historial(app, cerrados) {
   return h('section', { class: 'panel', 'aria-labelledby': 'historial-titulo' },
     h('h2', { id: 'historial-titulo' }, 'Sprints anteriores'),
     h('p', { class: 'ayuda' }, `Velocidad promedio (últimos 3): ${velocidad(p)} puntos.`),
-    h('table', { class: 'tabla' },
+    h('div', { class: 'tabla-scroll' }, h('table', { class: 'tabla' },
       h('thead', {}, h('tr', {}, h('th', {}, 'Sprint'), h('th', {}, 'Fechas'), h('th', {}, 'Terminado'), h('th', {}, 'Capacidad'), h('th', {}, 'Compartir'))),
       h('tbody', {}, [...cerrados].reverse().map((s) => h('tr', {},
         h('td', {}, s.nombre),
@@ -263,7 +263,7 @@ function historial(app, cerrados) {
         h('td', {}, `${puntosDe(p.historias.filter((x) => x.sprintId === s.id && x.estado === 'done'))} pts`),
         h('td', {}, s.capacidad ? `${s.capacidad} pts` : '—'),
         h('td', {}, botonesMarkdown(app, 'Reporte', s.nombre, () => reporteSprint(app.proyecto, s.id)),
-          botonesMarkdown(app, 'Notas de versión', `notas-${s.nombre}`, () => notasDeVersion(app.proyecto, { sprintId: s.id }))))))));
+          botonesMarkdown(app, 'Notas de versión', `notas-${s.nombre}`, () => notasDeVersion(app.proyecto, { sprintId: s.id })))))))));
 }
 
 function formatear(iso) {

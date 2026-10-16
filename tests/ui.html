@@ -1,0 +1,20 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <title>Pruebas de interfaz · Copiloto PO</title>
+  <style>
+    body { font: 14px/1.5 system-ui, sans-serif; margin: 16px; }
+    iframe { width: 1100px; height: 760px; border: 1px solid #ccc; }
+    .ok { color: #1d6b3a; } .falla { color: #b42318; font-weight: 600; }
+  </style>
+</head>
+<body>
+  <h1>Pruebas de interfaz</h1>
+  <p>Usa una base de datos aparte (<code>?prueba</code>): no toca tus proyectos.</p>
+  <ol id="lista"></ol>
+  <pre id="resultado"></pre>
+  <iframe id="app" title="Copiloto en prueba"></iframe>
+  <script type="module" src="ui.js"></script>
+</body>
+</html>

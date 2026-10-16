@@ -56,6 +56,7 @@ a { color: var(--cobre-texto); }
 .saltar:focus { left: 8px; }
 code, pre { font-family: var(--f-mono); font-size: .85rem; }
 .ayuda code { overflow-wrap: anywhere; }
+.tabla-scroll { overflow-x: auto; }
 pre { background: var(--papel); border: 1px solid var(--niebla); border-radius: 6px; padding: 10px 12px; overflow-x: auto; }
 
 /* Marco: barra lateral + contenido */

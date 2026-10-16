@@ -73,6 +73,8 @@ export function vistaBacklog(app) {
         meta.textContent = metaTexto(actual);
         insignia.replaceChildren(insigniaCalidad(actual));
         zonaIa.replaceChildren(...accionesInteligentes(app, actual));
+        // Puntos y prioridad cambian las cifras de arriba; son listas, así que redibujar no quita el foco de un texto
+        if ('puntos' in cambios || 'prioridad' in cambios) app.render();
       }, { epicas }),
       listaVerificacion(historia, definicionesDe(app.proyecto).ready, 'ready', (item, valor) => app.cambiar((x) => ({
         ...x, historias: x.historias.map((y) => (y.id === historia.id ? marcar(y, 'ready', item, valor) : y)),

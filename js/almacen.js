@@ -1,5 +1,7 @@
 // Almacenamiento local en IndexedDB. Nada sale del navegador.
-const NOMBRE = 'copiloto-po';
+// Con ?prueba en la dirección se usa una base aparte: las pruebas de interfaz nunca tocan los datos reales.
+export const MODO_PRUEBA = new URLSearchParams(location.search).has('prueba');
+const NOMBRE = MODO_PRUEBA ? 'copiloto-po-prueba' : 'copiloto-po';
 const VERSION = 1;
 
 let conexion = null;

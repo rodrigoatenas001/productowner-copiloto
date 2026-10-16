@@ -1,5 +1,5 @@
 // Arranque y estado de la aplicación. Cada vista vive en js/ui/*.js y recibe `app`.
-import { listarProyectos, guardarProyecto, borrarProyecto, leerAjuste, guardarAjuste, pedirPersistencia } from './almacen.js';
+import { listarProyectos, guardarProyecto, borrarProyecto, leerAjuste, guardarAjuste, pedirPersistencia, MODO_PRUEBA } from './almacen.js';
 import { nuevoProyecto, necesitaRespaldo } from './nucleo/proyecto.js';
 import { nombreArchivo } from './nucleo/exportar.js';
 import { h, vaciar, avisar, descargar } from './ui/dom.js';
@@ -240,7 +240,7 @@ window.addEventListener('hashchange', () => {
   if (app.proyecto && VISTAS[vista] && vista !== app.vista) app.ir(vista);
 });
 
-if ('serviceWorker' in navigator && location.protocol !== 'file:') {
+if ('serviceWorker' in navigator && location.protocol !== 'file:' && !MODO_PRUEBA) {
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 

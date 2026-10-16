@@ -74,8 +74,11 @@ tests/
 ```
 
 ```bash
-npm test        # o: node --test
+npm test          # lógica (node --test)
+npm run test:ui   # interfaz: recorre la app real en Chrome o Edge sin ventana
 ```
+
+Las pruebas de interfaz también se pueden ver en vivo abriendo `tests/ui.html` con el servidor local. Usan una base de datos aparte (`?prueba`), así que no tocan tus proyectos.
 
 Al publicar una versión nueva, cambia `VERSION` en `sw.js` para que los navegadores descarguen los archivos nuevos.
 
