@@ -1,4 +1,4 @@
 node_modules/
 .DS_Store
 Thumbs.db
-.perfil-pruebas/
+.perfil-pruebas*/

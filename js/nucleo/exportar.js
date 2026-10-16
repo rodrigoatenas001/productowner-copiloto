@@ -23,6 +23,10 @@ export function aCsv(proyecto) {
   return '\uFEFF' + lineas.join('\r\n'); // BOM para que Excel lea bien los acentos
 }
 
+// Jira no trae "Spike" ni "Deuda técnica" por defecto: van como tareas con etiqueta
+const TIPO_JIRA = { historia: 'Story', bug: 'Bug', spike: 'Task', deuda: 'Task' };
+const ETIQUETA_TIPO = { spike: 'spike', deuda: 'deuda-tecnica' };
+
 const etiquetaDe = (texto) => texto.normalize('NFD').replace(/[\u0300-\u036f]/g, '').replace(/[^\w]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
 
 /**
@@ -44,8 +48,8 @@ export function aJiraCsv(proyecto) {
   proyecto.historias.forEach((h, i) => {
     const descripcion = `${enunciado(h)}\n\nCriterios de aceptación:\n${h.criterios.map((c) => `* ${c}`).join('\n')}`;
     lineas.push(fila([
-      String(epicas.length + i + 1), h.epica ? idEpica[h.epica] : '', h.titulo, descripcion, 'Story',
-      h.puntos ?? '', prioridadJira[h.prioridad] || 'Medium', h.epica ? etiquetaDe(h.epica) : '', sprints[h.sprintId] || '',
+      String(epicas.length + i + 1), h.epica ? idEpica[h.epica] : '', h.titulo, descripcion, TIPO_JIRA[h.tipo] || 'Story',
+      h.puntos ?? '', prioridadJira[h.prioridad] || 'Medium', [h.epica ? etiquetaDe(h.epica) : '', ETIQUETA_TIPO[h.tipo] || ''].filter(Boolean).join(' '), sprints[h.sprintId] || '',
     ]));
   });
   return lineas.join('\r\n');

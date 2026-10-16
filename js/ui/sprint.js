@@ -2,6 +2,7 @@
 import { h, campo } from './dom.js';
 import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
 import { listaVerificacion } from './historia.js';
+import { dependenciasPendientes, bloqueosDelSprint } from '../nucleo/dependencias.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteSprint, notasDeVersion } from '../nucleo/reportes.js';
 import { sugerirObjetivo } from '../nucleo/objetivo.js';
@@ -112,7 +113,9 @@ function planificar(app, sprint) {
           h('input', { type: 'checkbox', checked: x.sprintId === sprint.id, onchange: (e) => alternar(x.id, e.target.checked) }),
           h('span', {}, x.titulo),
           h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar',
-            avance(x, definicionesDe(p).ready, 'ready').completa ? '' : h('span', { class: 'chip chip--aviso', title: 'No cumple la Definition of Ready' }, ' no lista')))))) : h('p', { class: 'vacio' }, 'El backlog está vacío.')),
+            avance(x, definicionesDe(p).ready, 'ready').completa ? '' : h('span', { class: 'chip chip--aviso', title: 'No cumple la Definition of Ready' }, ' no lista'),
+            dependenciasPendientes(p, x).length ? h('span', { class: 'chip chip--aviso', title: `Espera a: ${dependenciasPendientes(p, x).map((d) => d.titulo).join(', ')}` }, ' depende de algo pendiente') : ''))))) : h('p', { class: 'vacio' }, 'El backlog está vacío.')),
+      avisoDependencias(p, sprint.id),
     h('div', { class: 'acciones' },
       h('button', {
         type: 'button', class: 'btn btn--cobre', disabled: !resumen.historias,
@@ -161,6 +164,7 @@ function tablero(app, sprint) {
       ondragstart: (e) => { arrastrando = x.id; e.dataTransfer.effectAllowed = 'move'; },
     },
     h('span', { class: 'ficha-titulo' }, x.titulo),
+    dependenciasPendientes(p, x).length && x.estado !== 'done' ? h('span', { class: 'chip chip--aviso' }, `espera a: ${dependenciasPendientes(p, x).map((d) => d.titulo).join(', ')}`) : null,
     estado !== 'todo' ? listaVerificacion(x, dod, 'done', (item, valor) => app.cambiar((y) => ({
       ...y, historias: y.historias.map((z) => (z.id === x.id ? marcar(z, 'done', item, valor) : z)),
     }), { redibujar: false })) : null,
@@ -310,4 +314,12 @@ function seccionReview(app, sprint) {
           }));
         },
       }, 'Pasar al backlog')));
+}
+
+/** En la planificación: historias del sprint que esperan algo que no está terminado ni entra en este sprint. */
+function avisoDependencias(proyecto, sprintId) {
+  const bloqueos = bloqueosDelSprint(proyecto, sprintId);
+  if (!bloqueos.length) return null;
+  return h('ul', { class: 'invest' }, bloqueos.map((b) => h('li', { class: 'invest--aviso' },
+    `"${b.historia.titulo}" depende de ${b.espera.map((d) => `"${d.titulo}"`).join(', ')}, que no está terminada ni en este sprint.`)));
 }

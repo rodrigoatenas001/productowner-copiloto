@@ -1,6 +1,6 @@
 // Editor y tarjeta de una historia, compartidos por Notas (candidatas) y Backlog.
 import { h, campo, selector } from './dom.js';
-import { revisarInvest, calidad, enunciado, resumirTitulo, ESCALA_PUNTOS, PRIORIDADES } from '../nucleo/historias.js';
+import { revisarInvest, calidad, enunciado, resumirTitulo, ESCALA_PUNTOS, PRIORIDADES, TIPOS } from '../nucleo/historias.js';
 import { avance, NOMBRES } from '../nucleo/definiciones.js';
 
 /** Insignia de calidad INVEST: color y texto según los avisos. */
@@ -62,6 +62,7 @@ export function editorHistoria(historia, alCambiar, { epicas = [] } = {}) {
         onchange: (e) => actualizar({ puntos: e.target.value ? Number(e.target.value) : null }),
       })),
       campo('Prioridad', selector(PRIORIDADES, historia.prioridad, { onchange: (e) => actualizar({ prioridad: e.target.value }) })),
+      campo('Tipo', selector(TIPOS, historia.tipo || 'historia', { onchange: (e) => actualizar({ tipo: e.target.value }) })),
     ),
     avisos,
     historia.notaOriginal && historia.notaOriginal !== enunciado(historia)

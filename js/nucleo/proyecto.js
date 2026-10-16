@@ -1,5 +1,6 @@
 // Modelo de proyecto, sprints y métricas. Puro y serializable a JSON.
-import { nuevoId, ESCALA_PUNTOS, PRIORIDADES, notasAHistorias } from './historias.js';
+import { nuevoId, ESCALA_PUNTOS, PRIORIDADES, TIPOS, notasAHistorias } from './historias.js';
+import { normalizarDependencias } from './dependencias.js';
 import { normalizarRetros } from './retro.js';
 import { DEFINICIONES_INICIALES, normalizarDefiniciones, normalizarChecks } from './definiciones.js';
 import { normalizarPriorizacion } from './priorizacion.js';
@@ -88,7 +89,7 @@ export function normalizarProyecto(datos) {
   }));
   const idsSprint = new Set(sprints.map((s) => s.id));
 
-  const historias = datos.historias.map((h) => ({
+  const historias = normalizarDependencias(datos.historias.map((h) => ({
     id: texto(h.id, 60) || nuevoId('h'),
     titulo: texto(h.titulo, 200),
     rol: texto(h.rol, 120) || 'usuario',
@@ -104,8 +105,10 @@ export function normalizarProyecto(datos) {
     creada: texto(h.creada, 40) || new Date().toISOString(),
     terminada: texto(h.terminada, 40) || null,
     checks: normalizarChecks(h.checks),
+    tipo: Object.hasOwn(TIPOS, h.tipo) ? h.tipo : 'historia',
+    dependeDe: Array.isArray(h.dependeDe) ? h.dependeDe : [],
     priorizacion: normalizarPriorizacion(h.priorizacion),
-  }));
+  })));
 
   return {
     version: VERSION_DATOS,

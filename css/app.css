@@ -394,6 +394,10 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 
 .resultado-hipotesis { border-top: 1px dashed var(--niebla); padding-top: 10px; margin-top: 4px; }
 
+.dependencias { list-style: none; margin: 8px 0; padding: 0; display: grid; gap: 4px; }
+.dependencias li { display: flex; gap: 8px; align-items: center; }
+.ficha .chip { white-space: normal; }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }

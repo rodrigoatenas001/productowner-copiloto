@@ -1,7 +1,7 @@
 // Backlog priorizado: el orden es la prioridad. Se reordena arrastrando o con los botones.
 import { h, selector } from './dom.js';
 import { mover, puntosDe, resumenEpicas, mapaHistorias, moverEnMapa } from '../nucleo/proyecto.js';
-import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest, enunciado } from '../nucleo/historias.js';
+import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest, enunciado, TIPOS } from '../nucleo/historias.js';
 import { iaConfigurada, criteriosConIa, dividirConIa, revisarConIa, redactarConIa, nombreProveedor } from '../ia.js';
 import { revisarEnDosVoces, llamadasMaximas } from '../nucleo/dosvoces.js';
 import { casosBorde, agregarCasosBorde } from '../nucleo/casosborde.js';
@@ -12,6 +12,7 @@ import { vistaPriorizar } from './priorizar.js';
 import { vistaRoadmap } from './roadmap.js';
 import { panelObjetivos, detalleEpica } from './okr.js';
 import { pronosticar, textoPronostico } from '../nucleo/pronostico.js';
+import { agregarDependencia, quitarDependencia, dependenciasPendientes, creaCiclo } from '../nucleo/dependencias.js';
 import { issueDe, issueMarkdown, urlGithub, urlLinear } from '../nucleo/issues.js';
 import { botonesMarkdown } from './compartir.js';
 import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../nucleo/reportes.js';
@@ -78,6 +79,7 @@ export function vistaBacklog(app) {
         // Puntos y prioridad cambian las cifras de arriba; son listas, así que redibujar no quita el foco de un texto
         if ('puntos' in cambios || 'prioridad' in cambios) app.render();
       }, { epicas }),
+      editorDependencias(app, historia),
       listaVerificacion(historia, definicionesDe(app.proyecto).ready, 'ready', (item, valor) => app.cambiar((x) => ({
         ...x, historias: x.historias.map((y) => (y.id === historia.id ? marcar(y, 'ready', item, valor) : y)),
       }), { redibujar: false })),
@@ -157,7 +159,30 @@ export function vistaBacklog(app) {
 }
 
 function metaTexto(x) {
-  return [x.epica, x.puntos ? `${x.puntos} pts` : 'sin estimar', PRIORIDADES[x.prioridad]].filter(Boolean).join(' · ');
+  const tipo = x.tipo && x.tipo !== 'historia' ? TIPOS[x.tipo] : null;
+  return [tipo, x.epica, x.puntos ? `${x.puntos} pts` : 'sin estimar', PRIORIDADES[x.prioridad], x.dependeDe?.length ? `depende de ${x.dependeDe.length}` : null].filter(Boolean).join(' · ');
+}
+
+/** "Depende de": lista con quitar, y un selector para agregar (sin ciclos ni ítems terminados). */
+function editorDependencias(app, historia) {
+  const p = app.proyecto;
+  const actual = p.historias.find((x) => x.id === historia.id) || historia;
+  const deps = p.historias.filter((x) => (actual.dependeDe || []).includes(x.id));
+  const pendientes = new Set(dependenciasPendientes(p, actual).map((x) => x.id));
+  const candidatas = p.historias.filter((x) => x.id !== actual.id && x.estado !== 'done' && !(actual.dependeDe || []).includes(x.id) && !creaCiclo(p, actual.id, x.id));
+  return h('details', { class: 'verificacion', open: deps.length ? true : null },
+    h('summary', {}, 'Depende de ', h('span', { class: `chip${deps.length && !pendientes.size ? ' chip--ok' : ''}` }, String(deps.length))),
+    deps.length ? h('ul', { class: 'dependencias' }, deps.map((d) => h('li', {},
+      h('span', {}, d.titulo),
+      h('span', { class: `chip${pendientes.has(d.id) ? ' chip--aviso' : ' chip--ok'}` }, pendientes.has(d.id) ? 'pendiente' : 'terminada'),
+      h('button', { type: 'button', class: 'icono', 'aria-label': `Quitar dependencia: ${d.titulo}`, onclick: () => app.cambiar((x) => quitarDependencia(x, actual.id, d.id)) }, '×')))) : null,
+    candidatas.length ? selector({ '': 'Agregar dependencia…', ...Object.fromEntries(candidatas.map((c) => [c.id, c.titulo])) }, '', {
+      'aria-label': 'Agregar dependencia',
+      onchange: (e) => {
+        if (!e.target.value) return;
+        try { app.cambiar((x) => agregarDependencia(x, actual.id, e.target.value)); } catch (err) { app.avisar(err.message, 'error'); }
+      },
+    }) : null);
 }
 
 function cifra(etiqueta, valor) {

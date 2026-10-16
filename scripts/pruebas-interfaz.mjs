@@ -1,3 +1,4 @@
+// (No se llama test-*.mjs para que `node --test` no lo ejecute como prueba.)
 // Corre las pruebas de interfaz (tests/ui.html) en Chrome o Edge sin ventana. Sin dependencias:
 // un servidor estático de Node y el protocolo de depuración del navegador (WebSocket incluido en Node 22+).
 // Uso: npm run test:ui   (o CHROME=/ruta/al/navegador npm run test:ui)
@@ -72,7 +73,7 @@ async function main() {
   }
   const servidor = await servir();
   const url = `http://127.0.0.1:${servidor.address().port}/tests/ui.html`;
-  const perfil = join(RAIZ, '.perfil-pruebas');
+  const perfil = join(RAIZ, `.perfil-pruebas-${Date.now()}`);
   const puerto = 9300 + Math.floor(Math.random() * 500);
   const proceso = spawn(navegador, ['--headless=new', '--disable-gpu', '--no-first-run', '--no-default-browser-check',
     `--user-data-dir=${perfil}`, `--remote-debugging-port=${puerto}`, '--window-size=1280,900', url], { stdio: 'ignore' });

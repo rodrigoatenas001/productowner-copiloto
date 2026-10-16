@@ -222,11 +222,22 @@ export function revisarInvest(h) {
   const palabras = quiero.split(/\s+/).filter(Boolean);
   const baja = ` ${quiero.toLowerCase()} `;
 
-  if (!h.rol || h.rol === 'usuario') {
+  const tipo = h.tipo || 'historia';
+  const esHistoria = tipo === 'historia';
+  if (esHistoria && (!h.rol || h.rol === 'usuario')) {
     avisos.push({ codigo: 'rol', nivel: 'sugerencia', texto: '¿Quién se beneficia exactamente? "Usuario" es muy general: prueba con un rol concreto.' });
   }
-  if (!h.para) {
+  if (esHistoria && !h.para) {
     avisos.push({ codigo: 'valor', nivel: 'aviso', texto: 'Falta el "para qué". Sin el beneficio es difícil priorizar (V de Valiosa).' });
+  }
+  if (tipo === 'bug' && !/(reproduc|pasos|esperad)/i.test((h.criterios || []).join(' '))) {
+    avisos.push({ codigo: 'reproducir', nivel: 'aviso', texto: 'Para un bug, indica los pasos para reproducirlo, qué pasa y qué debería pasar.' });
+  }
+  if (tipo === 'spike' && !/(hora|dia|día|semana|plazo|time.?box)/i.test(`${h.quiero} ${(h.criterios || []).join(' ')}`)) {
+    avisos.push({ codigo: 'timebox', nivel: 'aviso', texto: 'Un spike necesita plazo (time-box) y la pregunta que debe responder al terminar.' });
+  }
+  if (tipo === 'deuda' && !h.para) {
+    avisos.push({ codigo: 'valor', nivel: 'sugerencia', texto: 'Explica qué riesgo o costo reduce esta deuda técnica: así se puede priorizar frente a lo demás.' });
   }
   if (palabras.length > 25) {
     avisos.push({ codigo: 'larga', nivel: 'aviso', texto: 'Es larga: probablemente se puede dividir en historias más pequeñas (S de Small).' });
@@ -245,7 +256,7 @@ export function revisarInvest(h) {
     const [v] = vagasCriterios;
     avisos.push({ codigo: 'vaga-criterio', nivel: 'aviso', texto: `Un criterio dice "${v.palabra}": así no se puede probar. Por ejemplo: ${v.metrica}.` });
   }
-  if (TECNICAS.test(quiero) && !h.para) {
+  if (esHistoria && TECNICAS.test(quiero) && !h.para) {
     avisos.push({ codigo: 'tecnica', nivel: 'sugerencia', texto: 'Suena a tarea técnica. Explica a quién ayuda o márcala como habilitador técnico.' });
   }
   if (!h.criterios || !h.criterios.length || h.criterios.every((c) => !String(c).trim())) {
@@ -272,6 +283,14 @@ export function notasAHistorias(texto, opciones = {}) {
 
 /** Escalas de estimación admitidas. */
 export const ESCALA_PUNTOS = [1, 2, 3, 5, 8, 13, 21];
+/** Tipos de ítem del backlog. */
+export const TIPOS = {
+  historia: 'Historia',
+  bug: 'Bug',
+  spike: 'Spike (investigación)',
+  deuda: 'Deuda técnica',
+};
+
 export const PRIORIDADES = {
   must: 'Imprescindible',
   should: 'Importante',
