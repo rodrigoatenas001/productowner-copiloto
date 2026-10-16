@@ -3,6 +3,7 @@ import { nuevoId, ESCALA_PUNTOS, PRIORIDADES } from './historias.js';
 import { normalizarRetros } from './retro.js';
 import { DEFINICIONES_INICIALES, normalizarDefiniciones, normalizarChecks } from './definiciones.js';
 import { normalizarPriorizacion } from './priorizacion.js';
+import { normalizarOkr } from './okr.js';
 
 export const VERSION_DATOS = 1;
 export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', done: 'Hecho' };
@@ -19,6 +20,8 @@ export function nuevoProyecto(nombre = 'Mi proyecto') {
     sprints: [],
     retros: [],
     definiciones: structuredClone(DEFINICIONES_INICIALES),
+    objetivos: [],
+    epicasInfo: {},
     respaldado: null,
     creado: ahora,
     actualizado: ahora,
@@ -111,6 +114,7 @@ export function normalizarProyecto(datos) {
     sprints,
     retros: normalizarRetros(datos.retros, idsSprint),
     definiciones: normalizarDefiniciones(datos.definiciones),
+    ...normalizarOkr(datos.objetivos, datos.epicasInfo),
     respaldado: texto(datos.respaldado, 40) || null,
     creado: texto(datos.creado, 40) || new Date().toISOString(),
     actualizado: new Date().toISOString(),

@@ -359,6 +359,20 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .cuadrante--trampa { background: var(--alerta-suave); }
 @media (max-width: 640px) { .matriz { grid-template-columns: 1fr; } }
 
+/* OKR e hipótesis */
+.okr summary { cursor: pointer; display: flex; gap: 8px; align-items: center; }
+.okr-titulo { font: 600 1.1rem var(--f-display); }
+.okr-lista { list-style: none; margin: 12px 0; padding: 0; display: grid; gap: 12px; }
+.okr-objetivo { border-left: 3px solid var(--cobre); padding: 4px 0 4px 12px; }
+.okr-cabecera { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
+.okr-objetivo > ul { list-style: none; margin: 6px 0 8px; padding: 0; display: grid; gap: 4px; }
+.okr-kr { display: flex; flex-wrap: wrap; align-items: center; gap: 4px 8px; font-size: .92rem; }
+.okr-kr::before { content: "→"; color: var(--pizarra); }
+.fila-accion--dos { grid-template-columns: minmax(0, 1fr) auto; }
+.hipotesis-campo { display: grid; gap: 2px; margin: 0 0 8px; font-size: .88rem; }
+.hipotesis-campo span { color: var(--pizarra); }
+.hipotesis-frase { font-style: italic; border-left: 3px solid var(--bosque); padding-left: 10px; margin: 8px 0 12px; }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }

@@ -4,6 +4,7 @@ import { enunciado, revisarInvest, PRIORIDADES } from './historias.js';
 import { ESTADOS, resumenSprint, burndown, puntosDe, resumenEpicas, velocidad } from './proyecto.js';
 import { definicionesDe, avance } from './definiciones.js';
 import { COLUMNAS_RETRO, notasDe } from './retro.js';
+import { infoEpica, hipotesis, resultadosDeEpica, cobertura } from './okr.js';
 
 const fecha = (iso) => String(iso || '').slice(0, 10).split('-').reverse().join('-');
 const lista = (items, vacio = '_Nada._') => (items.length ? items : [vacio]);
@@ -64,8 +65,23 @@ export function reporteSprint(proyecto, sprintId, hoy = new Date()) {
 export function reporteEpicas(proyecto, hoy = new Date()) {
   const epicas = resumenEpicas(proyecto);
   const barra = (p) => '█'.repeat(Math.round(p / 10)) + '░'.repeat(10 - Math.round(p / 10));
+  const objetivos = proyecto.objetivos || [];
+  const { epicasPorResultado } = cobertura(proyecto);
+  const seccionOkr = objetivos.length ? [
+    '## Objetivos y resultados clave',
+    '',
+    ...objetivos.flatMap((o) => [
+      `**${o.objetivo}**`,
+      '',
+      ...lista(o.resultados.map((r) => `- ${r.texto} · ${epicasPorResultado[r.id] ? `épicas: ${epicasPorResultado[r.id].join(', ')}` : '**sin épicas trabajando en esto**'}`), '_Sin resultados clave._'),
+      '',
+    ]),
+  ] : [];
   return [
     `# ${proyecto.nombre} · Avance por épica`,
+    '',
+    ...seccionOkr,
+    '## Avance',
     '',
     '| Épica | Avance | Historias | Puntos | Sin estimar |',
     '|---|---|---:|---:|---:|',
@@ -151,6 +167,7 @@ export function especificacionHistoria(proyecto, historiaId) {
     '',
     `- **Proyecto:** ${proyecto.nombre}`,
     h.epica ? `- **Épica:** ${h.epica}` : null,
+    ...(h.epica ? contextoNegocio(proyecto, h.epica).map((l) => `- ${l}`) : []),
     `- **Prioridad:** ${PRIORIDADES[h.prioridad]}${h.puntos ? ` · ${h.puntos} puntos` : ''}`,
     '',
     '## Historia de usuario',
@@ -196,6 +213,7 @@ export function especificacionEpica(proyecto, epica) {
     `# Especificación de la épica: ${epica || 'Sin épica'}`,
     '',
     `Proyecto **${proyecto.nombre}**. ${hs.length} ${hs.length === 1 ? 'historia' : 'historias'}, en orden de prioridad (${pts(puntosDe(hs))} estimados).`,
+    ...contextoNegocio(proyecto, epica),
     'Implementa una historia a la vez, en este orden, y confirma cada una antes de pasar a la siguiente.',
     '',
     ...hs.flatMap((h, i) => [
@@ -218,4 +236,14 @@ export function especificacionEpica(proyecto, epica) {
     '',
     ...INSTRUCCIONES_AGENTE.map((i) => `- ${i}`),
   ].join('\n');
+}
+
+/** Hipótesis y resultados clave de una épica, como líneas de Markdown (vacío si no hay). */
+function contextoNegocio(proyecto, epica) {
+  const h = hipotesis(infoEpica(proyecto, epica));
+  const krs = resultadosDeEpica(proyecto, epica);
+  return [
+    h ? `**Hipótesis:** ${h}` : null,
+    krs.length ? `**Aporta a:** ${krs.map((r) => `${r.texto} (${r.objetivo})`).join('; ')}` : null,
+  ].filter(Boolean);
 }

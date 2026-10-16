@@ -4,11 +4,45 @@
 const VIÑETA = /^\s*(?:[-*•·–]|\d+[.)]|\[[ x]\])\s+/i;
 const TITULO = /^\s*(?:#{1,6}\s+(.+?)|(.{2,80}?):)\s*$/;
 
-/** Palabras que suelen esconder un requisito poco verificable. */
-export const PALABRAS_VAGAS = [
-  'rápido', 'rápida', 'rapido', 'rapida', 'lento', 'lenta', 'fácil', 'facil', 'intuitivo', 'intuitiva', 'amigable', 'mejor', 'mejorar',
-  'optimizar', 'simple', 'sencillo', 'sencilla', 'moderno', 'moderna', 'robusto', 'eficiente', 'flexible', 'etc', 'bonito', 'bonita',
-];
+/**
+ * Palabras que suelen esconder un requisito poco verificable, con una forma de medirlas.
+ * Las cifras son un punto de partida para conversar, no un estándar.
+ */
+export const METRICAS_VAGAS = {
+  rápido: 'en menos de 2 segundos (o el tiempo que acuerden con el equipo)',
+  lento: 'si tarda más de N segundos',
+  fácil: 'en máximo 3 pasos, sin ayuda, la primera vez (pruébalo con 5 personas)',
+  intuitivo: 'que 4 de 5 personas lo logren sin ayuda la primera vez',
+  amigable: 'que 4 de 5 personas lo logren sin ayuda la primera vez',
+  simple: 'en máximo 3 pasos o pantallas',
+  sencillo: 'en máximo 3 pasos o pantallas',
+  mejor: 'de cuánto a cuánto (por ejemplo, de 10 a 5 minutos)',
+  mejorar: 'de cuánto a cuánto (por ejemplo, de 10 a 5 minutos)',
+  optimizar: 'de cuánto a cuánto y cómo se mide',
+  eficiente: 'en cuántos pasos, minutos o recursos',
+  robusto: 'cuántos usuarios simultáneos o errores por día se aceptan',
+  flexible: 'qué se puede configurar y quién lo configura',
+  moderno: 'según qué diseño aprobado (enlace o captura)',
+  bonito: 'según qué diseño aprobado (enlace o captura)',
+  etc: 'la lista completa (lo que no se nombra no se construye)',
+};
+
+const VARIANTES = { rápida: 'rápido', rapido: 'rápido', rapida: 'rápido', lenta: 'lento', facil: 'fácil', intuitiva: 'intuitivo', sencilla: 'sencillo', moderna: 'moderno', bonita: 'bonito' };
+
+/** Palabras vagas reconocidas (incluye variantes sin tilde y femeninas). */
+export const PALABRAS_VAGAS = [...Object.keys(METRICAS_VAGAS), ...Object.keys(VARIANTES)];
+
+/** Busca palabras vagas en un texto. @returns {{palabra: string, metrica: string}[]} */
+export function palabrasVagas(texto) {
+  const encontradas = new Map();
+  for (const p of PALABRAS_VAGAS) {
+    if (new RegExp(`(^|[^\\p{L}])${p}([^\\p{L}]|$)`, 'iu').test(String(texto || ''))) {
+      const base = VARIANTES[p] || p;
+      if (!encontradas.has(base)) encontradas.set(base, { palabra: p, metrica: METRICAS_VAGAS[base] });
+    }
+  }
+  return [...encontradas.values()];
+}
 
 /** Términos que indican una tarea técnica más que valor para alguien. */
 const TECNICAS = /\b(refactor\w*|migra\w*|base de datos|bd|api|endpoint|servidor|deploy\w*|despliegue|librer[ií]a|framework|docker|kubernetes|cache|índice|indice|tabla)\b/i;
@@ -201,9 +235,15 @@ export function revisarInvest(h) {
   if (conjunciones >= 2 || (conjunciones === 1 && palabras.length > 12)) {
     avisos.push({ codigo: 'varias', nivel: 'aviso', texto: 'Parece pedir varias cosas a la vez. Una historia, un resultado (I de Independiente).' });
   }
-  const vagas = PALABRAS_VAGAS.filter((p) => new RegExp(`(^|[^\\p{L}])${p}([^\\p{L}]|$)`, 'iu').test(quiero));
+  const vagas = palabrasVagas(quiero);
   if (vagas.length) {
-    avisos.push({ codigo: 'vaga', nivel: 'aviso', texto: `"${vagas[0]}" no se puede verificar. Di cuánto o cómo se mide (T de Testeable).` });
+    const [v] = vagas;
+    avisos.push({ codigo: 'vaga', nivel: 'aviso', texto: `"${v.palabra}" no se puede verificar (T de Testeable). Por ejemplo: ${v.metrica}.` });
+  }
+  const vagasCriterios = palabrasVagas((h.criterios || []).join(' ')).filter((x) => !vagas.some((y) => y.metrica === x.metrica));
+  if (vagasCriterios.length) {
+    const [v] = vagasCriterios;
+    avisos.push({ codigo: 'vaga-criterio', nivel: 'aviso', texto: `Un criterio dice "${v.palabra}": así no se puede probar. Por ejemplo: ${v.metrica}.` });
   }
   if (TECNICAS.test(quiero) && !h.para) {
     avisos.push({ codigo: 'tecnica', nivel: 'sugerencia', texto: 'Suena a tarea técnica. Explica a quién ayuda o márcala como habilitador técnico.' });

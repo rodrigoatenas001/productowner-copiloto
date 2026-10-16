@@ -4,10 +4,12 @@ import { mover, puntosDe, resumenEpicas, mapaHistorias, moverEnMapa } from '../n
 import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest, enunciado } from '../nucleo/historias.js';
 import { iaConfigurada, criteriosConIa, dividirConIa, revisarConIa, redactarConIa, nombreProveedor } from '../ia.js';
 import { revisarEnDosVoces, llamadasMaximas } from '../nucleo/dosvoces.js';
+import { casosBorde, agregarCasosBorde } from '../nucleo/casosborde.js';
 import { editorHistoria, insigniaCalidad, listaVerificacion } from './historia.js';
 import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
 import { vistaPriorizar } from './priorizar.js';
+import { panelObjetivos, detalleEpica } from './okr.js';
 import { botonesMarkdown } from './compartir.js';
 import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../nucleo/reportes.js';
 
@@ -181,6 +183,16 @@ function accionesInteligentes(app, historia) {
     }
   };
 
+  const borde = casosBorde(historia);
+  if (borde.length) {
+    botones.push(h('button', {
+      type: 'button', class: 'btn btn--secundario',
+      title: borde.map((c) => c.texto).join(' · '),
+      onclick: () => app.cambiarConDeshacer(`${borde.length} casos borde agregados a los criterios.`, (x) => ({
+        ...x, historias: x.historias.map((y) => (y.id === historia.id ? agregarCasosBorde(y) : y)),
+      })),
+    }, `Agregar ${borde.length} casos borde`));
+  }
   if (pideDividir && conIa) {
     botones.push(h('button', {
       type: 'button', class: 'btn btn--secundario',
@@ -215,6 +227,7 @@ function vistaEpicas(app) {
   const epicas = resumenEpicas(app.proyecto);
   if (!epicas.length) return h('p', { class: 'vacio' }, 'Aún no hay historias.');
   return h('div', {},
+    panelObjetivos(app),
     h('div', { class: 'compartir' }, botonesMarkdown(app, 'Reporte de avance por épica', 'avance-epicas', () => reporteEpicas(app.proyecto))),
     h('ul', { class: 'lista-epicas' }, epicas.map((e) => h('li', { class: 'epica' },
     h('div', { class: 'epica-cabecera' },
@@ -229,6 +242,7 @@ function vistaEpicas(app) {
     h('p', { class: 'tarjeta-meta' },
       `${e.hechas} de ${e.historias} historias · ${e.puntosHechos} de ${e.puntos} pts`,
       e.sinEstimar ? ` · ${e.sinEstimar} sin estimar` : ''),
+    e.epica ? detalleEpica(app, e.epica) : null,
     e.historias > e.hechas ? h('div', { class: 'compartir' },
       botonesMarkdown(app, 'Especificación de la épica', `epica-${e.epica || 'sin-epica'}`, () => especificacionEpica(app.proyecto, e.epica))) : null))));
 }

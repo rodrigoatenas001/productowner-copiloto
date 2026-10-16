@@ -127,3 +127,14 @@ test('reemplazarPorPartes deja las partes en el mismo lugar', () => {
   const nuevas = reemplazarPorPartes(hs, hs[1].id, partes);
   assert.deepEqual(nuevas.map((x) => x.quiero), ['primera cosa', 'buscar productos', 'comparar precios', 'última cosa']);
 });
+
+test('palabras vagas: sugiere cómo medirlas, también en los criterios', () => {
+  const h = aHistoria({ texto: 'Como cliente, quiero un checkout rápido, para comprar' });
+  const vaga = revisarInvest(h).find((a) => a.codigo === 'vaga');
+  assert.match(vaga.texto, /"rápido".*menos de 2 segundos/);
+
+  const h2 = aHistoria({ texto: 'Como contadora, quiero descargar boletas, para declarar' });
+  h2.criterios = ['Dado que descargo, entonces la descarga es fácil e intuitiva'];
+  const enCriterio = revisarInvest(h2).find((a) => a.codigo === 'vaga-criterio');
+  assert.match(enCriterio.texto, /Un criterio dice "fácil"/);
+});
