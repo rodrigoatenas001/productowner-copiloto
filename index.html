@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Copiloto PO</title>
+  <meta name="description" content="De tus notas a historias de usuario, backlog y sprints. Libre, sin cuentas y sin conexión.">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self' data:; connect-src 'self' https: http://localhost:* http://127.0.0.1:*; object-src 'none'; base-uri 'self'; form-action 'none'">
+  <meta name="theme-color" content="#10213a">
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="icon" href="icons/icono.svg" type="image/svg+xml">
+  <link rel="apple-touch-icon" href="icons/icon-192.png">
+  <link rel="stylesheet" href="css/app.css">
+  <script type="module" src="js/app.js"></script>
+</head>
+<body>
+  <a class="saltar" href="#principal">Saltar al contenido</a>
+  <div class="marco">
+    <aside class="lateral">
+      <a class="marca" href="#notas" aria-label="Copiloto PO, inicio">
+        <img src="icons/icono.svg" alt="" width="28" height="28">
+        <span>Copiloto <b>PO</b></span>
+      </a>
+      <div id="navegacion"></div>
+    </aside>
+    <main id="principal" tabindex="-1">
+      <noscript><p class="vacio">El copiloto necesita JavaScript para funcionar.</p></noscript>
+      <p class="vacio">Cargando…</p>
+    </main>
+  </div>
+  <div id="avisos" class="avisos"></div>
+</body>
+</html>

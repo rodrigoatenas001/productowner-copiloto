@@ -1,0 +1,12 @@
+{
+  "name": "copiloto-po",
+  "version": "0.1.0",
+  "description": "De tus notas a historias de usuario, backlog y sprints. Libre, sin cuentas y sin conexión.",
+  "private": true,
+  "type": "module",
+  "license": "MIT",
+  "scripts": {
+    "test": "node --test tests/",
+    "start": "python -m http.server 8080"
+  }
+}

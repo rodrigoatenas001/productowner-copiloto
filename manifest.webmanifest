@@ -1,0 +1,17 @@
+{
+  "name": "Copiloto PO",
+  "short_name": "Copiloto PO",
+  "description": "De tus notas a historias de usuario, backlog y sprints. Libre, sin cuentas y sin conexión.",
+  "lang": "es",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#f5f7fa",
+  "theme_color": "#10213a",
+  "icons": [
+    { "src": "icons/icono.svg", "sizes": "any", "type": "image/svg+xml" },
+    { "src": "icons/icon-192.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png" },
+    { "src": "icons/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "maskable" }
+  ]
+}
