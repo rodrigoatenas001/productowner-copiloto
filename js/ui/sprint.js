@@ -9,7 +9,7 @@ import { iaConfigurada, objetivoConIa, notasConIa } from '../ia.js';
 
 let notasIa = null; // { sprintId, estado: 'corriendo'|'lista'|'error', texto, error }
 import {
-  nuevoSprint, sugerirSprint, resumenSprint, burndown, cerrarSprint, cambiarEstado, velocidad, puntosDe, ESTADOS,
+  nuevoSprint, sugerirSprint, resumenSprint, burndown, cerrarSprint, cambiarEstado, velocidad, puntosDe, ESTADOS, feedbackAHistorias,
 } from '../nucleo/proyecto.js';
 
 const COLUMNAS = ['todo', 'doing', 'done'];
@@ -178,6 +178,7 @@ function tablero(app, sprint) {
       h('div', { class: 'cifra' }, h('dt', {}, 'Fechas'), h('dd', {}, `${formatear(sprint.inicio)} – ${formatear(sprint.fin)}`)),
       h('div', { class: 'cifra' }, h('dt', {}, 'Capacidad'), h('dd', {}, sprint.capacidad ? `${sprint.capacidad} pts` : '—'))),
     h('div', { class: 'tablero' }, COLUMNAS.map(columna)),
+    seccionReview(app, sprint),
     h('section', { class: 'panel', 'aria-labelledby': 'burndown-titulo' },
       h('h2', { id: 'burndown-titulo' }, 'Burndown'),
       graficoBurndown(burndown(sprint, p.historias))),
@@ -283,4 +284,30 @@ function panelNotasIa(app) {
     h('div', { class: 'compartir' },
       botonesMarkdown(app, 'Notas', 'notas-version', () => notasIa.texto),
       h('button', { type: 'button', class: 'btn-texto', onclick: () => { notasIa = null; app.render(); } }, 'Cerrar')));
+}
+
+/** Lo que dicen los stakeholders en la Sprint Review, para que vuelva al backlog en vez de perderse. */
+function seccionReview(app, sprint) {
+  const area = h('textarea', {
+    id: 'feedback-review', rows: 4, maxlength: 5000,
+    placeholder: 'Una idea por línea. Ej.: - que el reporte se pueda filtrar por sucursal',
+    oninput: (e) => app.cambiar((x) => ({ ...x, sprints: x.sprints.map((s) => (s.id === sprint.id ? { ...s, feedback: e.target.value } : s)) }), { redibujar: false }),
+  }, sprint.feedback || '');
+  return h('section', { class: 'panel', 'aria-labelledby': 'review-titulo' },
+    h('h2', { id: 'review-titulo' }, 'Sprint Review: lo que dijeron los stakeholders'),
+    h('p', { class: 'ayuda' }, 'Anota los comentarios durante la Review y pásalos al backlog para priorizarlos después.'),
+    area,
+    h('div', { class: 'acciones' },
+      h('button', {
+        type: 'button', class: 'btn btn--secundario',
+        onclick: () => {
+          const nuevas = feedbackAHistorias(app.proyecto, sprint.id, area.value);
+          if (!nuevas.length) { app.avisar('Escribe al menos un comentario.', 'error'); return; }
+          app.cambiarConDeshacer(`${nuevas.length} ${nuevas.length === 1 ? 'comentario pasó' : 'comentarios pasaron'} al backlog.`, (x) => ({
+            ...x,
+            historias: [...x.historias, ...nuevas],
+            sprints: x.sprints.map((s) => (s.id === sprint.id ? { ...s, feedback: '' } : s)),
+          }));
+        },
+      }, 'Pasar al backlog')));
 }

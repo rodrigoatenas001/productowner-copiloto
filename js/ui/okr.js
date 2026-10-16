@@ -1,7 +1,7 @@
 // Objetivos (OKR) del proyecto e hipótesis de valor por épica.
-import { h } from './dom.js';
+import { h, selector } from './dom.js';
 import {
-  agregarObjetivo, agregarResultado, quitarObjetivo, quitarResultado, editarEpica, infoEpica, hipotesis, cobertura,
+  agregarObjetivo, agregarResultado, quitarObjetivo, quitarResultado, editarEpica, infoEpica, hipotesis, cobertura, RESULTADOS_HIPOTESIS,
 } from '../nucleo/okr.js';
 
 export function panelObjetivos(app) {
@@ -50,6 +50,12 @@ export function detalleEpica(app, epica) {
     campoHipotesis('creemos', 'Creemos que al…', 'implementar el pago con tarjeta'),
     campoHipotesis('lograremos', 'lograremos…', 'que más visitas terminen comprando'),
     campoHipotesis('veremos', 'lo sabremos cuando…', 'la conversión suba del 2% al 4% en 2 meses'),
+    frase ? h('div', { class: 'resultado-hipotesis' },
+      h('label', { class: 'hipotesis-campo' }, h('span', {}, '¿Cómo resultó?'),
+        selector(RESULTADOS_HIPOTESIS, info.resultadoHipotesis, { onchange: (e) => app.cambiar((x) => editarEpica(x, epica, { resultadoHipotesis: e.target.value }), { redibujar: false }) })),
+      h('label', { class: 'hipotesis-campo' }, h('span', {}, 'Dato real medido'),
+        h('input', { type: 'text', value: info.datoReal, placeholder: 'La conversión llegó a 3,1% en 8 semanas', maxlength: 300, onchange: (e) => guardar({ datoReal: e.target.value }) })),
+      h('p', { class: 'ayuda' }, 'Mide después de entregar. Si no se cumplió, también es aprendizaje: ajusta la próxima épica.')) : null,
     resultados.length ? h('fieldset', { class: 'temas' }, h('legend', {}, 'Aporta a'),
       resultados.map((r) => h('label', { class: 'opcion' },
         h('input', {

@@ -1,5 +1,5 @@
 // Modelo de proyecto, sprints y métricas. Puro y serializable a JSON.
-import { nuevoId, ESCALA_PUNTOS, PRIORIDADES } from './historias.js';
+import { nuevoId, ESCALA_PUNTOS, PRIORIDADES, notasAHistorias } from './historias.js';
 import { normalizarRetros } from './retro.js';
 import { DEFINICIONES_INICIALES, normalizarDefiniciones, normalizarChecks } from './definiciones.js';
 import { normalizarPriorizacion } from './priorizacion.js';
@@ -84,6 +84,7 @@ export function normalizarProyecto(datos) {
     fin: /^\d{4}-\d{2}-\d{2}$/.test(s.fin) ? s.fin : fechaISO(new Date()),
     capacidad: Number.isFinite(s.capacidad) && s.capacidad >= 0 ? s.capacidad : null,
     estado: ['planificado', 'activo', 'cerrado'].includes(s.estado) ? s.estado : 'planificado',
+    feedback: texto(s.feedback, 5000),
   }));
   const idsSprint = new Set(sprints.map((s) => s.id));
 
@@ -277,4 +278,15 @@ export function mapaHistorias(proyecto) {
 /** Mueve una historia a otra celda del mapa. */
 export function moverEnMapa(historias, id, epica, prioridad) {
   return historias.map((h) => (h.id === id ? { ...h, epica, prioridad } : h));
+}
+
+/**
+ * Lo que dijeron los stakeholders en la Review, convertido en historias para el backlog.
+ * Cada historia recuerda de qué Review vino.
+ */
+export function feedbackAHistorias(proyecto, sprintId, texto) {
+  const sprint = proyecto.sprints.find((s) => s.id === sprintId);
+  const origen = `Feedback de la Review${sprint ? ` de ${sprint.nombre}` : ''}`;
+  return notasAHistorias(texto, { rolPorDefecto: proyecto.rolPorDefecto })
+    .map((h) => ({ ...h, notaOriginal: `${origen}: ${h.notaOriginal}` }));
 }

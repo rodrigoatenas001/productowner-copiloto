@@ -392,6 +392,8 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .roadmap-epica .tarjeta-meta { margin: 0; }
 .roadmap-mover { font-size: .82rem; padding: 4px 8px; }
 
+.resultado-hipotesis { border-top: 1px dashed var(--niebla); padding-top: 10px; margin-top: 4px; }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }

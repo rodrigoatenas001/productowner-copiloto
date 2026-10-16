@@ -66,3 +66,12 @@ test('reporte de roadmap en Markdown con visión y horizontes', async () => {
   assert.ok(md.includes('**Terminado:** Base, Cierre.'));
   assert.ok(md.includes('no un compromiso'));
 });
+
+test('el feedback de la Review se vuelve historias que recuerdan su origen', async () => {
+  const { feedbackAHistorias } = await import('../js/nucleo/proyecto.js');
+  const p = proyecto();
+  const hs = feedbackAHistorias(p, 's1', '- que el reporte se pueda filtrar por sucursal\n- el botón de pago no se ve en celular');
+  assert.equal(hs.length, 2);
+  assert.equal(hs[0].estado, 'backlog');
+  assert.ok(hs[0].notaOriginal.startsWith('Feedback de la Review de Sprint 1: '));
+});
