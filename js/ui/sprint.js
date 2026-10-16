@@ -1,5 +1,5 @@
 // Sprint: planificar con la capacidad del equipo, trabajar en un tablero y cerrar con burndown y velocidad.
-import { h, campo } from './dom.js';
+import { h, campo, pedirTexto, vacio, selector } from './dom.js';
 import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
 import { listaVerificacion, editorHistoria } from './historia.js';
 import { dependenciasPendientes, bloqueosDelSprint } from '../nucleo/dependencias.js';
@@ -15,6 +15,7 @@ import {
 } from '../nucleo/proyecto.js';
 
 let arrastrando = null;
+const filtroTablero = { epica: '', bloqueadas: false };
 
 export function vistaSprint(app) {
   const p = app.proyecto;
@@ -33,13 +34,11 @@ export function vistaSprint(app) {
 
 function sinSprint(app) {
   const vel = velocidad(app.proyecto);
-  return h('div', { class: 'vacio' },
-    h('p', {}, 'No hay un sprint en curso.'),
-    vel ? h('p', { class: 'ayuda' }, `Tu velocidad promedio es ${vel} puntos por sprint.`) : null,
-    h('button', {
-      type: 'button', class: 'btn',
-      onclick: () => app.cambiar((x) => ({ ...x, sprints: [...x.sprints, nuevoSprint(x)] })),
-    }, 'Planificar un sprint'));
+  const pendientes = app.proyecto.historias.filter((x) => x.estado === 'backlog').length;
+  if (!pendientes) return vacio('No hay un sprint en curso.', 'Para planificar uno necesitas historias en el backlog.', ['Ir a Notas', () => app.ir('notas')], ['Ir al Backlog', () => app.ir('backlog')]);
+  return vacio('No hay un sprint en curso.',
+    `Un sprint es un bloque corto (1 a 4 semanas) con un objetivo. Tienes ${pendientes} ${pendientes === 1 ? 'historia' : 'historias'} en el backlog${vel ? ` y tu velocidad promedio es ${vel} puntos por sprint` : ''}: al planificar eliges cuáles entran.`,
+    ['Planificar un sprint', () => app.cambiar((x) => ({ ...x, sprints: [...x.sprints, nuevoSprint(x)] }))]);
 }
 
 function planificar(app, sprint) {
@@ -114,7 +113,7 @@ function planificar(app, sprint) {
           h('span', {}, x.titulo),
           h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar',
             avance(x, definicionesDe(p).ready, 'ready').completa ? '' : h('span', { class: 'chip chip--aviso', title: 'No cumple la Definition of Ready' }, ' no lista'),
-            dependenciasPendientes(p, x).length ? h('span', { class: 'chip chip--aviso', title: `Espera a: ${dependenciasPendientes(p, x).map((d) => d.titulo).join(', ')}` }, ' depende de algo pendiente') : ''))))) : h('p', { class: 'vacio' }, 'El backlog está vacío.')),
+            dependenciasPendientes(p, x).length ? h('span', { class: 'chip chip--aviso', title: `Espera a: ${dependenciasPendientes(p, x).map((d) => d.titulo).join(', ')}` }, ' depende de algo pendiente') : ''))))) : vacio('El backlog está vacío.', 'Agrega historias para elegir cuáles entran a este sprint.', ['Ir a Notas', () => app.ir('notas')])),
       avisoDependencias(p, sprint.id),
     h('div', { class: 'acciones' },
       h('button', {
@@ -157,8 +156,20 @@ function tablero(app, sprint) {
   const ciclo = cicloPromedio(terminadas);
   const bloqueadas = p.historias.filter((x) => x.sprintId === sprint.id && x.bloqueo && x.estado !== 'done');
 
+  const epicasSprint = [...new Set(p.historias.filter((x) => x.sprintId === sprint.id).map((x) => x.epica).filter(Boolean))].sort();
+  if (filtroTablero.epica && !epicasSprint.includes(filtroTablero.epica)) filtroTablero.epica = '';
+  const pasaFiltro = (x) => (!filtroTablero.epica || x.epica === filtroTablero.epica) && (!filtroTablero.bloqueadas || x.bloqueo);
+  const filtrosTablero = h('div', { class: 'barra-filtros filtros-tablero', role: 'group', 'aria-label': 'Filtrar el tablero' },
+    epicasSprint.length ? selector({ '': 'Todas las épicas', ...Object.fromEntries(epicasSprint.map((e) => [e, e])) }, filtroTablero.epica, {
+      'aria-label': 'Filtrar por épica', onchange: (e) => { filtroTablero.epica = e.target.value; app.render(); },
+    }) : null,
+    h('label', { class: 'opcion' },
+      h('input', { type: 'checkbox', checked: filtroTablero.bloqueadas, onchange: (e) => { filtroTablero.bloqueadas = e.target.checked; app.render(); } }),
+      h('span', {}, 'Solo bloqueadas')),
+    filtroTablero.epica || filtroTablero.bloqueadas ? h('button', { type: 'button', class: 'btn-texto', onclick: () => { filtroTablero.epica = ''; filtroTablero.bloqueadas = false; app.render(); } }, 'Ver todo') : null);
+
   const columna = (estado) => {
-    const hs = p.historias.filter((x) => x.sprintId === sprint.id && enColumna(x, estado));
+    const hs = p.historias.filter((x) => x.sprintId === sprint.id && enColumna(x, estado) && pasaFiltro(x));
     const i = COLUMNAS.indexOf(estado);
     const wip = usoWip(p, sprint.id, estado);
     return h('section', {
@@ -199,9 +210,9 @@ function tablero(app, sprint) {
       h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar'),
       estado !== 'done' ? h('button', {
         type: 'button', class: 'btn-texto ficha-bloqueo',
-        onclick: () => {
+        onclick: async () => {
           if (x.bloqueo) { app.cambiar((y) => ({ ...y, historias: y.historias.map((z) => (z.id === x.id ? desbloquear(z) : z)) })); return; }
-          const motivo = prompt('¿Qué la bloquea? (por ejemplo: esperando credenciales del cliente)');
+          const motivo = await pedirTexto('¿Qué la bloquea?', { aceptar: 'Bloquear', placeholder: 'Ej.: esperando credenciales del cliente' });
           if (motivo === null) return;
           try {
             app.cambiar((y) => ({ ...y, historias: y.historias.map((z) => (z.id === x.id ? bloquear(z, motivo) : z)) }));
@@ -221,6 +232,7 @@ function tablero(app, sprint) {
       h('div', { class: 'cifra' }, h('dt', {}, 'Capacidad'), h('dd', {}, sprint.capacidad ? `${sprint.capacidad} pts` : '—')),
       h('div', { class: 'cifra' }, h('dt', {}, 'Tiempo de ciclo'), h('dd', {}, ciclo === null ? '—' : `${ciclo.toLocaleString('es-CL')} días`))),
     bloqueadas.length ? h('p', { class: 'aviso-bloqueos', role: 'status' }, `${bloqueadas.length} ${bloqueadas.length === 1 ? 'ítem bloqueado' : 'ítems bloqueados'}: pídelo en la Daily o escálalo hoy.`) : null,
+    filtrosTablero,
     h('div', { class: `tablero tablero--${COLUMNAS.length}` }, COLUMNAS.map(columna)),
     seccionReview(app, sprint),
     h('section', { class: 'panel', 'aria-labelledby': 'burndown-titulo' },
@@ -366,7 +378,7 @@ function avisoDependencias(proyecto, sprintId) {
 }
 
 /** Ficha completa de un ítem del sprint en un diálogo: se edita igual que en el backlog. */
-function abrirFicha(app, id) {
+export function abrirFicha(app, id) {
   const historia = app.proyecto.historias.find((x) => x.id === id);
   if (!historia) return;
   const epicas = [...new Set(app.proyecto.historias.map((x) => x.epica).filter(Boolean))].sort();
@@ -376,12 +388,18 @@ function abrirFicha(app, id) {
     onclick: (e) => { if (e.target === dialogo) dialogo.close(); }, // clic fuera cierra
   },
   h('div', { class: 'dialogo-cabecera' },
-    h('p', { class: 'eyebrow' }, 'Ítem del sprint'),
+    h('p', { class: 'eyebrow' }, `Ítem del sprint · ${ESTADOS[historia.estado]}`),
     h('button', { type: 'button', class: 'icono', 'aria-label': 'Cerrar', onclick: () => dialogo.close() }, '×')),
   editorHistoria(historia, (cambios) => {
     cambio = true;
     app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === id ? { ...y, ...cambios } : y)) }), { redibujar: false });
   }, { epicas }),
+  h('div', { class: 'mover-a', role: 'group', 'aria-label': 'Mover a' },
+    h('span', {}, 'Mover a:'),
+    columnasDe(app.proyecto).filter((c) => c !== historia.estado).map((c) => h('button', {
+      type: 'button', class: 'btn btn--secundario',
+      onclick: () => { cambio = true; app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === id ? cambiarEstado(y, c) : y)) }), { redibujar: false }); app.avisar(`Movida a ${ESTADOS[c]}.`); dialogo.close(); },
+    }, ESTADOS[c]))),
   h('div', { class: 'acciones' }, h('button', { type: 'button', class: 'btn', onclick: () => dialogo.close() }, 'Listo')));
   document.body.append(dialogo);
   dialogo.showModal();

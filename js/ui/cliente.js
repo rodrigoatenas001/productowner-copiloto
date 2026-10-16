@@ -1,5 +1,5 @@
 // Cliente: lo comercial del PO independiente. Alcance, cotización, hitos de pago y cambios.
-import { h, campo, selector } from './dom.js';
+import { h, campo, selector, pedirTexto } from './dom.js';
 import { botonesMarkdown } from './compartir.js';
 import { PLANTILLAS } from '../nucleo/plantillas.js';
 import {
@@ -136,8 +136,8 @@ function hitos(app) {
           botonesMarkdown(app, 'Acta de aceptación', `acta-${hito.nombre}`, () => actaAceptacion(app.proyecto, hito.id)),
           hito.estado !== 'aceptado' ? h('button', {
             type: 'button', class: 'btn-texto',
-            onclick: () => {
-              const nombre = prompt('¿Quién acepta este hito por parte del cliente?');
+            onclick: async () => {
+              const nombre = await pedirTexto('¿Quién acepta este hito por parte del cliente?', { aceptar: 'Registrar aceptación', placeholder: 'Nombre y cargo' });
               if (nombre === null) return;
               try { app.cambiarConDeshacer(`${hito.nombre} aceptado.`, (x) => aceptarHito(x, hito.id, { nombre })); } catch (e) { app.avisar(e.message, 'error'); }
             },

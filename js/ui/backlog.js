@@ -1,7 +1,7 @@
 // Backlog priorizado: el orden es la prioridad. Se reordena arrastrando o con los botones.
-import { h, selector } from './dom.js';
+import { h, selector, vacio, pedirTexto } from './dom.js';
 import { mover, puntosDe, resumenEpicas, mapaHistorias, moverEnMapa } from '../nucleo/proyecto.js';
-import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest, enunciado, TIPOS } from '../nucleo/historias.js';
+import { calidad, nuevoId, PRIORIDADES, ESCALA_PUNTOS, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest, enunciado, TIPOS } from '../nucleo/historias.js';
 import { iaConfigurada, criteriosConIa, dividirConIa, revisarConIa, redactarConIa, nombreProveedor } from '../ia.js';
 import { revisarEnDosVoces, llamadasMaximas } from '../nucleo/dosvoces.js';
 import { casosBorde, agregarCasosBorde } from '../nucleo/casosborde.js';
@@ -22,6 +22,12 @@ let revision = null; // { historiaId, pasos, estado: 'corriendo'|'lista'|'error'
 let modo = 'lista'; // 'lista' | 'priorizar' | 'roadmap' | 'epicas' | 'mapa' | 'estimar'
 let abierta = null;
 let arrastrando = null;
+const seleccion = new Set(); // historias marcadas para cambios en grupo
+
+/** Deja una historia abierta en la lista (lo usan el mapa y el buscador). */
+export function enfocarHistoria(id) {
+  abierta = id; modo = 'lista'; filtros.texto = ''; filtros.epica = '';
+}
 
 export function vistaBacklog(app) {
   const p = app.proyecto;
@@ -34,6 +40,8 @@ export function vistaBacklog(app) {
   const filtrando = Boolean(filtros.texto || filtros.epica);
 
   const indiceGlobal = (id) => p.historias.findIndex((x) => x.id === id);
+  for (const id of [...seleccion]) if (!backlog.some((x) => x.id === id)) seleccion.delete(id);
+  const editarRapido = (id, cambios) => app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === id ? { ...y, ...cambios } : y)) }));
   const reordenar = (id, delta) => app.cambiar((x) => ({ ...x, historias: mover(x.historias, id, indiceGlobal(id) + delta) }));
 
   const tarjeta = (historia, posicion) => {
@@ -60,12 +68,19 @@ export function vistaBacklog(app) {
       },
     },
     h('div', { class: 'tarjeta-cabecera' },
-      h('span', { class: 'tarjeta-orden', 'aria-hidden': 'true' }, String(posicion + 1)),
+      h('label', { class: 'tarjeta-orden', title: 'Marcar para cambiar varias a la vez' },
+        h('input', { type: 'checkbox', checked: seleccion.has(historia.id), 'aria-label': `Seleccionar: ${historia.titulo}`, onchange: (e) => { if (e.target.checked) seleccion.add(historia.id); else seleccion.delete(historia.id); app.render(); } }),
+        h('span', { 'aria-hidden': 'true' }, String(posicion + 1))),
       h('button', {
         type: 'button', class: 'tarjeta-abrir', 'aria-expanded': String(esAbierta),
         onclick: () => { abierta = esAbierta ? null : historia.id; app.render(); },
       }, titulo, meta),
       insignia,
+      esAbierta ? h('span', {}) : h('span', { class: 'tarjeta-rapido' },
+        selector({ '': '— pts', ...Object.fromEntries(ESCALA_PUNTOS.map((n) => [n, `${n} pts`])) }, historia.puntos ?? '', {
+          'aria-label': `Puntos: ${historia.titulo}`, title: 'Puntos', onchange: (e) => editarRapido(historia.id, { puntos: e.target.value === '' ? null : Number(e.target.value) }),
+        }),
+        selector(PRIORIDADES, historia.prioridad, { 'aria-label': `Prioridad: ${historia.titulo}`, title: 'Prioridad', onchange: (e) => editarRapido(historia.id, { prioridad: e.target.value }) })),
       filtrando ? null : h('span', { class: 'tarjeta-mover' },
         h('button', { type: 'button', class: 'icono', 'aria-label': `Subir: ${historia.titulo}`, disabled: posicion === 0, onclick: () => reordenar(historia.id, -1) }, '↑'),
         h('button', { type: 'button', class: 'icono', 'aria-label': `Bajar: ${historia.titulo}`, disabled: posicion === visibles.length - 1, onclick: () => reordenar(historia.id, 1) }, '↓'))),
@@ -152,11 +167,43 @@ export function vistaBacklog(app) {
         },
       }, '+ Historia')),
     modo !== 'lista' ? null : filtrando ? h('p', { class: 'ayuda' }, 'Con filtros activos no se puede reordenar.') : null,
+    modo === 'lista' && seleccion.size ? barraSeleccion(app, sprintAbierto) : null,
     modo !== 'lista' ? null : backlog.length
       ? (visibles.length ? h('ol', { class: 'lista-tarjetas' }, visibles.map(tarjeta)) : h('p', { class: 'vacio' }, 'Ninguna historia coincide con el filtro.'))
-      : h('div', { class: 'vacio' },
-        h('p', {}, 'El backlog está vacío.'),
-        h('button', { type: 'button', class: 'btn', onclick: () => app.ir('notas') }, 'Convertir notas en historias')));
+      : vacio('El backlog está vacío.', 'Es la lista de todo lo que hay que hacer. Puedes llenarlo desde tus notas, con una plantilla de proyecto o agregando historias una a una con "+ Historia".',
+        ['Convertir notas en historias', () => app.ir('notas')],
+        ['Usar una plantilla', () => app.ir('cliente')],
+        ['Ver un ejemplo', () => app.cargarEjemplo()]));
+}
+
+/** Acciones sobre varias historias marcadas. */
+function barraSeleccion(app, sprintAbierto) {
+  const n = seleccion.size;
+  const aplicar = (texto, cambios) => {
+    const ids = new Set(seleccion);
+    seleccion.clear();
+    app.cambiarConDeshacer(texto, (x) => ({ ...x, historias: x.historias.map((y) => (ids.has(y.id) ? { ...y, ...cambios } : y)) }));
+  };
+  return h('div', { class: 'barra-seleccion', role: 'region', 'aria-label': 'Historias seleccionadas' },
+    h('strong', {}, `${n} ${n === 1 ? 'seleccionada' : 'seleccionadas'}`),
+    selector({ '': 'Cambiar prioridad…', ...PRIORIDADES }, '', { 'aria-label': 'Cambiar prioridad de las seleccionadas', onchange: (e) => { if (e.target.value) aplicar(`Prioridad cambiada en ${n}.`, { prioridad: e.target.value }); } }),
+    h('button', {
+      type: 'button', class: 'btn btn--secundario',
+      onclick: async () => {
+        const epica = await pedirTexto('¿A qué épica pasan?', { aceptar: 'Asignar épica', placeholder: 'Ej.: Pagos' });
+        if (epica) aplicar(`Épica "${epica}" asignada a ${n}.`, { epica });
+      },
+    }, 'Asignar épica'),
+    sprintAbierto ? h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => aplicar(`${n} pasadas a ${sprintAbierto.nombre}.`, { sprintId: sprintAbierto.id, estado: 'todo' }) }, `Pasar a ${sprintAbierto.nombre}`) : null,
+    h('button', {
+      type: 'button', class: 'btn-texto btn-peligro',
+      onclick: () => {
+        const ids = new Set(seleccion);
+        seleccion.clear();
+        app.cambiarConDeshacer(`${n} eliminadas.`, (x) => ({ ...x, historias: x.historias.filter((y) => !ids.has(y.id)) }));
+      },
+    }, 'Eliminar'),
+    h('button', { type: 'button', class: 'btn-texto', onclick: () => { seleccion.clear(); app.render(); } }, 'Quitar selección'));
 }
 
 function metaTexto(x) {
@@ -258,7 +305,7 @@ function accionesInteligentes(app, historia) {
 /** Épicas con su avance; al elegir una se vuelve a la lista filtrada por ella. */
 function vistaEpicas(app) {
   const epicas = resumenEpicas(app.proyecto);
-  if (!epicas.length) return h('p', { class: 'vacio' }, 'Aún no hay historias.');
+  if (!epicas.length) return vacio('Aún no hay historias.', 'Pega lo que te pidió el cliente en Notas y conviértelo en historias.', ['Ir a Notas', () => app.ir('notas')]);
   const pron = pronosticar(app.proyecto);
   const porEpica = Object.fromEntries((pron?.epicas || []).map((x) => [x.epica, x]));
   return h('div', {},
@@ -288,7 +335,7 @@ function vistaEpicas(app) {
 /** Mapa de historias: arrastra una tarjeta a otra celda para cambiar su épica o su versión. */
 function vistaMapa(app) {
   const { epicas, filas } = mapaHistorias(app.proyecto);
-  if (!app.proyecto.historias.length) return h('p', { class: 'vacio' }, 'Aún no hay historias.');
+  if (!app.proyecto.historias.length) return vacio('Aún no hay historias.', 'Pega lo que te pidió el cliente en Notas y conviértelo en historias.', ['Ir a Notas', () => app.ir('notas')]);
   let arrastrada = null;
 
   const celda = (fila, epica) => h('td', {
@@ -306,7 +353,7 @@ function vistaMapa(app) {
     class: `mapa-tarjeta${x.estado === 'done' ? ' is-hecha' : ''}`,
     title: 'Arrastra para cambiar épica o versión; clic para editar',
     ondragstart: (e) => { arrastrada = x.id; e.dataTransfer.effectAllowed = 'move'; },
-    onclick: () => { abierta = x.id; modo = 'lista'; filtros.texto = ''; filtros.epica = ''; app.render(); },
+    onclick: () => { enfocarHistoria(x.id); app.render(); },
   }, x.titulo, x.puntos ? h('span', { class: 'tarjeta-meta' }, ` · ${x.puntos}`) : null)));
 
   return h('div', { class: 'mapa-contenedor' },

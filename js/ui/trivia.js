@@ -1,6 +1,6 @@
 // Trivia para proyectar: el facilitador muestra la pregunta, corre el tiempo, revela la respuesta
 // y marca qué equipos acertaron. Sin celulares ni servidor.
-import { h, campo, descargar } from './dom.js';
+import { h, campo, descargar, confirmar } from './dom.js';
 import { TEMAS } from '../nucleo/preguntas.js';
 import {
   BANCO_INCLUIDO, crearPartida, registrarRespuestas, siguientePregunta, ranking, validarPreguntas,
@@ -103,7 +103,7 @@ function configuracion(app) {
         propias.length ? h('button', {
           type: 'button', class: 'btn-texto btn-peligro',
           onclick: async () => {
-            if (!confirm(`¿Borrar tus ${propias.length} preguntas propias?`)) return;
+            if (!(await confirmar(`¿Borrar tus ${propias.length} preguntas propias?`, { aceptar: 'Borrar', peligro: true }))) return;
             await app.guardarPreguntas([]);
             config.temas = config.temas.filter((t) => t !== 'propias');
             app.render();
@@ -138,7 +138,7 @@ function jugar(app) {
       h('span', { class: 'eyebrow' }, `Pregunta ${partida.indice + 1} de ${partida.preguntas.length} · ${TEMAS[pregunta.tema] || 'Mis preguntas'}`),
       h('span', { class: 'trivia-acciones' },
         h('button', { type: 'button', class: 'btn-texto', onclick: () => pantallaCompleta() }, 'Pantalla completa'),
-        h('button', { type: 'button', class: 'btn-texto', onclick: () => { if (confirm('¿Terminar la trivia?')) { partida = { ...partida, fase: 'final' }; app.render(); } } }, 'Terminar'))),
+        h('button', { type: 'button', class: 'btn-texto', onclick: async () => { if (await confirmar('¿Terminar la trivia?', { aceptar: 'Terminar' })) { partida = { ...partida, fase: 'final' }; app.render(); } } }, 'Terminar'))),
     h('div', { class: 'capacidad-barra trivia-barra', 'aria-hidden': 'true' }, barra),
     h('h2', { class: 'trivia-pregunta' }, pregunta.texto),
     h('ol', { class: 'trivia-opciones' }, pregunta.opciones.map((o, i) => h('li', {

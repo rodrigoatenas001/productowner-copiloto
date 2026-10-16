@@ -34,6 +34,7 @@ function verdad(cond, que) { if (!cond) throw new Error(que); }
 
 let copiado = '';
 let abiertas = [];
+let responderDialogos = true;
 
 async function cargar(ruta = '#notas') {
   marco.src = `../index.html?prueba&carga=${Date.now()}${ruta}`; // cambia la dirección para forzar una recarga real
@@ -45,6 +46,15 @@ async function cargar(ruta = '#notas') {
   w.open = (url) => { abiertas.push(url); };
   w.confirm = () => true;
   w.prompt = () => 'Proyecto de prueba';
+  // Diálogos propios de la app: se responden solos, como antes confirm/prompt
+  new w.MutationObserver(() => {
+    const d = doc().querySelector('dialog.dialogo-pregunta[open]:not(.respondido)');
+    if (!d || !responderDialogos) return;
+    d.classList.add('respondido');
+    const entrada = d.querySelector('input');
+    if (entrada) entrada.value = 'Proyecto de prueba';
+    d.querySelector('[type=submit]').click();
+  }).observe(doc().body, { childList: true });
   const fetchReal = w.fetch.bind(w);
   w.fetch = async (_url, op) => {
     if (!op?.body) return fetchReal(_url, op); // archivos de la app (por ejemplo, el proyecto de ejemplo)
@@ -308,6 +318,49 @@ const PRUEBAS = [
     verdad(!uno(`.columna--todo .ficha[data-id="${id}"]`), 'la tarjeta salió de Por hacer');
     verdad(doc().activeElement?.dataset?.id === id, 'el foco sigue en la tarjeta');
   }],
+  ['Buscador (Ctrl+K) y atajos de teclado', async () => {
+    await ir('notas');
+    const tecla = (key, extra = {}) => doc().body.dispatchEvent(new KeyboardEvent('keydown', { key, bubbles: true, ...extra }));
+    tecla('b');
+    await esperar(() => ventana().location.hash === '#backlog', 'la tecla B lleva al backlog');
+    tecla('k', { ctrlKey: true });
+    await esperar(() => uno('dialog.buscador[open]'), 'Ctrl+K abre el buscador');
+    const entrada = uno('dialog.buscador input');
+    escribir(entrada, 'cuotas');
+    verdad(todos('.buscador-lista li').some((li) => li.textContent.includes('Pagar en cuotas')), 'encuentra la historia');
+    entrada.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    await esperar(() => !uno('dialog.buscador') && uno('.tarjeta.is-abierta'), 'abre la historia en el backlog');
+    tecla('?');
+    await esperar(() => uno('dialog .atajos'), 'el ? muestra los atajos');
+    await clic('Entendido');
+  }],
+  ['Backlog: edición rápida y selección múltiple', async () => {
+    await ir('backlog');
+    uno('.tarjeta.is-abierta .tarjeta-abrir')?.click(); await pausa(80);
+    const pts = uno('.tarjeta-rapido select');
+    escribir(pts, '13', 'change');
+    await esperar(() => uno('.tarjeta-rapido select').value === '13', 'cambió los puntos sin abrir la tarjeta');
+    const casillas = todos('label.tarjeta-orden input');
+    casillas[0].click(); await pausa(50);
+    todos('label.tarjeta-orden input')[1].click(); await pausa(50);
+    await esperar(() => uno('.barra-seleccion')?.textContent.includes('2 seleccionadas'), 'aparece la barra de selección');
+    escribir(uno('.barra-seleccion select'), 'wont', 'change');
+    await esperar(() => !uno('.barra-seleccion'), 'aplicó el cambio y limpió la selección');
+    verdad(todos('.tarjeta-rapido select[aria-label^="Prioridad"]').filter((x) => x.value === 'wont').length >= 2, 'dos historias cambiaron de prioridad');
+  }],
+  ['Sprint: filtros y mover desde la ficha', async () => {
+    await ir('sprint');
+    uno('.filtros-tablero input[type="checkbox"]').click();
+    await esperar(() => todos('.ficha').length === todos('.ficha.is-bloqueada').length && todos('.ficha').length > 0, 'solo muestra bloqueadas');
+    await clic('Ver todo');
+    const ficha = uno('.columna--todo .ficha') || uno('.columna--doing .ficha');
+    const id = ficha.dataset.id;
+    ficha.querySelector('.ficha-titulo').click();
+    await esperar(() => uno('dialog.dialogo-ficha .mover-a'), 'la ficha ofrece mover');
+    todos('.mover-a button').find((b) => b.textContent === 'Hecho').click();
+    await esperar(() => uno(`.columna--done .ficha[data-id="${id}"]`), 'quedó en Hecho');
+    verdad(/\d+%/.test(uno('#navegacion a[href="#sprint"]').textContent), 'el menú muestra el avance del sprint');
+  }],
   ['Celular: sin desplazamiento horizontal', async () => {
     marco.style.width = '375px';
     await pausa(150);
@@ -316,6 +369,7 @@ const PRUEBAS = [
       const ancho = doc().documentElement.scrollWidth;
       verdad(ancho <= 376, `${vista} mide ${ancho}px en un celular de 375px`);
     }
+    verdad(ventana().getComputedStyle(uno('#barra-inferior')).display !== 'none', 'en el celular se ve la barra inferior');
     marco.style.width = '';
   }],
 ];

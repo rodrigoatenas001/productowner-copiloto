@@ -2,7 +2,7 @@
 import { listarProyectos, guardarProyecto, borrarProyecto, leerAjuste, guardarAjuste, pedirPersistencia, MODO_PRUEBA } from './almacen.js';
 import { nuevoProyecto, necesitaRespaldo } from './nucleo/proyecto.js';
 import { nombreArchivo } from './nucleo/exportar.js';
-import { h, vaciar, avisar, descargar } from './ui/dom.js';
+import { h, vaciar, avisar, descargar, pedirTexto } from './ui/dom.js';
 import { vistaNotas } from './ui/notas.js';
 import { vistaBacklog } from './ui/backlog.js';
 import { vistaSprint } from './ui/sprint.js';
@@ -13,7 +13,8 @@ import { vistaCliente } from './ui/cliente.js';
 import { vistaBienvenida } from './ui/bienvenida.js';
 import { vistaComentar } from './ui/comentar.js';
 import { cajaRecorrido, avisoEjemplo, cajaInfo, PASOS_RECORRIDO } from './ui/ayuda.js';
-import { normalizarProyecto } from './nucleo/proyecto.js';
+import { normalizarProyecto, resumenSprint } from './nucleo/proyecto.js';
+import { activarAtajos, abrirBuscador } from './ui/buscador.js';
 
 const VISTAS = {
   inicio: { titulo: 'Inicio', render: vistaBienvenida },
@@ -191,6 +192,7 @@ const app = {
 
   render() {
     renderNavegacion();
+    renderBarraInferior();
     const principal = document.getElementById('principal');
     const v = this.vista;
     const caja = AYUDAS[v] && v !== 'comentar' && this.recorrido === null ? cajaInfo(this, v, `Para qué sirve ${VISTAS[v].titulo}`, AYUDAS[v], EXTRA_AYUDA[v]?.()) : null;
@@ -247,14 +249,17 @@ function renderNavegacion() {
   app.proyectos.map((p) => h('option', { value: p.id, selected: p.id === app.proyecto.id }, p.nombre)),
   h('option', { value: '__nuevo' }, '+ Nuevo proyecto…'));
 
-  const enSprint = app.proyecto.sprints.some((s) => s.estado === 'activo');
+  const activo = app.proyecto.sprints.find((s) => s.estado === 'activo');
+  const r = activo ? resumenSprint(activo, app.proyecto.historias) : null;
+  const avanceSprint = r ? Math.round((r.hechos / (r.puntos || 1)) * 100) : null;
   const conteos = {
     backlog: app.proyecto.historias.filter((x) => x.estado === 'backlog').length,
-    sprint: enSprint ? '●' : '',
+    sprint: r ? `${avanceSprint}%` : '',
   };
 
   vaciar(document.getElementById('navegacion'),
     h('div', { class: 'nav-proyecto' }, selectorProyecto),
+    h('button', { type: 'button', class: 'nav-buscar', onclick: () => abrirBuscador(app, VISTAS), title: 'Buscar (Ctrl + K)' }, 'Buscar…', h('kbd', {}, 'Ctrl K')),
     h('nav', { 'aria-label': 'Secciones' },
       h('ul', {}, Object.entries(VISTAS).filter(([clave]) => clave === app.vista || !(app.modoSimple && AVANZADAS.has(clave))).map(([clave, v]) => h('li', { class: clave === 'comentar' ? 'nav-comentar' : null },
         h('a', {
@@ -262,14 +267,27 @@ function renderNavegacion() {
           title: AYUDAS[clave] || null,
           'aria-current': app.vista === clave ? 'page' : null,
           onclick: (e) => { e.preventDefault(); app.ir(clave); },
-        }, v.titulo, conteos[clave] ? h('span', { class: 'nav-conteo' }, String(conteos[clave])) : null))))),
+        }, v.titulo, conteos[clave] ? h('span', { class: 'nav-conteo', title: clave === 'sprint' ? `${activo.nombre}: ${r.hechos} de ${r.puntos} puntos terminados` : null }, String(conteos[clave])) : null,
+        clave === 'sprint' && r ? h('span', { class: 'nav-avance', 'aria-hidden': 'true' }, h('span', { class: `nav-avance-${Math.min(10, Math.round(avanceSprint / 10))}` })) : null))))),
     h('p', { class: 'nav-estado', id: 'estado-guardado', 'aria-live': 'polite' }, 'Guardado en este navegador'));
 }
 
-function pedirNuevoProyecto(select) {
-  const nombre = prompt('Nombre del nuevo proyecto');
-  if (nombre && nombre.trim()) {
-    app.crearProyecto(nombre.trim());
+// Barra inferior para el pulgar (solo se ve en pantallas angostas)
+function renderBarraInferior() {
+  let barra = document.getElementById('barra-inferior');
+  if (!barra) { barra = h('nav', { id: 'barra-inferior', 'aria-label': 'Secciones principales' }); document.body.append(barra); }
+  const enlace = (clave, icono) => h('a', {
+    href: `#${clave}`, 'aria-current': app.vista === clave ? 'page' : null,
+    onclick: (e) => { e.preventDefault(); app.ir(clave); },
+  }, h('span', { class: 'barra-icono', 'aria-hidden': 'true' }, icono), VISTAS[clave].titulo);
+  barra.replaceChildren(enlace('notas', '✎'), enlace('backlog', '☰'), enlace('cliente', '◈'), enlace('sprint', '▦'),
+    h('button', { type: 'button', onclick: () => abrirBuscador(app, VISTAS) }, h('span', { class: 'barra-icono', 'aria-hidden': 'true' }, '⌕'), 'Buscar'));
+}
+
+async function pedirNuevoProyecto(select) {
+  const nombre = await pedirTexto('Nombre del nuevo proyecto', { aceptar: 'Crear proyecto', placeholder: 'Ej.: Tienda de Carla' });
+  if (nombre) {
+    app.crearProyecto(nombre);
   } else {
     select.value = app.proyecto.id;
   }
@@ -323,4 +341,5 @@ if ('serviceWorker' in navigator && location.protocol !== 'file:' && !MODO_PRUEB
   navigator.serviceWorker.register('./sw.js').catch(() => {});
 }
 
+activarAtajos(app, VISTAS);
 iniciar();

@@ -1,5 +1,5 @@
 // Ayudas: cajas informativas que se pueden cerrar, el recorrido introductorio y el aviso del proyecto de ejemplo.
-import { h } from './dom.js';
+import { h, confirmar } from './dom.js';
 
 /** Caja "¿Para qué sirve esta sección?". Se cierra y no vuelve a aparecer (se puede reabrir desde Inicio). */
 export function cajaInfo(app, clave, titulo, ...contenido) {
@@ -48,7 +48,7 @@ export function avisoEjemplo(app) {
       h('button', {
         type: 'button', class: 'btn-texto',
         onclick: async () => {
-          if (!confirm('¿Eliminar el proyecto de ejemplo? Puedes volver a cargarlo desde Inicio.')) return;
+          if (!(await confirmar('¿Eliminar el proyecto de ejemplo?', { detalle: 'Puedes volver a cargarlo desde Inicio.', aceptar: 'Eliminar ejemplo', peligro: true }))) return;
           await app.borrarProyectoActual();
         },
       }, 'Eliminar el ejemplo')));

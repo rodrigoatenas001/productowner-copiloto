@@ -1,5 +1,5 @@
 // Priorizar con números: WSJF o RICE, orden del backlog por puntaje y matriz valor/esfuerzo.
-import { h, selector } from './dom.js';
+import { h, selector, vacio } from './dom.js';
 import {
   METODOS, ESCALA_WSJF, IMPACTO_RICE, CONFIANZA_RICE, reordenarBacklog, matrizValorEsfuerzo, CUADRANTES,
 } from '../nucleo/priorizacion.js';
@@ -8,7 +8,7 @@ let metodo = 'wsjf';
 
 export function vistaPriorizar(app) {
   const backlog = app.proyecto.historias.filter((x) => x.estado === 'backlog');
-  if (!backlog.length) return h('p', { class: 'vacio' }, 'El backlog está vacío.');
+  if (!backlog.length) return vacio('No hay nada que priorizar.', 'Cuando tengas historias en el backlog podrás ordenarlas por valor y esfuerzo.', ['Ir a Notas', () => app.ir('notas')]);
   const def = METODOS[metodo];
 
   const guardar = (id, cambios) => app.cambiar((x) => ({

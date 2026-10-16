@@ -81,3 +81,42 @@ export function campo(etiqueta, control, ayuda) {
 export function selector(opciones, valor, atributos = {}) {
   return h('select', atributos, Object.entries(opciones).map(([v, t]) => h('option', { value: v, selected: String(v) === String(valor) }, t)));
 }
+
+/**
+ * Diálogo propio (reemplaza confirm/prompt del navegador). Devuelve una promesa:
+ * con `campo` resuelve el texto escrito (o null si cancela); sin `campo`, true/false.
+ */
+function dialogoPregunta(pregunta, { detalle = '', aceptar = 'Aceptar', peligro = false, campo: conCampo = false, valor = '', placeholder = '' } = {}) {
+  return new Promise((resolver) => {
+    let respuesta = conCampo ? null : false;
+    const entrada = conCampo ? h('input', { type: 'text', value: valor, placeholder, 'aria-label': pregunta, maxlength: 300 }) : null;
+    const dialogo = h('dialog', { class: 'dialogo-pregunta', onclose: () => { dialogo.remove(); resolver(respuesta); } },
+      h('form', {
+        method: 'dialog',
+        onsubmit: (e) => {
+          if (conCampo && !entrada.value.trim()) { e.preventDefault(); entrada.focus(); return; }
+          respuesta = conCampo ? entrada.value.trim() : true;
+        },
+      },
+      h('p', { class: 'dialogo-pregunta-texto' }, pregunta),
+      detalle ? h('p', { class: 'ayuda' }, detalle) : null,
+      entrada,
+      h('div', { class: 'acciones' },
+        h('button', { type: 'submit', class: peligro ? 'btn btn-peligro-solido' : 'btn' }, aceptar),
+        h('button', { type: 'button', class: 'btn-texto', onclick: () => dialogo.close() }, 'Cancelar'))));
+    document.body.append(dialogo);
+    dialogo.showModal();
+    (entrada || dialogo.querySelector('[type=submit]')).focus();
+  });
+}
+
+export const confirmar = (pregunta, opciones = {}) => dialogoPregunta(pregunta, opciones);
+export const pedirTexto = (pregunta, opciones = {}) => dialogoPregunta(pregunta, { ...opciones, campo: true });
+
+/** Estado vacío que invita a actuar: un título, por qué está vacío y los botones para empezar. */
+export function vacio(titulo, texto, ...acciones) {
+  return h('div', { class: 'vacio' },
+    h('p', { class: 'vacio-titulo' }, titulo),
+    texto ? h('p', { class: 'ayuda' }, texto) : null,
+    acciones.length ? h('div', { class: 'acciones' }, acciones.filter(Boolean).map(([etiqueta, hacer], i) => h('button', { type: 'button', class: i === 0 ? 'btn' : 'btn btn--secundario', onclick: hacer }, etiqueta))) : null);
+}

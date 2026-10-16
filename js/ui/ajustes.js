@@ -1,5 +1,5 @@
 // Ajustes: proyecto, IA opcional, respaldo y exportaciones.
-import { h, campo, selector, descargar } from './dom.js';
+import { h, campo, selector, descargar, confirmar } from './dom.js';
 import { normalizarProyecto } from '../nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, nombreArchivo, GUIA_JQL } from '../nucleo/exportar.js';
 import { PROVEEDORES, probarConexion, iaConfigurada } from '../ia.js';
@@ -51,7 +51,7 @@ function seccionProyecto(app) {
       h('button', {
         type: 'button', class: 'btn-texto btn-peligro',
         onclick: async () => {
-          if (!confirm(`¿Eliminar el proyecto "${p.nombre}" de este navegador? Descarga un respaldo antes si lo quieres conservar.`)) return;
+          if (!(await confirmar(`¿Eliminar el proyecto "${p.nombre}" de este navegador?`, { detalle: 'Descarga un respaldo antes si lo quieres conservar.', aceptar: 'Eliminar proyecto', peligro: true }))) return;
           await app.borrarProyectoActual();
           app.avisar('Proyecto eliminado.');
         },

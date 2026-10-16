@@ -1,5 +1,5 @@
 // Retrospectiva para proyectar: notas anónimas en tres columnas, votos y acciones con responsable.
-import { h } from './dom.js';
+import { h, vacio } from './dom.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteRetro } from '../nucleo/reportes.js';
 import {
@@ -30,9 +30,7 @@ export function vistaRetro(app) {
         onchange: (e) => { retroActiva = e.target.value; app.render(); },
       }, [...retros].reverse().map((r) => h('option', { value: r.id, selected: r.id === actual?.id }, `${r.titulo} · ${r.fecha.split('-').reverse().join('-')}`))) : null,
       h('button', { type: 'button', class: actual ? 'btn btn--secundario' : 'btn', onclick: crear }, 'Nueva retrospectiva')),
-    actual ? tablero(app, actual, retros) : h('div', { class: 'vacio' },
-      h('p', {}, 'Aún no hay retrospectivas.'),
-      h('p', { class: 'ayuda' }, 'Lo ideal es hacer una al cerrar cada sprint.')));
+    actual ? tablero(app, actual, retros) : vacio('Aún no hay retrospectivas.', 'Lo ideal es hacer una al cerrar cada sprint: qué salió bien, qué mejorar y qué acciones tomar. Sirve también si trabajas solo con tu cliente.', ['Nueva retrospectiva', crear]));
 }
 
 function tablero(app, retro, retros) {
