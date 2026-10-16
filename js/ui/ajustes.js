@@ -61,9 +61,10 @@ function seccionRespaldo(app) {
 
   return h('section', { class: 'panel', 'aria-labelledby': 'aj-respaldo' },
     h('h2', { id: 'aj-respaldo' }, 'Respaldo y exportación'),
-    h('p', { class: 'ayuda' }, 'Tus datos están solo en este navegador. Si borras los datos del navegador o cambias de equipo, se pierden: descarga un respaldo de vez en cuando.'),
+    h('p', { class: 'ayuda' }, 'Tus datos están solo en este navegador. Si borras los datos del navegador o cambias de equipo, se pierden: descarga un respaldo de vez en cuando.',
+      p.respaldado ? ` Último respaldo: ${new Date(p.respaldado).toLocaleDateString('es-CL')}.` : ' Aún no descargas ninguno.'),
     h('div', { class: 'acciones' },
-      h('button', { type: 'button', class: 'btn', onclick: () => descargar(nombreArchivo(p, 'json'), JSON.stringify(p, null, 2), 'application/json') }, 'Descargar respaldo (.json)'),
+      h('button', { type: 'button', class: 'btn', onclick: () => app.descargarRespaldo() }, 'Descargar respaldo (.json)'),
       entrada,
       h('label', { for: 'importar', class: 'btn btn--secundario', tabindex: '0', onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); entrada.click(); } } }, 'Importar respaldo')),
     h('h3', {}, 'Exportar el backlog'),
@@ -104,7 +105,8 @@ function seccionIa(app) {
       h('button', {
         type: 'button', class: 'btn btn--secundario',
         onclick: async (e) => {
-          e.currentTarget.disabled = true;
+          const boton = e.currentTarget; // currentTarget deja de existir después del await
+          boton.disabled = true;
           estado.textContent = 'Probando…';
           try {
             await probarConexion({ ...c, url: c.url || def.url, modelo: c.modelo || def.modelo });
@@ -112,7 +114,7 @@ function seccionIa(app) {
           } catch (err) {
             estado.textContent = err.message;
           } finally {
-            e.currentTarget.disabled = false;
+            boton.disabled = false;
           }
         },
       }, 'Probar conexión')), estado);

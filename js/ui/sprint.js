@@ -92,8 +92,7 @@ function planificar(app, sprint) {
       h('button', {
         type: 'button', class: 'btn-texto btn-peligro',
         onclick: () => {
-          if (!confirm('¿Descartar esta planificación? Las historias vuelven al backlog.')) return;
-          app.cambiar((x) => ({
+          app.cambiarConDeshacer('Planificación descartada. Las historias volvieron al backlog.', (x) => ({
             ...x,
             sprints: x.sprints.filter((s) => s.id !== sprint.id),
             historias: x.historias.map((y) => (y.sprintId === sprint.id ? { ...y, sprintId: null, estado: 'backlog' } : y)),
@@ -146,10 +145,8 @@ function tablero(app, sprint) {
         type: 'button', class: 'btn',
         onclick: () => {
           const pendientes = p.historias.filter((x) => x.sprintId === sprint.id && x.estado !== 'done').length;
-          const texto = pendientes ? `Quedan ${pendientes} historias sin terminar: volverán al inicio del backlog. ¿Cerrar el sprint?` : '¿Cerrar el sprint?';
-          if (!confirm(texto)) return;
-          app.cambiar((x) => cerrarSprint(x, sprint.id));
-          app.avisar(`${sprint.nombre} cerrado. ${resumen.hechos} puntos terminados.`);
+          const extra = pendientes ? ` ${pendientes} sin terminar volvieron al inicio del backlog.` : '';
+          app.cambiarConDeshacer(`${sprint.nombre} cerrado: ${resumen.hechos} puntos terminados.${extra}`, (x) => cerrarSprint(x, sprint.id));
         },
       }, 'Cerrar sprint')));
 }

@@ -74,6 +74,11 @@ pre { background: var(--papel); border: 1px solid var(--niebla); border-radius: 
 .nav-estado { margin-top: auto; font: .75rem var(--f-mono); color: #8fa1b9; }
 main { padding: 32px clamp(16px, 4vw, 48px) 64px; max-width: 1100px; width: 100%; outline: none; }
 
+/* Recordatorio de respaldo */
+.recordatorio { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 8px 16px; background: var(--ambar-suave); color: var(--ambar-texto); border-radius: var(--radio); padding: 12px 16px; margin: 0 0 24px; }
+.recordatorio p { margin: 0; }
+.recordatorio .acciones { margin: 0; }
+
 /* Vistas */
 .vista-cabecera { margin-bottom: 24px; }
 .eyebrow { font: 500 .72rem var(--f-mono); letter-spacing: .1em; text-transform: uppercase; color: var(--cobre-texto); margin: 0 0 8px; }
@@ -108,6 +113,7 @@ input:focus, select:focus, textarea:focus { border-color: var(--cobre); outline:
 button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .icono { background: none; border: 1px solid transparent; width: 30px; height: 30px; color: var(--pizarra); font-size: 1rem; line-height: 1; }
 .icono:hover:not(:disabled) { border-color: var(--niebla); color: var(--texto); }
+.acciones-ia { display: contents; }
 .acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
 @media (prefers-color-scheme: dark) { .btn { background: #e8eef7; color: var(--tinta); border-color: #e8eef7; } .btn:hover { background: #fff; } .btn--cobre { background: var(--cobre); color: #fff; border-color: var(--cobre); } }
 
@@ -215,8 +221,10 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 
 /* Avisos flotantes */
 .avisos { position: fixed; right: 16px; bottom: 16px; display: grid; gap: 8px; z-index: 20; max-width: min(420px, calc(100vw - 32px)); }
-.aviso { margin: 0; padding: 12px 16px; border-radius: 8px; background: var(--tinta); color: #fff; box-shadow: var(--sombra); font-size: .92rem; transition: opacity .4s, transform .4s; }
+.aviso { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin: 0; padding: 12px 16px; border-radius: 8px; background: var(--tinta); color: #fff; box-shadow: var(--sombra); font-size: .92rem; transition: opacity .4s, transform .4s; }
 .aviso--error { background: var(--alerta); }
+.aviso-accion { background: none; border: 1px solid rgba(255, 255, 255, .5); color: #fff; border-radius: 6px; padding: 4px 10px; font: 600 .85rem var(--f-texto); cursor: pointer; white-space: nowrap; }
+.aviso-accion:hover { background: rgba(255, 255, 255, .12); }
 .aviso.is-saliendo { opacity: 0; transform: translateY(8px); }
 
 /* Celular: barra superior y navegación horizontal */

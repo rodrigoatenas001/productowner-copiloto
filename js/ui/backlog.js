@@ -1,7 +1,8 @@
 // Backlog priorizado: el orden es la prioridad. Se reordena arrastrando o con los botones.
 import { h, selector } from './dom.js';
 import { mover, puntosDe } from '../nucleo/proyecto.js';
-import { calidad, nuevoId, PRIORIDADES, sugerirCriterios } from '../nucleo/historias.js';
+import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest } from '../nucleo/historias.js';
+import { iaConfigurada, criteriosConIa, dividirConIa } from '../ia.js';
 import { editorHistoria, insigniaCalidad } from './historia.js';
 
 const filtros = { texto: '', epica: '' };
@@ -26,6 +27,7 @@ export function vistaBacklog(app) {
     const titulo = h('span', { class: 'tarjeta-titulo' }, historia.titulo || '(sin título)');
     const insignia = h('span', {}, insigniaCalidad(historia));
     const meta = h('span', { class: 'tarjeta-meta' }, metaTexto(historia));
+    const zonaIa = h('span', { class: 'acciones-ia' }, esAbierta ? accionesInteligentes(app, historia) : null);
 
     const li = h('li', {
       class: `tarjeta${esAbierta ? ' is-abierta' : ''}`,
@@ -59,8 +61,10 @@ export function vistaBacklog(app) {
         titulo.textContent = actual.titulo || '(sin título)';
         meta.textContent = metaTexto(actual);
         insignia.replaceChildren(insigniaCalidad(actual));
+        zonaIa.replaceChildren(...accionesInteligentes(app, actual));
       }, { epicas }),
       h('div', { class: 'acciones' },
+        zonaIa,
         sprintAbierto ? h('button', {
           type: 'button', class: 'btn btn--secundario',
           onclick: () => {
@@ -72,9 +76,8 @@ export function vistaBacklog(app) {
         h('button', {
           type: 'button', class: 'btn-texto btn-peligro',
           onclick: () => {
-            if (!confirm(`¿Eliminar "${historia.titulo}"? No se puede deshacer (salvo desde un respaldo).`)) return;
             abierta = null;
-            app.cambiar((x) => ({ ...x, historias: x.historias.filter((y) => y.id !== historia.id) }));
+            app.cambiarConDeshacer(`"${historia.titulo}" eliminada.`, (x) => ({ ...x, historias: x.historias.filter((y) => y.id !== historia.id) }));
           },
         }, 'Eliminar'))) : null);
     return li;
@@ -127,4 +130,52 @@ function metaTexto(x) {
 
 function cifra(etiqueta, valor) {
   return h('div', { class: 'cifra' }, h('dt', {}, etiqueta), h('dd', {}, String(valor)));
+}
+
+/** Dividir (con reglas o IA) y mejorar criterios con IA. Solo aparecen cuando sirven. */
+function accionesInteligentes(app, historia) {
+  const conIa = iaConfigurada(app.ia);
+  const codigos = revisarInvest(historia).map((a) => a.codigo);
+  const pideDividir = codigos.includes('varias') || codigos.includes('larga') || codigos.includes('grande');
+  const porReglas = dividirHistoria(historia);
+  const botones = [];
+
+  const dividir = (partes, origen) => {
+    abierta = null;
+    app.cambiarConDeshacer(`Dividida en ${partes.length} historias ${origen}.`, (x) => ({ ...x, historias: reemplazarPorPartes(x.historias, historia.id, partes) }));
+  };
+  const ocupado = async (boton, texto, tarea) => {
+    const original = boton.textContent;
+    boton.disabled = true;
+    boton.textContent = texto;
+    try {
+      await tarea();
+    } catch (err) {
+      app.avisar(err.message, 'error');
+    } finally {
+      boton.disabled = false;
+      boton.textContent = original;
+    }
+  };
+
+  if (pideDividir && conIa) {
+    botones.push(h('button', {
+      type: 'button', class: 'btn btn--secundario',
+      onclick: (e) => ocupado(e.currentTarget, 'Dividiendo…', async () => dividir(await dividirConIa(app.ia, historia), 'con IA')),
+    }, 'Dividir con IA'));
+  }
+  if (porReglas && (pideDividir || !conIa)) {
+    botones.push(h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => dividir(porReglas, 'por sus partes') },
+      `Dividir en ${porReglas.length}`));
+  }
+  if (conIa) {
+    botones.push(h('button', {
+      type: 'button', class: 'btn btn--secundario',
+      onclick: (e) => ocupado(e.currentTarget, 'Escribiendo…', async () => {
+        const criterios = await criteriosConIa(app.ia, historia);
+        app.cambiarConDeshacer('Criterios de aceptación actualizados.', (x) => ({ ...x, historias: x.historias.map((y) => (y.id === historia.id ? { ...y, criterios } : y)) }));
+      }),
+    }, 'Mejorar criterios con IA'));
+  }
+  return botones;
 }

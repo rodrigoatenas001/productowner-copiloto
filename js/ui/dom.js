@@ -47,14 +47,20 @@ export function descargar(nombre, contenido, tipo = 'text/plain') {
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
 
-/** Mensaje breve en pantalla, anunciado a lectores de pantalla. */
-export function avisar(texto, tipo = 'ok') {
+/**
+ * Mensaje breve en pantalla, anunciado a lectores de pantalla.
+ * Con `accion` agrega un botón (por ejemplo "Deshacer") y el aviso dura más.
+ */
+export function avisar(texto, tipo = 'ok', { accion = null, duracion = accion ? 8000 : 4000 } = {}) {
   const zona = document.getElementById('avisos');
   if (!zona) return;
-  const aviso = h('p', { class: `aviso aviso--${tipo}`, role: tipo === 'error' ? 'alert' : 'status' }, texto);
+  const cerrar = () => { aviso.classList.add('is-saliendo'); setTimeout(() => aviso.remove(), 400); };
+  const aviso = h('div', { class: `aviso aviso--${tipo}`, role: tipo === 'error' ? 'alert' : 'status' },
+    h('span', {}, texto),
+    accion ? h('button', { type: 'button', class: 'aviso-accion', onclick: () => { accion.alHacer(); cerrar(); } }, accion.texto) : null);
   zona.append(aviso);
-  setTimeout(() => aviso.classList.add('is-saliendo'), 3600);
-  setTimeout(() => aviso.remove(), 4000);
+  while (zona.children.length > 3) zona.firstElementChild.remove(); // no tapar la pantalla
+  setTimeout(cerrar, duracion);
 }
 
 /** Campo con etiqueta asociada. */

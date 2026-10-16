@@ -1,6 +1,6 @@
 // IA opcional y del usuario: Ollama en su equipo, o su propia clave de un servicio.
 // Las notas viajan solo al servicio que el usuario configuró; nosotros no tenemos servidor.
-import { nuevoId, resumirTitulo, sugerirCriterios } from './nucleo/historias.js';
+import { nuevoId, resumirTitulo, sugerirCriterios, enunciado } from './nucleo/historias.js';
 
 export const PROVEEDORES = {
   ninguno: { nombre: 'Sin IA' },
@@ -138,4 +138,30 @@ export async function probarConexion(config) {
   const texto = await llamar(config, 'Responde exactamente {"ok":true}', { maxTokens: 20, sistema: 'Responde solo con JSON.' });
   extraerJson(texto);
   return true;
+}
+
+const INSTRUCCIONES_CRITERIOS = `Eres un Product Owner senior que escribe en español de Chile.
+Escribe de 2 a 5 criterios de aceptación verificables para la historia de usuario, en formato
+"Dado…, cuando…, entonces…". Incluye al menos un caso de error o borde. No agregues alcance nuevo.
+Responde SOLO con JSON válido: {"criterios":[""]}`;
+
+/** Propone criterios de aceptación para una historia. */
+export async function criteriosConIa(config, historia) {
+  const texto = await llamar(config, `Historia: ${enunciado(historia)}\nCriterios actuales:\n${(historia.criterios || []).join('\n') || '(ninguno)'}`,
+    { maxTokens: 1200, sistema: INSTRUCCIONES_CRITERIOS });
+  const datos = extraerJson(texto);
+  const criterios = (Array.isArray(datos?.criterios) ? datos.criterios : [])
+    .filter((c) => typeof c === 'string' && c.trim()).map((c) => c.trim().slice(0, 1000)).slice(0, 8);
+  if (!criterios.length) throw new Error('La IA no propuso criterios.');
+  return criterios;
+}
+
+/** Divide una historia grande en historias más pequeñas e independientes. */
+export async function dividirConIa(config, historia) {
+  const texto = await llamar(config,
+    `Divide esta historia en 2 a 5 historias más pequeñas, independientes y que entreguen valor por sí solas (por flujo, regla de negocio, tipo de dato o caso).\nHistoria: ${enunciado(historia)}\nCriterios: ${(historia.criterios || []).join(' | ')}`);
+  const partes = historiasDesdeIa(extraerJson(texto), historia.rol)
+    .map((p) => ({ ...p, epica: p.epica || historia.epica, prioridad: historia.prioridad, notaOriginal: enunciado(historia) }));
+  if (partes.length < 2) throw new Error('La IA no encontró cómo dividirla.');
+  return partes;
 }

@@ -14,9 +14,22 @@ export function nuevoProyecto(nombre = 'Mi proyecto') {
     notas: '',
     historias: [],
     sprints: [],
+    respaldado: null,
     creado: ahora,
     actualizado: ahora,
   };
+}
+
+/**
+ * ¿Conviene recordar un respaldo? Los datos viven solo en el navegador.
+ * Sí cuando hay trabajo sin respaldar: 5+ historias y nunca respaldado,
+ * o cambios posteriores a un respaldo de hace más de 14 días.
+ */
+export function necesitaRespaldo(p, hoy = new Date()) {
+  if (p.historias.length < 5) return false;
+  if (!p.respaldado) return true;
+  const dias = (new Date(hoy) - new Date(p.respaldado)) / 86400000;
+  return dias > 14 && new Date(p.actualizado) > new Date(p.respaldado);
 }
 
 export function nuevoSprint(proyecto, { capacidad = null, objetivo = '', dias = 14, inicio = null } = {}) {
@@ -89,6 +102,7 @@ export function normalizarProyecto(datos) {
     notas: texto(datos.notas, 100000),
     historias,
     sprints,
+    respaldado: texto(datos.respaldado, 40) || null,
     creado: texto(datos.creado, 40) || new Date().toISOString(),
     actualizado: new Date().toISOString(),
   };

@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { notasAHistorias } from '../js/nucleo/historias.js';
 import {
   nuevoProyecto, nuevoSprint, normalizarProyecto, mover, cambiarEstado, velocidad, sugerirSprint,
-  burndown, resumenSprint, cerrarSprint,
+  burndown, resumenSprint, cerrarSprint, necesitaRespaldo,
 } from '../js/nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, celdaCsv, nombreArchivo } from '../js/nucleo/exportar.js';
 
@@ -124,4 +124,18 @@ test('Markdown agrupa por épica con criterios como casillas', () => {
 
 test('nombreArchivo quita acentos y espacios', () => {
   assert.match(nombreArchivo(nuevoProyecto('Tienda Ñuñoa 2.0'), 'json'), /^tienda-nunoa-2-0-\d{4}-\d{2}-\d{2}\.json$/);
+});
+
+test('recuerda respaldar solo cuando hay trabajo sin respaldo reciente', () => {
+  const p = proyectoDeEjemplo();
+  assert.equal(necesitaRespaldo(p), false); // 4 historias: aún poco
+  p.historias.push(...notasAHistorias('- quinta historia'));
+  assert.equal(necesitaRespaldo(p), true);
+
+  p.respaldado = '2026-03-01T10:00:00Z';
+  p.actualizado = '2026-03-10T10:00:00Z';
+  assert.equal(necesitaRespaldo(p, new Date('2026-03-10T12:00:00Z')), false); // respaldo de hace 9 días
+  assert.equal(necesitaRespaldo(p, new Date('2026-03-20T12:00:00Z')), true);
+  p.actualizado = '2026-02-28T10:00:00Z';
+  assert.equal(necesitaRespaldo(p, new Date('2026-03-20T12:00:00Z')), false); // sin cambios desde el respaldo
 });

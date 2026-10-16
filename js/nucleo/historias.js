@@ -238,3 +238,35 @@ export const PRIORIDADES = {
   could: 'Deseable',
   wont: 'Esta vez no',
 };
+
+/**
+ * Propone dividir una historia que pide varias cosas: separa "lo que quiere" en
+ * comas, "y", "e" y "además". Devuelve null si no hay al menos dos partes con sentido.
+ * Cada parte conserva rol, beneficio, épica y prioridad de la original.
+ */
+export function dividirHistoria(h) {
+  const partes = String(h.quiero || '')
+    .split(/\s*,\s*(?:y\s+|e\s+)?|\s+y\s+además\s+|\s+además\s+|\s+y\s+también\s+|\s+y\s+|\s+e\s+/i)
+    .map((p) => p.trim().replace(/^(?:que\s+)?(?:también\s+)?/i, ''))
+    .filter((p) => p.split(/\s+/).length >= 2);
+  if (partes.length < 2) return null;
+
+  return partes.map((quiero) => ({
+    ...h,
+    id: nuevoId('h'),
+    quiero,
+    titulo: capitalizar(resumirTitulo(quiero)),
+    criterios: sugerirCriterios(quiero),
+    puntos: null,
+    notaOriginal: enunciado(h),
+    creada: new Date().toISOString(),
+    terminada: null,
+  }));
+}
+
+/** Reemplaza una historia por sus partes, en el mismo lugar del backlog. */
+export function reemplazarPorPartes(historias, id, partes) {
+  const i = historias.findIndex((x) => x.id === id);
+  if (i < 0 || !partes?.length) return historias;
+  return [...historias.slice(0, i), ...partes, ...historias.slice(i + 1)];
+}

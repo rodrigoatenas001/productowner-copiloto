@@ -1,7 +1,8 @@
 // Arranque y estado de la aplicación. Cada vista vive en js/ui/*.js y recibe `app`.
 import { listarProyectos, guardarProyecto, borrarProyecto, leerAjuste, guardarAjuste, pedirPersistencia } from './almacen.js';
-import { nuevoProyecto } from './nucleo/proyecto.js';
-import { h, vaciar, avisar } from './ui/dom.js';
+import { nuevoProyecto, necesitaRespaldo } from './nucleo/proyecto.js';
+import { nombreArchivo } from './nucleo/exportar.js';
+import { h, vaciar, avisar, descargar } from './ui/dom.js';
 import { vistaNotas } from './ui/notas.js';
 import { vistaBacklog } from './ui/backlog.js';
 import { vistaSprint } from './ui/sprint.js';
@@ -29,6 +30,22 @@ const app = {
     this.proyectos = this.proyectos.map((p) => (p.id === nuevo.id ? nuevo : p));
     programarGuardado();
     if (redibujar) this.render();
+  },
+
+  /** Como `cambiar`, pero ofrece deshacer durante unos segundos. */
+  cambiarConDeshacer(texto, transformar) {
+    const antes = structuredClone(this.proyecto);
+    this.cambiar(transformar);
+    avisar(texto, 'ok', {
+      accion: {
+        texto: 'Deshacer',
+        alHacer: () => {
+          if (this.proyecto.id !== antes.id) return; // cambió de proyecto entretanto
+          this.cambiar(() => antes);
+          avisar('Cambio deshecho.');
+        },
+      },
+    });
   },
 
   async crearProyecto(nombre) {
@@ -76,13 +93,32 @@ const app = {
     document.getElementById('principal')?.focus({ preventScroll: true });
   },
 
+  /** Descarga el respaldo del proyecto actual y anota la fecha. */
+  descargarRespaldo() {
+    const p = { ...this.proyecto, respaldado: new Date().toISOString() };
+    descargar(nombreArchivo(p, 'json'), JSON.stringify(p, null, 2), 'application/json');
+    this.cambiar(() => p);
+  },
+
   render() {
     renderNavegacion();
     const principal = document.getElementById('principal');
-    vaciar(principal, VISTAS[this.vista].render(this));
+    vaciar(principal, avisoRespaldo(this), VISTAS[this.vista].render(this));
     document.title = `${VISTAS[this.vista].titulo} · ${this.proyecto.nombre} · Copiloto PO`;
   },
 };
+
+const postergados = new Set();
+function avisoRespaldo(app) {
+  const p = app.proyecto;
+  if (postergados.has(p.id) || !necesitaRespaldo(p)) return null;
+  return h('aside', { class: 'recordatorio', 'aria-label': 'Recordatorio de respaldo' },
+    h('p', {}, h('strong', {}, 'Tus datos están solo en este navegador. '),
+      p.respaldado ? 'Hiciste cambios desde tu último respaldo.' : 'Aún no descargas un respaldo de este proyecto.'),
+    h('div', { class: 'acciones' },
+      h('button', { type: 'button', class: 'btn', onclick: () => { app.descargarRespaldo(); avisar('Respaldo descargado. Guárdalo en una carpeta segura.'); } }, 'Descargar respaldo'),
+      h('button', { type: 'button', class: 'btn-texto', onclick: () => { postergados.add(p.id); app.render(); } }, 'Más tarde')));
+}
 
 let temporizador = null;
 let pendiente = false;
@@ -178,6 +214,11 @@ window.addEventListener('beforeunload', (e) => {
   }
 });
 document.addEventListener('visibilitychange', () => { if (document.hidden) guardarAhora(); });
+// Enlaces con #vista (el logo, atrás/adelante del navegador)
+window.addEventListener('hashchange', () => {
+  const vista = location.hash.slice(1);
+  if (app.proyecto && VISTAS[vista] && vista !== app.vista) app.ir(vista);
+});
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:') {
   navigator.serviceWorker.register('./sw.js').catch(() => {});

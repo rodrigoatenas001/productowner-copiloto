@@ -2,6 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   extraerItems, aHistoria, notasAHistorias, revisarInvest, calidad, enunciado, singular, resumirTitulo,
+  dividirHistoria, reemplazarPorPartes,
 } from '../js/nucleo/historias.js';
 
 test('separa viñetas, numeración, punto y coma y toma títulos como épica', () => {
@@ -104,4 +105,25 @@ test('notasAHistorias genera ids únicos', () => {
 
 test('resumirTitulo corta con puntos suspensivos', () => {
   assert.equal(resumirTitulo('a b c d e f g h i j', 3), 'a b c…');
+});
+
+test('divide una historia con varias metas y conserva rol, beneficio y épica', () => {
+  const h = aHistoria({ texto: 'Como vendedor, quiero buscar clientes por RUT, filtrar por comuna y exportar el listado, para preparar visitas', epica: 'CRM' });
+  const partes = dividirHistoria(h);
+  assert.deepEqual(partes.map((p) => p.quiero), ['buscar clientes por RUT', 'filtrar por comuna', 'exportar el listado']);
+  assert.ok(partes.every((p) => p.rol === 'vendedor' && p.para === 'preparar visitas' && p.epica === 'CRM'));
+  assert.equal(new Set(partes.map((p) => p.id)).size, 3);
+  assert.ok(partes[0].notaOriginal.startsWith('Como vendedor'));
+});
+
+test('no divide lo que no tiene varias partes con sentido', () => {
+  assert.equal(dividirHistoria(aHistoria({ texto: 'Como cliente quiero pagar con tarjeta para comprar' })), null);
+  assert.equal(dividirHistoria(aHistoria({ texto: 'ver blanco y negro' })), null);
+});
+
+test('reemplazarPorPartes deja las partes en el mismo lugar', () => {
+  const hs = notasAHistorias('- primera cosa\n- buscar productos y comparar precios\n- última cosa');
+  const partes = dividirHistoria(hs[1]);
+  const nuevas = reemplazarPorPartes(hs, hs[1].id, partes);
+  assert.deepEqual(nuevas.map((x) => x.quiero), ['primera cosa', 'buscar productos', 'comparar precios', 'última cosa']);
 });
