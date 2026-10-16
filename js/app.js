@@ -9,10 +9,12 @@ import { vistaSprint } from './ui/sprint.js';
 import { vistaAjustes } from './ui/ajustes.js';
 import { vistaTaller } from './ui/taller.js';
 import { vistaRetro } from './ui/retro.js';
+import { vistaCliente } from './ui/cliente.js';
 
 const VISTAS = {
   notas: { titulo: 'Notas', render: vistaNotas },
   backlog: { titulo: 'Backlog', render: vistaBacklog },
+  cliente: { titulo: 'Cliente', render: vistaCliente },
   sprint: { titulo: 'Sprint', render: vistaSprint },
   retro: { titulo: 'Retro', render: vistaRetro },
   taller: { titulo: 'Taller', render: vistaTaller },

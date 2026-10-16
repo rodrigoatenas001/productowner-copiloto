@@ -414,6 +414,17 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .clasificar li > p { grid-column: 1 / -1; margin: 0; font-size: .88rem; }
 @media (max-width: 640px) { .clasificar li { grid-template-columns: 1fr; } }
 
+/* Cliente */
+.aviso-legal { margin-top: 24px; }
+.aviso-suelto { padding: 10px 14px; border-radius: var(--radio); margin: 0 0 16px; }
+.lista-hitos { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.hito { border-left: 3px solid var(--niebla); }
+.hito--aceptado { border-left-color: var(--bosque); }
+.entregables { margin: 4px 0 0; padding-left: 20px; font-size: .92rem; }
+.cambio--propuesto { border-left: 3px solid var(--ambar-texto); }
+.cambio--aprobado { border-left: 3px solid var(--bosque); }
+.cambio--rechazado { opacity: .7; }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }

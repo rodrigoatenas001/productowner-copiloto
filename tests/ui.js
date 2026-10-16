@@ -222,10 +222,36 @@ const PRUEBAS = [
     await clic('Se cumplió');
     verdad(todos('.desafios .resultado').length === 2, 'responde la hipótesis');
   }],
+  ['Cliente: plantilla, cotización, hitos, acta y cambio', async () => {
+    await ir('cliente');
+    escribir(uno('[aria-label="Plantilla por tipo de proyecto"]'), 'web', 'change');
+    await clic('Aplicar');
+    verdad(todos('textarea').some((t) => t.value.includes('Redacción de textos')), 'la plantilla llenó lo que no incluye');
+    await pestana('Cotización');
+    const valorHora = todos('input[type=number]')[0];
+    escribir(valorHora, '0.5', 'change');
+    await pausa(80);
+    verdad(/UF/.test(todos('.cifra dd')[3].textContent), `hay total: ${todos('.cifra dd')[3].textContent}`);
+    await pestana('Hitos de pago');
+    await clic('Proponer 3 hitos');
+    igual(todos('.hito').length, 3, 'hitos propuestos');
+    copiado = '';
+    todos('.compartir-md').find((g) => g.getAttribute('aria-label') === 'Acta de aceptación').querySelector('button').click();
+    await esperar(() => copiado.startsWith('# Acta de aceptación'), 'se copió el acta');
+    await pestana('Cambios');
+    escribir(uno('[aria-label="Solicitud del cliente"]'), 'Agregar un blog de recetas');
+    escribir(uno('[aria-label="Horas estimadas del cambio"]'), '8');
+    await clic('Registrar y calcular impacto');
+    copiado = '';
+    todos('.compartir-md').find((g) => g.getAttribute('aria-label') === 'Respuesta al cliente').querySelector('button').click();
+    await esperar(() => copiado.includes('Agregar un blog de recetas'), 'se copió la respuesta');
+    await clic('El cliente aprobó');
+    verdad(uno('.cambio--aprobado'), 'el cambio quedó aprobado');
+  }],
   ['Celular: sin desplazamiento horizontal', async () => {
     marco.style.width = '375px';
     await pausa(150);
-    for (const vista of ['notas', 'backlog', 'sprint', 'retro', 'taller', 'ajustes']) {
+    for (const vista of ['notas', 'backlog', 'cliente', 'sprint', 'retro', 'taller', 'ajustes']) {
       await ir(vista);
       const ancho = doc().documentElement.scrollWidth;
       verdad(ancho <= 376, `${vista} mide ${ancho}px en un celular de 375px`);
