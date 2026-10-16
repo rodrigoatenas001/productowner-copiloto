@@ -56,7 +56,7 @@ tests/
 ```
 
 ```bash
-npm test        # o: node --test tests/
+npm test        # o: node --test
 ```
 
 Al publicar una versión nueva, cambia `VERSION` en `sw.js` para que los navegadores descarguen los archivos nuevos.
