@@ -6,6 +6,8 @@ import { iaConfigurada, criteriosConIa, dividirConIa } from '../ia.js';
 import { editorHistoria, insigniaCalidad, listaVerificacion } from './historia.js';
 import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
+import { botonesMarkdown } from './compartir.js';
+import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../nucleo/reportes.js';
 
 const filtros = { texto: '', epica: '' };
 let modo = 'lista'; // 'lista' | 'epicas' | 'mapa' | 'estimar'
@@ -69,6 +71,8 @@ export function vistaBacklog(app) {
       listaVerificacion(historia, definicionesDe(app.proyecto).ready, 'ready', (item, valor) => app.cambiar((x) => ({
         ...x, historias: x.historias.map((y) => (y.id === historia.id ? marcar(y, 'ready', item, valor) : y)),
       }), { redibujar: false })),
+      h('div', { class: 'compartir' },
+        botonesMarkdown(app, 'Especificación para agente', `spec-${historia.titulo}`, () => especificacionHistoria(app.proyecto, historia.id))),
       h('div', { class: 'acciones' },
         zonaIa,
         sprintAbierto ? h('button', {
@@ -198,7 +202,9 @@ function accionesInteligentes(app, historia) {
 function vistaEpicas(app) {
   const epicas = resumenEpicas(app.proyecto);
   if (!epicas.length) return h('p', { class: 'vacio' }, 'Aún no hay historias.');
-  return h('ul', { class: 'lista-epicas' }, epicas.map((e) => h('li', { class: 'epica' },
+  return h('div', {},
+    h('div', { class: 'compartir' }, botonesMarkdown(app, 'Reporte de avance por épica', 'avance-epicas', () => reporteEpicas(app.proyecto))),
+    h('ul', { class: 'lista-epicas' }, epicas.map((e) => h('li', { class: 'epica' },
     h('div', { class: 'epica-cabecera' },
       h('button', {
         type: 'button', class: 'epica-nombre',
@@ -210,7 +216,9 @@ function vistaEpicas(app) {
       h('span', { class: `relleno-${Math.round(e.avance / 5) * 5}` })),
     h('p', { class: 'tarjeta-meta' },
       `${e.hechas} de ${e.historias} historias · ${e.puntosHechos} de ${e.puntos} pts`,
-      e.sinEstimar ? ` · ${e.sinEstimar} sin estimar` : ''))));
+      e.sinEstimar ? ` · ${e.sinEstimar} sin estimar` : ''),
+    e.historias > e.hechas ? h('div', { class: 'compartir' },
+      botonesMarkdown(app, 'Especificación de la épica', `epica-${e.epica || 'sin-epica'}`, () => especificacionEpica(app.proyecto, e.epica))) : null))));
 }
 
 /** Mapa de historias: arrastra una tarjeta a otra celda para cambiar su épica o su versión. */

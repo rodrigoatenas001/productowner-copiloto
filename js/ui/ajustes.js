@@ -4,6 +4,8 @@ import { normalizarProyecto } from '../nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, nombreArchivo, GUIA_JQL } from '../nucleo/exportar.js';
 import { PROVEEDORES, probarConexion } from '../ia.js';
 import { importarCsv } from '../nucleo/importar.js';
+import { botonesMarkdown } from './compartir.js';
+import { reporteEpicas, notasDeVersion } from '../nucleo/reportes.js';
 import { definicionesDe, listaDesdeTexto, NOMBRES, DEFINICIONES_INICIALES } from '../nucleo/definiciones.js';
 
 export function vistaAjustes(app) {
@@ -78,6 +80,9 @@ function seccionRespaldo(app) {
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'md'), aMarkdown(p), 'text/markdown') }, 'Markdown'),
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'csv'), aCsv(p), 'text/csv') }, 'CSV (Excel)'),
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'jira.csv'), aJiraCsv(p), 'text/csv') }, 'CSV para Jira')),
+    h('div', { class: 'compartir' },
+      botonesMarkdown(app, 'Avance por épica', 'avance-epicas', () => reporteEpicas(app.proyecto)),
+      botonesMarkdown(app, 'Notas de versión (todo lo terminado)', 'notas-de-version', () => notasDeVersion(app.proyecto))),
     h('p', { class: 'ayuda' }, 'En Jira: Configuración del sistema → Importación externa → CSV. Asocia "Issue ID" y "Parent ID" para que las historias queden dentro de sus épicas. El sprint solo se asigna si ya existe uno con ese nombre en Jira; si no, deja esa columna sin mapear.'),
     h('details', { class: 'guia-jql' },
       h('summary', {}, 'Guía rápida de JQL'),

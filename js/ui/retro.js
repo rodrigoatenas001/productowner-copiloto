@@ -1,5 +1,7 @@
 // Retrospectiva para proyectar: notas anónimas en tres columnas, votos y acciones con responsable.
 import { h } from './dom.js';
+import { botonesMarkdown } from './compartir.js';
+import { reporteRetro } from '../nucleo/reportes.js';
 import {
   COLUMNAS_RETRO, nuevaRetro, agregarNota, votar, quitarNota, notasDe, agregarAccion, alternarAccion, accionesPendientes,
 } from '../nucleo/retro.js';
@@ -83,6 +85,7 @@ function tablero(app, retro, retros) {
           a.texto, a.responsable ? h('span', { class: 'tarjeta-meta' }, ` · ${a.responsable}`) : null,
           h('span', { class: 'tarjeta-meta' }, ` · ${a.retroTitulo}`)))))) : null,
     h('div', { class: 'tablero tablero-retro' }, Object.keys(COLUMNAS_RETRO).map(columna)),
+    h('div', { class: 'compartir' }, botonesMarkdown(app, 'Reporte de la retro', retro.titulo, () => reporteRetro(app.proyecto, retro.id))),
     h('section', { class: 'panel', 'aria-labelledby': 'acciones-titulo' },
       h('h2', { id: 'acciones-titulo' }, 'Acciones acordadas'),
       h('p', { class: 'ayuda' }, 'Mejor dos acciones que se cumplen que diez que se olvidan.'),

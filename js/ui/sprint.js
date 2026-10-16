@@ -2,6 +2,8 @@
 import { h, campo } from './dom.js';
 import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
 import { listaVerificacion } from './historia.js';
+import { botonesMarkdown } from './compartir.js';
+import { reporteSprint, notasDeVersion } from '../nucleo/reportes.js';
 import {
   nuevoSprint, sugerirSprint, resumenSprint, burndown, cerrarSprint, cambiarEstado, velocidad, puntosDe, ESTADOS,
 } from '../nucleo/proyecto.js';
@@ -161,7 +163,10 @@ function tablero(app, sprint) {
           const extra = pendientes ? ` ${pendientes} sin terminar volvieron al inicio del backlog.` : '';
           app.cambiarConDeshacer(`${sprint.nombre} cerrado: ${resumen.hechos} puntos terminados.${extra} Buen momento para la retrospectiva.`, (x) => cerrarSprint(x, sprint.id));
         },
-      }, 'Cerrar sprint')));
+      }, 'Cerrar sprint')),
+    h('div', { class: 'compartir' },
+      botonesMarkdown(app, 'Reporte del sprint', sprint.nombre, () => reporteSprint(app.proyecto, sprint.id)),
+      botonesMarkdown(app, 'Notas de versión', `notas-${sprint.nombre}`, () => notasDeVersion(app.proyecto, { sprintId: sprint.id }))));
 }
 
 /** Gráfico SVG accesible: línea ideal y real, con tabla equivalente para lectores de pantalla. */
@@ -209,12 +214,14 @@ function historial(app, cerrados) {
     h('h2', { id: 'historial-titulo' }, 'Sprints anteriores'),
     h('p', { class: 'ayuda' }, `Velocidad promedio (últimos 3): ${velocidad(p)} puntos.`),
     h('table', { class: 'tabla' },
-      h('thead', {}, h('tr', {}, h('th', {}, 'Sprint'), h('th', {}, 'Fechas'), h('th', {}, 'Terminado'), h('th', {}, 'Capacidad'))),
+      h('thead', {}, h('tr', {}, h('th', {}, 'Sprint'), h('th', {}, 'Fechas'), h('th', {}, 'Terminado'), h('th', {}, 'Capacidad'), h('th', {}, 'Compartir'))),
       h('tbody', {}, [...cerrados].reverse().map((s) => h('tr', {},
         h('td', {}, s.nombre),
         h('td', {}, `${formatear(s.inicio)} – ${formatear(s.fin)}`),
         h('td', {}, `${puntosDe(p.historias.filter((x) => x.sprintId === s.id && x.estado === 'done'))} pts`),
-        h('td', {}, s.capacidad ? `${s.capacidad} pts` : '—'))))));
+        h('td', {}, s.capacidad ? `${s.capacidad} pts` : '—'),
+        h('td', {}, botonesMarkdown(app, 'Reporte', s.nombre, () => reporteSprint(app.proyecto, s.id)),
+          botonesMarkdown(app, 'Notas de versión', `notas-${s.nombre}`, () => notasDeVersion(app.proyecto, { sprintId: s.id }))))))));
 }
 
 function formatear(iso) {

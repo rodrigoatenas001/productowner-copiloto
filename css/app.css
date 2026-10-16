@@ -312,6 +312,13 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .mapa-tarjeta:hover { border-color: var(--pizarra); }
 .mapa-tarjeta.is-hecha { border-left-color: var(--bosque); color: var(--pizarra); text-decoration: line-through; }
 
+/* Compartir en Markdown */
+.compartir { display: flex; flex-wrap: wrap; gap: 6px 18px; margin: 12px 0 0; }
+.compartir-md { display: inline-flex; flex-wrap: wrap; align-items: center; gap: 2px 8px; font-size: .88rem; }
+.compartir-etiqueta { color: var(--pizarra); }
+.compartir-etiqueta::after { content: ":"; }
+.tabla .compartir-md { display: flex; }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }
