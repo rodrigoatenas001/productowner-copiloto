@@ -64,6 +64,8 @@ pre { background: var(--papel); border: 1px solid var(--niebla); border-radius: 
 .lateral { background: var(--tinta); color: #dbe4ef; padding: 20px 16px; position: sticky; top: 0; height: 100vh; display: flex; flex-direction: column; gap: 20px; }
 .marca { display: flex; align-items: center; gap: 10px; color: #fff; text-decoration: none; font: 600 1.15rem var(--f-display); }
 .marca b { color: #f0b98f; font-weight: 700; }
+.version-app { align-self: flex-start; margin: -14px 0 0 38px; font: .72rem var(--f-mono); color: #9fb0c6; text-decoration: none; }
+.version-app:hover { color: #fff; text-decoration: underline; }
 #navegacion { display: flex; flex-direction: column; gap: 18px; flex: 1; }
 .nav-proyecto select { width: 100%; background: rgba(255, 255, 255, .08); color: #fff; border: 1px solid rgba(255, 255, 255, .18); border-radius: 8px; padding: 8px 10px; font: inherit; }
 .nav-proyecto option { color: var(--tinta); }
@@ -483,6 +485,7 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 820px) {
   .marco { grid-template-columns: 1fr; }
   .lateral { position: sticky; top: 0; height: auto; z-index: 5; padding: 12px 16px; gap: 10px; }
+  .version-app { margin-top: -8px; }
   #navegacion { gap: 10px; }
   .marco > *, #navegacion, #navegacion nav { min-width: 0; }
   #navegacion ul { grid-auto-flow: column; justify-content: start; overflow-x: auto; scrollbar-width: thin; }
