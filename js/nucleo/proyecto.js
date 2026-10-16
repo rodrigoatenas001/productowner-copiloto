@@ -7,6 +7,7 @@ import { normalizarPriorizacion } from './priorizacion.js';
 import { normalizarOkr } from './okr.js';
 import { repoGithub } from './issues.js';
 import { FLUJO_INICIAL, normalizarFlujo, normalizarBloqueo } from './flujo.js';
+import { ALCANCE_VACIO, COMERCIAL_INICIAL, normalizarComercial } from './comercial.js';
 
 export const VERSION_DATOS = 1;
 export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', review: 'En revisión', done: 'Hecho' };
@@ -27,6 +28,10 @@ export function nuevoProyecto(nombre = 'Mi proyecto') {
     epicasInfo: {},
     vision: { vision: '', objetivoProducto: '' },
     flujo: structuredClone(FLUJO_INICIAL),
+    alcance: structuredClone(ALCANCE_VACIO),
+    comercial: { ...COMERCIAL_INICIAL },
+    hitos: [],
+    cambios: [],
     respaldado: null,
     creado: ahora,
     actualizado: ahora,
@@ -108,6 +113,8 @@ export function normalizarProyecto(datos) {
     terminada: texto(h.terminada, 40) || null,
     iniciada: texto(h.iniciada, 40) || null,
     bloqueo: normalizarBloqueo(h.bloqueo),
+    horas: Number.isFinite(h.horas) && h.horas > 0 && h.horas <= 10000 ? h.horas : null,
+    cambioId: texto(h.cambioId, 60) || null,
     checks: normalizarChecks(h.checks),
     tipo: Object.hasOwn(TIPOS, h.tipo) ? h.tipo : 'historia',
     dependeDe: Array.isArray(h.dependeDe) ? h.dependeDe : [],
@@ -128,6 +135,7 @@ export function normalizarProyecto(datos) {
     ...normalizarOkr(datos.objetivos, datos.epicasInfo),
     vision: { vision: texto(datos.vision?.vision, 600), objetivoProducto: texto(datos.vision?.objetivoProducto, 300) },
     flujo: normalizarFlujo(datos.flujo),
+    ...normalizarComercial(datos, new Set(historias.map((h) => h.id))),
     respaldado: texto(datos.respaldado, 40) || null,
     creado: texto(datos.creado, 40) || new Date().toISOString(),
     actualizado: new Date().toISOString(),
