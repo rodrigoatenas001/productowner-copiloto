@@ -6,6 +6,7 @@ import { definicionesDe, avance } from './definiciones.js';
 import { COLUMNAS_RETRO, notasDe } from './retro.js';
 import { infoEpica, hipotesis, resultadosDeEpica, cobertura, RESULTADOS_HIPOTESIS } from './okr.js';
 import { roadmap, visionDe, HORIZONTES } from './roadmap.js';
+import { cicloPromedio } from './flujo.js';
 
 const fecha = (iso) => String(iso || '').slice(0, 10).split('-').reverse().join('-');
 const lista = (items, vacio = '_Nada._') => (items.length ? items : [vacio]);
@@ -37,6 +38,7 @@ export function reporteSprint(proyecto, sprintId, hoy = new Date()) {
     `| Historias | ${hechas.length} de ${hs.length} terminadas |`,
     `| Capacidad | ${s.capacidad ? pts(s.capacidad) : 'no definida'} |`,
     `| Velocidad promedio | ${pts(velocidad(proyecto))} (últimos 3 sprints cerrados) |`,
+    `| Tiempo de ciclo | ${cicloPromedio(hechas) === null ? '—' : `${cicloPromedio(hechas)} días en promedio`} |`,
     '',
     '## Terminado',
     '',
@@ -44,7 +46,7 @@ export function reporteSprint(proyecto, sprintId, hoy = new Date()) {
     '',
     '## No terminado',
     '',
-    ...lista(pendientes.map((h) => `- [ ] **${h.titulo}** (${h.puntos ?? '?'} pts) · ${ESTADOS[h.estado]}`), '_Todo se terminó._'),
+    ...lista(pendientes.map((h) => `- [ ] **${h.titulo}** (${h.puntos ?? '?'} pts) · ${ESTADOS[h.estado]}${h.bloqueo ? ` · **bloqueada:** ${h.bloqueo.motivo}` : ''}`), '_Todo se terminó._'),
     '',
     '## Burndown',
     '',

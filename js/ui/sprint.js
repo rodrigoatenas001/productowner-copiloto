@@ -3,6 +3,7 @@ import { h, campo } from './dom.js';
 import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
 import { listaVerificacion } from './historia.js';
 import { dependenciasPendientes, bloqueosDelSprint } from '../nucleo/dependencias.js';
+import { columnasDe, usoWip, cicloPromedio, bloquear, desbloquear, diasBloqueada } from '../nucleo/flujo.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteSprint, notasDeVersion } from '../nucleo/reportes.js';
 import { sugerirObjetivo } from '../nucleo/objetivo.js';
@@ -13,7 +14,6 @@ import {
   nuevoSprint, sugerirSprint, resumenSprint, burndown, cerrarSprint, cambiarEstado, velocidad, puntosDe, ESTADOS, feedbackAHistorias,
 } from '../nucleo/proyecto.js';
 
-const COLUMNAS = ['todo', 'doing', 'done'];
 let arrastrando = null;
 
 export function vistaSprint(app) {
@@ -142,34 +142,57 @@ function tablero(app, sprint) {
   const hoy = new Date().toISOString().slice(0, 10);
   const restantes = Math.max(0, Math.round((new Date(sprint.fin) - new Date(hoy)) / 86400000));
   const dod = definicionesDe(p).done;
+  const COLUMNAS = columnasDe(p);
+  // Si se desactivó la columna de revisión, lo que estaba en revisión se ve en "En curso"
+  const enColumna = (x, estado) => x.estado === estado || (estado === 'doing' && x.estado === 'review' && !COLUMNAS.includes('review'));
   const moverA = (id, estado) => {
     const historia = p.historias.find((y) => y.id === id);
     app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === id ? cambiarEstado(y, estado) : y)) }));
     const faltan = estado === 'done' && historia ? avance(historia, dod, 'done').faltan.length : 0;
     if (faltan) app.avisar(`"${historia.titulo}" pasó a Hecho, pero le faltan ${faltan} puntos de la Definition of Done.`, 'error');
+    const wip = usoWip(app.proyecto, sprint.id, estado);
+    if (wip.excede) app.avisar(`"${ESTADOS[estado]}" tiene ${wip.cuenta} ítems y el límite es ${wip.limite}. Terminen algo antes de empezar más.`, 'error');
   };
+  const terminadas = p.historias.filter((x) => x.sprintId === sprint.id && x.estado === 'done');
+  const ciclo = cicloPromedio(terminadas);
+  const bloqueadas = p.historias.filter((x) => x.sprintId === sprint.id && x.bloqueo && x.estado !== 'done');
 
   const columna = (estado) => {
-    const hs = p.historias.filter((x) => x.sprintId === sprint.id && x.estado === estado);
+    const hs = p.historias.filter((x) => x.sprintId === sprint.id && enColumna(x, estado));
     const i = COLUMNAS.indexOf(estado);
+    const wip = usoWip(p, sprint.id, estado);
     return h('section', {
       class: `columna columna--${estado}`, 'aria-labelledby': `col-${estado}`,
       ondragover: (e) => { if (arrastrando) { e.preventDefault(); e.currentTarget.classList.add('is-destino'); } },
       ondragleave: (e) => e.currentTarget.classList.remove('is-destino'),
       ondrop: (e) => { e.preventDefault(); const id = arrastrando; arrastrando = null; if (id) moverA(id, estado); },
     },
-    h('h2', { id: `col-${estado}` }, ESTADOS[estado], h('span', { class: 'nav-conteo' }, `${puntosDe(hs)} pts`)),
+    h('h2', { id: `col-${estado}` }, ESTADOS[estado],
+      h('span', { class: `nav-conteo${wip.excede ? ' wip-excedido' : ''}`, title: wip.limite ? `Límite de trabajo en curso: ${wip.limite}` : null },
+        wip.limite ? `${wip.cuenta}/${wip.limite}` : `${puntosDe(hs)} pts`)),
     h('ul', {}, hs.map((x) => h('li', {
-      class: 'ficha', draggable: 'true',
+      class: `ficha${x.bloqueo ? ' is-bloqueada' : ''}`, draggable: 'true',
       ondragstart: (e) => { arrastrando = x.id; e.dataTransfer.effectAllowed = 'move'; },
     },
     h('span', { class: 'ficha-titulo' }, x.titulo),
+    x.bloqueo ? h('span', { class: 'bloqueo' }, h('strong', {}, 'Bloqueada'), ` hace ${diasBloqueada(x)} ${diasBloqueada(x) === 1 ? 'día' : 'días'}: ${x.bloqueo.motivo}`) : null,
     dependenciasPendientes(p, x).length && x.estado !== 'done' ? h('span', { class: 'chip chip--aviso' }, `espera a: ${dependenciasPendientes(p, x).map((d) => d.titulo).join(', ')}`) : null,
     estado !== 'todo' ? listaVerificacion(x, dod, 'done', (item, valor) => app.cambiar((y) => ({
       ...y, historias: y.historias.map((z) => (z.id === x.id ? marcar(z, 'done', item, valor) : z)),
     }), { redibujar: false })) : null,
     h('span', { class: 'ficha-pie' },
       h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar'),
+      estado !== 'done' ? h('button', {
+        type: 'button', class: 'btn-texto ficha-bloqueo',
+        onclick: () => {
+          if (x.bloqueo) { app.cambiar((y) => ({ ...y, historias: y.historias.map((z) => (z.id === x.id ? desbloquear(z) : z)) })); return; }
+          const motivo = prompt('¿Qué la bloquea? (por ejemplo: esperando credenciales del cliente)');
+          if (motivo === null) return;
+          try {
+            app.cambiar((y) => ({ ...y, historias: y.historias.map((z) => (z.id === x.id ? bloquear(z, motivo) : z)) }));
+          } catch (err) { app.avisar(err.message, 'error'); }
+        },
+      }, x.bloqueo ? 'Desbloquear' : 'Bloquear') : null,
       h('span', { class: 'tarjeta-mover' },
         i > 0 ? h('button', { type: 'button', class: 'icono', 'aria-label': `Mover a ${ESTADOS[COLUMNAS[i - 1]]}: ${x.titulo}`, onclick: () => moverA(x.id, COLUMNAS[i - 1]) }, '←') : null,
         i < COLUMNAS.length - 1 ? h('button', { type: 'button', class: 'icono', 'aria-label': `Mover a ${ESTADOS[COLUMNAS[i + 1]]}: ${x.titulo}`, onclick: () => moverA(x.id, COLUMNAS[i + 1]) }, '→') : null))))));
@@ -180,8 +203,10 @@ function tablero(app, sprint) {
       h('div', { class: 'cifra' }, h('dt', {}, 'Terminado'), h('dd', {}, `${resumen.hechos} / ${resumen.puntos} pts`)),
       h('div', { class: 'cifra' }, h('dt', {}, 'Días restantes'), h('dd', {}, String(restantes))),
       h('div', { class: 'cifra' }, h('dt', {}, 'Fechas'), h('dd', {}, `${formatear(sprint.inicio)} – ${formatear(sprint.fin)}`)),
-      h('div', { class: 'cifra' }, h('dt', {}, 'Capacidad'), h('dd', {}, sprint.capacidad ? `${sprint.capacidad} pts` : '—'))),
-    h('div', { class: 'tablero' }, COLUMNAS.map(columna)),
+      h('div', { class: 'cifra' }, h('dt', {}, 'Capacidad'), h('dd', {}, sprint.capacidad ? `${sprint.capacidad} pts` : '—')),
+      h('div', { class: 'cifra' }, h('dt', {}, 'Tiempo de ciclo'), h('dd', {}, ciclo === null ? '—' : `${ciclo.toLocaleString('es-CL')} días`))),
+    bloqueadas.length ? h('p', { class: 'aviso-bloqueos', role: 'status' }, `${bloqueadas.length} ${bloqueadas.length === 1 ? 'ítem bloqueado' : 'ítems bloqueados'}: pídelo en la Daily o escálalo hoy.`) : null,
+    h('div', { class: `tablero tablero--${COLUMNAS.length}` }, COLUMNAS.map(columna)),
     seccionReview(app, sprint),
     h('section', { class: 'panel', 'aria-labelledby': 'burndown-titulo' },
       h('h2', { id: 'burndown-titulo' }, 'Burndown'),

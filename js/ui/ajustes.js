@@ -5,6 +5,7 @@ import { aCsv, aJiraCsv, aMarkdown, nombreArchivo, GUIA_JQL } from '../nucleo/ex
 import { PROVEEDORES, probarConexion, iaConfigurada } from '../ia.js';
 import { importarCsv } from '../nucleo/importar.js';
 import { repoGithub } from '../nucleo/issues.js';
+import { flujoDe } from '../nucleo/flujo.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteEpicas, notasDeVersion } from '../nucleo/reportes.js';
 import { definicionesDe, listaDesdeTexto, NOMBRES, DEFINICIONES_INICIALES } from '../nucleo/definiciones.js';
@@ -17,6 +18,7 @@ export function vistaAjustes(app) {
       h('h1', {}, 'Ajustes')),
     seccionProyecto(app),
     seccionDefiniciones(app),
+    seccionFlujo(app),
     seccionRespaldo(app),
     seccionIa(app),
     iaConfigurada(app.ia) ? seccionIa(app, 'iaRevisor') : null,
@@ -230,4 +232,19 @@ function seccionDefiniciones(app) {
     h('div', { class: 'editor-fila' },
       editor('ready', 'Lo que debe cumplir una historia para entrar a un sprint. Se marca en el backlog.'),
       editor('done', 'Lo que debe cumplir para considerarse terminada. Se marca en el tablero del sprint.')));
+}
+
+/** Kanban liviano dentro del sprint: columna de revisión y límites de trabajo en curso. */
+function seccionFlujo(app) {
+  const f = flujoDe(app.proyecto);
+  const guardar = (cambios) => app.cambiar((x) => ({ ...x, flujo: { ...flujoDe(x), ...cambios, wip: { ...flujoDe(x).wip, ...(cambios.wip || {}) } } }));
+  const limite = (estado, etiqueta) => campo(etiqueta, h('input', {
+    type: 'number', min: 1, max: 50, value: f.wip[estado] ?? '', placeholder: 'Sin límite',
+    onchange: (e) => guardar({ wip: { [estado]: e.target.value ? Math.max(1, Math.min(50, Math.round(Number(e.target.value)))) : null } }),
+  }));
+  return h('section', { class: 'panel', 'aria-labelledby': 'aj-flujo' },
+    h('h2', { id: 'aj-flujo' }, 'Flujo del tablero'),
+    h('p', { class: 'ayuda' }, 'Lo mejor de Kanban dentro del sprint: limitar el trabajo en curso hace que las cosas se terminen antes. Un buen punto de partida es un límite igual al número de personas.'),
+    h('label', { class: 'opcion' }, h('input', { type: 'checkbox', checked: f.revision, onchange: (e) => guardar({ revision: e.target.checked }) }), 'Agregar la columna "En revisión"'),
+    h('div', { class: 'editor-fila' }, limite('doing', 'Límite en "En curso"'), f.revision ? limite('review', 'Límite en "En revisión"') : null));
 }

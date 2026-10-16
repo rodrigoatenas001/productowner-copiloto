@@ -6,9 +6,10 @@ import { DEFINICIONES_INICIALES, normalizarDefiniciones, normalizarChecks } from
 import { normalizarPriorizacion } from './priorizacion.js';
 import { normalizarOkr } from './okr.js';
 import { repoGithub } from './issues.js';
+import { FLUJO_INICIAL, normalizarFlujo, normalizarBloqueo } from './flujo.js';
 
 export const VERSION_DATOS = 1;
-export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', done: 'Hecho' };
+export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', review: 'En revisión', done: 'Hecho' };
 
 export function nuevoProyecto(nombre = 'Mi proyecto') {
   const ahora = new Date().toISOString();
@@ -25,6 +26,7 @@ export function nuevoProyecto(nombre = 'Mi proyecto') {
     objetivos: [],
     epicasInfo: {},
     vision: { vision: '', objetivoProducto: '' },
+    flujo: structuredClone(FLUJO_INICIAL),
     respaldado: null,
     creado: ahora,
     actualizado: ahora,
@@ -104,6 +106,8 @@ export function normalizarProyecto(datos) {
     notaOriginal: texto(h.notaOriginal, 2000),
     creada: texto(h.creada, 40) || new Date().toISOString(),
     terminada: texto(h.terminada, 40) || null,
+    iniciada: texto(h.iniciada, 40) || null,
+    bloqueo: normalizarBloqueo(h.bloqueo),
     checks: normalizarChecks(h.checks),
     tipo: Object.hasOwn(TIPOS, h.tipo) ? h.tipo : 'historia',
     dependeDe: Array.isArray(h.dependeDe) ? h.dependeDe : [],
@@ -123,6 +127,7 @@ export function normalizarProyecto(datos) {
     definiciones: normalizarDefiniciones(datos.definiciones),
     ...normalizarOkr(datos.objetivos, datos.epicasInfo),
     vision: { vision: texto(datos.vision?.vision, 600), objetivoProducto: texto(datos.vision?.objetivoProducto, 300) },
+    flujo: normalizarFlujo(datos.flujo),
     respaldado: texto(datos.respaldado, 40) || null,
     creado: texto(datos.creado, 40) || new Date().toISOString(),
     actualizado: new Date().toISOString(),
@@ -142,10 +147,15 @@ export function mover(historias, id, destino) {
 
 /** Cambia el estado y registra cuándo se terminó (para el burndown). */
 export function cambiarEstado(h, estado, cuando = new Date()) {
+  const fecha = new Date(cuando).toISOString();
+  const empezada = ['doing', 'review', 'done'].includes(estado);
   return {
     ...h,
     estado,
-    terminada: estado === 'done' ? (h.terminada || new Date(cuando).toISOString()) : null,
+    // El tiempo de ciclo cuenta desde la primera vez que se empezó; si vuelve a "por hacer", se reinicia
+    iniciada: empezada ? (h.iniciada || fecha) : null,
+    terminada: estado === 'done' ? (h.terminada || fecha) : null,
+    bloqueo: estado === 'done' ? null : (h.bloqueo || null),
   };
 }
 
