@@ -5,7 +5,7 @@ import { listaVerificacion } from './historia.js';
 import { dependenciasPendientes, bloqueosDelSprint } from '../nucleo/dependencias.js';
 import { columnasDe, usoWip, cicloPromedio, bloquear, desbloquear, diasBloqueada } from '../nucleo/flujo.js';
 import { botonesMarkdown } from './compartir.js';
-import { reporteSprint, notasDeVersion } from '../nucleo/reportes.js';
+import { reporteSprint, notasDeVersion, informeCliente } from '../nucleo/reportes.js';
 import { sugerirObjetivo } from '../nucleo/objetivo.js';
 import { iaConfigurada, objetivoConIa, notasConIa } from '../ia.js';
 
@@ -221,6 +221,7 @@ function tablero(app, sprint) {
         },
       }, 'Cerrar sprint')),
     h('div', { class: 'compartir' },
+      botonesMarkdown(app, 'Informe para el cliente', 'informe-cliente', () => informeCliente(app.proyecto)),
       botonesMarkdown(app, 'Reporte del sprint', sprint.nombre, () => reporteSprint(app.proyecto, sprint.id)),
       botonesMarkdown(app, 'Notas de versión', `notas-${sprint.nombre}`, () => notasDeVersion(app.proyecto, { sprintId: sprint.id })),
       iaConfigurada(app.ia) ? h('button', {

@@ -7,6 +7,7 @@ import { COLUMNAS_RETRO, notasDe } from './retro.js';
 import { infoEpica, hipotesis, resultadosDeEpica, cobertura, RESULTADOS_HIPOTESIS } from './okr.js';
 import { roadmap, visionDe, HORIZONTES } from './roadmap.js';
 import { cicloPromedio } from './flujo.js';
+import { pronosticar, textoPronostico } from './pronostico.js';
 
 const fecha = (iso) => String(iso || '').slice(0, 10).split('-').reverse().join('-');
 const lista = (items, vacio = '_Nada._') => (items.length ? items : [vacio]);
@@ -273,5 +274,56 @@ export function reporteRoadmap(proyecto, hoy = new Date()) {
     r.terminadas.length ? `**Terminado:** ${r.terminadas.map((e) => e.epica).join(', ')}.` : null,
     '',
     `_Generado con Copiloto PO el ${fecha(new Date(hoy).toISOString())}. Las fechas son un pronóstico con la velocidad real, no un compromiso._`,
+  ].filter((l) => l !== null).join('\n');
+}
+
+/**
+ * Informe para el cliente: lo que un PO independiente envía cada dos semanas.
+ * Lenguaje simple, sin jerga ágil; las fechas son pronóstico, no compromiso.
+ */
+export function informeCliente(proyecto, hoy = new Date()) {
+  const v = visionDe(proyecto);
+  const r = roadmap(proyecto, hoy);
+  const total = proyecto.historias.filter((h) => h.prioridad !== 'wont');
+  const hechasTotal = total.filter((h) => h.estado === 'done');
+  const avance = puntosDe(total) ? Math.round((puntosDe(hechasTotal) / puntosDe(total)) * 100) : (total.length ? Math.round((hechasTotal.length / total.length) * 100) : 0);
+  const activo = proyecto.sprints.find((s) => s.estado === 'activo');
+  const ultimo = [...proyecto.sprints].reverse().find((s) => s.estado === 'cerrado');
+  const entregado = ultimo ? proyecto.historias.filter((h) => h.sprintId === ultimo.id && h.estado === 'done') : [];
+  const pronosticoTotal = pronosticar(proyecto, hoy)?.total;
+
+  const bloqueadas = proyecto.historias.filter((h) => h.bloqueo && h.estado !== 'done');
+  const porAclarar = proyecto.historias.filter((h) => h.estado === 'backlog' && h.prioridad === 'must' && (!h.puntos || revisarInvest(h).some((a) => a.nivel === 'aviso')));
+  const porMedir = r.terminadas.filter((e) => e.hipotesis && e.resultadoHipotesis === 'pendiente');
+  const medidas = [...r.terminadas, ...r.ahora, ...r.siguiente, ...r.despues].filter((e) => e.hipotesis && e.resultadoHipotesis !== 'pendiente');
+
+  return [
+    `# ${proyecto.nombre} · Informe de avance`,
+    '',
+    `_${fecha(new Date(hoy).toISOString())}_`,
+    '',
+    '## En resumen',
+    '',
+    `- **Avance general:** ${avance}% del trabajo planificado está terminado.`,
+    ultimo ? `- **Último ciclo (${ultimo.nombre}):** ${entregado.length} ${entregado.length === 1 ? 'entrega' : 'entregas'}${ultimo.objetivo ? `, con el objetivo "${ultimo.objetivo}"` : ''}.` : null,
+    activo ? `- **Ahora estamos en:** ${activo.nombre}, hasta el ${fecha(activo.fin)}${activo.objetivo ? `, para ${activo.objetivo.replace(/^que\s+/i, 'que ').replace(/\.$/, '')}` : ''}.` : null,
+    pronosticoTotal?.pendientes ? `- **Fecha estimada para lo pendiente:** ${textoPronostico(pronosticoTotal)}.` : null,
+    '',
+    ...(v.vision || v.objetivoProducto ? ['## Hacia dónde vamos', '', ...(v.vision ? [v.vision, ''] : []), v.objetivoProducto ? `**Próxima meta:** ${v.objetivoProducto}` : null, ''] : []),
+    ...(entregado.length ? ['## Lo que entregamos', '', ...entregado.map((h) => `- **${h.titulo}.** ${h.rol !== 'usuario' ? `Como ${h.rol}, ahora puedes` : 'Ahora se puede'} ${h.quiero}${h.para ? `, para ${h.para}` : ''}.`), ''] : []),
+    '## Lo que viene',
+    '',
+    ...['ahora', 'siguiente'].flatMap((k) => (r[k].length ? [`**${HORIZONTES[k].nombre}:**`, '', ...r[k].map((e) => `- ${e.epica} (${e.avance}% listo${e.pronostico ? `; ${e.pronostico}` : ''})`), ''] : [])),
+    !r.ahora.length && !r.siguiente.length ? '_Por definir en conjunto._\n' : null,
+    ...(medidas.length ? ['## Resultados medidos', '', ...medidas.map((e) => `- **${e.epica}:** ${RESULTADOS_HIPOTESIS[e.resultadoHipotesis].toLowerCase()}${infoEpica(proyecto, e.epica).datoReal ? ` (${infoEpica(proyecto, e.epica).datoReal})` : ''}.`), ''] : []),
+    '## Necesitamos de ti',
+    '',
+    ...lista([
+      ...bloqueadas.map((h) => `- **Destrabar "${h.titulo}":** ${h.bloqueo.motivo}.`),
+      ...porAclarar.slice(0, 5).map((h) => `- **Aclarar "${h.titulo}":** es prioritaria y aún tiene dudas de alcance o tamaño.`),
+      ...porMedir.map((e) => `- **Medir "${e.epica}":** ya está entregada; ¿cómo resultó? (${e.hipotesis})`),
+    ], '_Nada por ahora. ¡Gracias!_'),
+    '',
+    '_Las fechas son estimaciones con el ritmo real de trabajo; se actualizan en cada informe._',
   ].filter((l) => l !== null).join('\n');
 }

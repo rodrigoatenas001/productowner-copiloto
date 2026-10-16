@@ -3,7 +3,7 @@ import { h, selector } from './dom.js';
 import { HORIZONTES, roadmap, visionDe } from '../nucleo/roadmap.js';
 import { editarEpica, RESULTADOS_HIPOTESIS } from '../nucleo/okr.js';
 import { botonesMarkdown } from './compartir.js';
-import { reporteRoadmap } from '../nucleo/reportes.js';
+import { reporteRoadmap, informeCliente } from '../nucleo/reportes.js';
 
 export function vistaRoadmap(app) {
   const v = visionDe(app.proyecto);
@@ -30,7 +30,9 @@ export function vistaRoadmap(app) {
       h('label', { class: 'hipotesis-campo' }, h('span', {}, 'Objetivo del Producto: el próximo gran resultado, medible'),
         h('input', { type: 'text', maxlength: 300, value: v.objetivoProducto, placeholder: 'Que 20 tiendas vendan con su propia web antes de diciembre.', onchange: (e) => guardarVision({ objetivoProducto: e.target.value.trim() }) })),
       h('p', { class: 'ayuda' }, 'Según la Guía Scrum, el Objetivo del Producto es el compromiso del Product Backlog: todo lo que está en él debería acercarte a ese objetivo.')),
-    h('div', { class: 'compartir' }, botonesMarkdown(app, 'Roadmap', 'roadmap', () => reporteRoadmap(app.proyecto))),
+    h('div', { class: 'compartir' },
+      botonesMarkdown(app, 'Informe para el cliente', 'informe-cliente', () => informeCliente(app.proyecto)),
+      botonesMarkdown(app, 'Roadmap', 'roadmap', () => reporteRoadmap(app.proyecto))),
     h('div', { class: 'tablero roadmap-columnas' }, Object.entries(HORIZONTES).map(([clave, x]) => h('section', { class: `columna roadmap-columna--${clave}`, 'aria-labelledby': `rm-${clave}` },
       h('h2', { id: `rm-${clave}` }, x.nombre, h('span', { class: 'nav-conteo' }, String(r[clave].length))),
       h('p', { class: 'ayuda' }, x.ayuda),
