@@ -541,3 +541,10 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .encuesta legend { font-weight: 600; margin-bottom: 8px; }
 .opciones { display: flex; flex-wrap: wrap; gap: 8px 18px; }
 .bloque-texto { white-space: pre-wrap; font: .85rem var(--f-mono); background: var(--superficie); padding: 12px; border-radius: 8px; }
+
+/* Ficha del sprint en diálogo */
+button.ficha-titulo { background: none; border: 0; padding: 0; text-align: left; color: inherit; font-family: inherit; cursor: pointer; }
+button.ficha-titulo:hover { text-decoration: underline; }
+.dialogo-ficha { width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 48px); border: 1px solid var(--niebla); border-radius: var(--radio); padding: 20px 22px; background: var(--fondo, var(--superficie)); color: var(--texto); }
+.dialogo-ficha::backdrop { background: rgb(10 20 35 / .55); }
+.dialogo-cabecera { display: flex; justify-content: space-between; align-items: center; }

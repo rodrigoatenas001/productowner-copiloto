@@ -1,7 +1,7 @@
 // Sprint: planificar con la capacidad del equipo, trabajar en un tablero y cerrar con burndown y velocidad.
 import { h, campo } from './dom.js';
 import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
-import { listaVerificacion } from './historia.js';
+import { listaVerificacion, editorHistoria } from './historia.js';
 import { dependenciasPendientes, bloqueosDelSprint } from '../nucleo/dependencias.js';
 import { columnasDe, usoWip, cicloPromedio, bloquear, desbloquear, diasBloqueada } from '../nucleo/flujo.js';
 import { botonesMarkdown } from './compartir.js';
@@ -173,8 +173,10 @@ function tablero(app, sprint) {
     h('ul', {}, hs.map((x) => h('li', {
       class: `ficha${x.bloqueo ? ' is-bloqueada' : ''}`, draggable: 'true',
       ondragstart: (e) => { arrastrando = x.id; e.dataTransfer.effectAllowed = 'move'; },
+      ondblclick: (e) => { if (!e.target.closest('button, input, label, a')) abrirFicha(app, x.id); },
+      title: 'Doble clic para ver y editar',
     },
-    h('span', { class: 'ficha-titulo' }, x.titulo),
+    h('button', { type: 'button', class: 'ficha-titulo', onclick: () => abrirFicha(app, x.id) }, x.titulo),
     x.bloqueo ? h('span', { class: 'bloqueo' }, h('strong', {}, 'Bloqueada'), ` hace ${diasBloqueada(x)} ${diasBloqueada(x) === 1 ? 'día' : 'días'}: ${x.bloqueo.motivo}`) : null,
     dependenciasPendientes(p, x).length && x.estado !== 'done' ? h('span', { class: 'chip chip--aviso' }, `espera a: ${dependenciasPendientes(p, x).map((d) => d.titulo).join(', ')}`) : null,
     estado !== 'todo' ? listaVerificacion(x, dod, 'done', (item, valor) => app.cambiar((y) => ({
@@ -348,4 +350,26 @@ function avisoDependencias(proyecto, sprintId) {
   if (!bloqueos.length) return null;
   return h('ul', { class: 'invest' }, bloqueos.map((b) => h('li', { class: 'invest--aviso' },
     `"${b.historia.titulo}" depende de ${b.espera.map((d) => `"${d.titulo}"`).join(', ')}, que no está terminada ni en este sprint.`)));
+}
+
+/** Ficha completa de un ítem del sprint en un diálogo: se edita igual que en el backlog. */
+function abrirFicha(app, id) {
+  const historia = app.proyecto.historias.find((x) => x.id === id);
+  if (!historia) return;
+  const epicas = [...new Set(app.proyecto.historias.map((x) => x.epica).filter(Boolean))].sort();
+  let cambio = false;
+  const dialogo = h('dialog', { class: 'dialogo-ficha', 'aria-label': historia.titulo,
+    onclose: () => { dialogo.remove(); if (cambio) app.render(); },
+    onclick: (e) => { if (e.target === dialogo) dialogo.close(); }, // clic fuera cierra
+  },
+  h('div', { class: 'dialogo-cabecera' },
+    h('p', { class: 'eyebrow' }, 'Ítem del sprint'),
+    h('button', { type: 'button', class: 'icono', 'aria-label': 'Cerrar', onclick: () => dialogo.close() }, '×')),
+  editorHistoria(historia, (cambios) => {
+    cambio = true;
+    app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === id ? { ...y, ...cambios } : y)) }), { redibujar: false });
+  }, { epicas }),
+  h('div', { class: 'acciones' }, h('button', { type: 'button', class: 'btn', onclick: () => dialogo.close() }, 'Listo')));
+  document.body.append(dialogo);
+  dialogo.showModal();
 }

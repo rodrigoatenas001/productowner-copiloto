@@ -289,6 +289,15 @@ const PRUEBAS = [
     await ir('backlog');
     verdad(uno('.caja-info'), 'la caja volvió');
   }],
+  ['Sprint: doble clic abre la ficha y se edita', async () => {
+    await ir('sprint');
+    const ficha = uno('.ficha');
+    ficha.dispatchEvent(new MouseEvent('dblclick', { bubbles: true }));
+    await esperar(() => uno('dialog.dialogo-ficha[open]'), 'se abrió la ficha');
+    escribir(doc().querySelectorAll('dialog.dialogo-ficha input')[1], 'pagar con Webpay');
+    await clic('Listo');
+    await esperar(() => !uno('dialog.dialogo-ficha') && todos('.ficha-titulo').some((t) => t.textContent.startsWith('Pagar con Webpay')), 'el tablero muestra el cambio');
+  }],
   ['Celular: sin desplazamiento horizontal', async () => {
     marco.style.width = '375px';
     await pausa(150);
