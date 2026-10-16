@@ -10,6 +10,7 @@ import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
 import { vistaPriorizar } from './priorizar.js';
 import { panelObjetivos, detalleEpica } from './okr.js';
+import { pronosticar, textoPronostico } from '../nucleo/pronostico.js';
 import { issueDe, issueMarkdown, urlGithub, urlLinear } from '../nucleo/issues.js';
 import { botonesMarkdown } from './compartir.js';
 import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../nucleo/reportes.js';
@@ -230,8 +231,11 @@ function accionesInteligentes(app, historia) {
 function vistaEpicas(app) {
   const epicas = resumenEpicas(app.proyecto);
   if (!epicas.length) return h('p', { class: 'vacio' }, 'Aún no hay historias.');
+  const pron = pronosticar(app.proyecto);
+  const porEpica = Object.fromEntries((pron?.epicas || []).map((x) => [x.epica, x]));
   return h('div', {},
     panelObjetivos(app),
+    panelPronostico(pron),
     h('div', { class: 'compartir' }, botonesMarkdown(app, 'Reporte de avance por épica', 'avance-epicas', () => reporteEpicas(app.proyecto))),
     h('ul', { class: 'lista-epicas' }, epicas.map((e) => h('li', { class: 'epica' },
     h('div', { class: 'epica-cabecera' },
@@ -246,6 +250,8 @@ function vistaEpicas(app) {
     h('p', { class: 'tarjeta-meta' },
       `${e.hechas} de ${e.historias} historias · ${e.puntosHechos} de ${e.puntos} pts`,
       e.sinEstimar ? ` · ${e.sinEstimar} sin estimar` : ''),
+    porEpica[e.epica] ? h('p', { class: 'pronostico-linea' }, h('span', { class: 'eyebrow' }, 'Pronóstico'), ' ', textoPronostico(porEpica[e.epica]),
+      porEpica[e.epica].sinEstimar ? h('span', { class: 'chip chip--aviso' }, `${porEpica[e.epica].sinEstimar} sin estimar`) : null) : null,
     e.epica ? detalleEpica(app, e.epica) : null,
     e.historias > e.hechas ? h('div', { class: 'compartir' },
       botonesMarkdown(app, 'Especificación de la épica', `epica-${e.epica || 'sin-epica'}`, () => especificacionEpica(app.proyecto, e.epica))) : null))));
@@ -363,4 +369,18 @@ function enlacesIssue(app, historia) {
         try { await navigator.clipboard.writeText(issueMarkdown(issueDe(app.proyecto, actual))); app.avisar('Issue copiada en Markdown.'); } catch { app.avisar('El navegador no permitió copiar.', 'error'); }
       },
     }, 'Copiar'));
+}
+
+/** Resumen del pronóstico: escenarios de velocidad y cuándo se termina todo el backlog. */
+function panelPronostico(pron) {
+  if (!pron) {
+    return h('p', { class: 'ayuda' }, 'El pronóstico de entrega aparece cuando cierres tu primer sprint: se calcula con la velocidad real, no con supuestos.');
+  }
+  const { escenarios: e, total } = pron;
+  return h('section', { class: 'panel pronostico', 'aria-labelledby': 'pronostico-titulo' },
+    h('h2', { id: 'pronostico-titulo' }, '¿Cuándo va a estar?'),
+    h('p', {}, total.pendientes ? `Todo el backlog pendiente (${total.pendientes} pts): ${textoPronostico(total)}.` : 'No queda trabajo estimado pendiente.'),
+    h('p', { class: 'ayuda' }, `Según tus últimos ${e.sprints} ${e.sprints === 1 ? 'sprint' : 'sprints'}: optimista ${e.optimista} pts por sprint, probable ${e.probable}, pesimista ${e.pesimista}. `,
+      'Las épicas avanzan en el orden del backlog.',
+      total.sinEstimar ? ` Hay ${total.sinEstimar} historias sin estimar que no se cuentan: el plazo real será mayor.` : ''));
 }

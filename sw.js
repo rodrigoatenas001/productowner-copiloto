@@ -33,6 +33,7 @@ const ARCHIVOS = [
   './js/ui/okr.js',
   './js/nucleo/objetivo.js',
   './js/nucleo/issues.js',
+  './js/nucleo/pronostico.js',
   './js/ui/dom.js',
   './js/ui/historia.js',
   './js/ui/notas.js',
