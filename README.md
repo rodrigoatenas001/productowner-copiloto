@@ -2,6 +2,13 @@
 
 De tus notas a historias de usuario, backlog y sprints. Libre (MIT), sin cuentas, sin servidor y sin conexión.
 
+<picture>
+  <source media="(prefers-color-scheme: dark)" srcset="docs/img/flujo-oscuro.svg">
+  <img alt="Flujo de Copiloto PO: levantar con el cliente, acordar alcance y precio, ordenar qué va primero, construir en sprints, entregar y cobrar, y aprender; los cambios y aprendizajes vuelven al backlog." src="docs/img/flujo.svg" width="100%">
+</picture>
+
+**[Ábrelo en línea](https://rodrigoatenas001.github.io/productowner-copiloto/)** · **[Descárgalo para usarlo en tu equipo](https://github.com/rodrigoatenas001/productowner-copiloto/releases/latest)**
+
 Pensado para **Product Owners independientes**: una persona que trabaja con uno o varios clientes, a veces con un par de desarrolladores, y que no necesita (ni quiere pagar) una herramienta corporativa como Jira para ordenar el trabajo y mostrar avance. Es parte de la comunidad de [ProductOwner.cl](https://productowner.cl).
 
 ## Qué hace, etapa por etapa
@@ -14,6 +21,14 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - **Notas → historias** "Como… quiero… para…", con reglas o con IA; **importar** desde CSV de Jira o Excel.
 - **Tipos de ítem** (historia, bug, spike, deuda técnica) y **dependencias** sin ciclos.
 - **Feedback de la Sprint Review** que pasa directo al backlog.
+
+**Acordar con el cliente**
+- **Plantillas por tipo de proyecto** (tienda en línea, sitio corporativo, integración API/ERP, dashboard, MVP móvil, consultoría) con historias, exclusiones y supuestos típicos.
+- **Alcance**: qué incluye, qué NO incluye, supuestos y lo que el cliente debe entregar.
+- **Cotización** en UF o pesos: horas por ítem (o por puntos), valor hora y margen de imprevistos.
+- **Hitos de pago** con sus entregables y **acta de aceptación** para que el cliente firme y se libere el pago.
+- **Solicitudes de cambio** con su impacto en horas, valor y plazo, y una **respuesta lista para enviar**.
+- Todo sale como documento: **propuesta**, actas y respuestas. Son borradores; no reemplazan un contrato ni asesoría legal.
 
 **Refinamiento**
 - **Revisión INVEST** por tipo, **casos borde** automáticos y **métricas** sugeridas para palabras vagas.
@@ -41,6 +56,17 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 **Siempre**
 - Funciona **sin IA**; si quieres, conecta la tuya (Ollama en tu equipo o tu propia clave).
 - **Deshacer**, recordatorio de **respaldo** y todo guardado en tu navegador.
+
+## Así se ve
+
+Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/ejemplo/pasteleria-carla.json), que puedes importar desde Ajustes → Importar respaldo para probarlo.
+
+| | |
+|---|---|
+| ![Backlog priorizado con épicas, puntos y calidad de cada historia](docs/img/captura-backlog.png) | ![Hitos de pago con montos en UF, entregables y acta de aceptación](docs/img/captura-cliente.png) |
+| **Backlog** priorizado, con la revisión de calidad de cada historia | **Cliente:** hitos de pago, montos y acta de aceptación |
+| ![Roadmap Ahora, Siguiente y Después con pronóstico por épica](docs/img/captura-roadmap.png) | ![Tablero del sprint con límite de trabajo en curso y un ítem bloqueado](docs/img/captura-sprint.png) |
+| **Roadmap** con visión, objetivo y pronóstico por épica | **Sprint** con límites de trabajo en curso y bloqueos |
 
 ## Hoja de ruta
 
@@ -127,7 +153,8 @@ tests/
 
 ```bash
 npm test          # lógica (node --test)
-npm run test:ui   # interfaz: 19 escenarios en la app real, en Chrome o Edge sin ventana
+npm run test:ui   # interfaz: 20 escenarios en la app real, en Chrome o Edge sin ventana
+npm run imagenes  # regenera el diagrama del flujo, el proyecto de ejemplo y las capturas del README
 ```
 
 Las pruebas de interfaz también se pueden ver en vivo abriendo `tests/ui.html` con el servidor local. Usan una base de datos aparte (`?prueba`), así que no tocan tus proyectos.

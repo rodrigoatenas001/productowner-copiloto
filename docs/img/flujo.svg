@@ -1,0 +1,115 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 520" width="1200" height="520" font-family="system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif" role="img" aria-labelledby="titulo desc">
+  <title id="titulo">Flujo de Copiloto PO</title>
+  <desc id="desc">Seis etapas: levantar con el cliente, acordar alcance y precio, ordenar qué va primero, construir en sprints, entregar y cobrar, y aprender; los cambios y aprendizajes vuelven al backlog.</desc>
+  <rect width="1200" height="520" rx="18" fill="#f5f7fa"/>
+  <text x="34" y="58" font-size="28" font-weight="800" fill="#10213a">Copiloto <tspan fill="#b8642e">PO</tspan></text>
+  <text x="34" y="84" font-size="15" fill="#5a6b82">Del primer audio desordenado del cliente a la entrega aceptada, sin cuentas ni servidor.</text>
+    <g>
+      <rect x="34" y="104" width="172" height="268" rx="14" fill="#ffffff" stroke="#e3e9f1"/>
+      <rect x="34" y="104" width="172" height="5" rx="2.5" fill="#b8642e"/>
+      <circle cx="64" cy="146" r="16" fill="#b8642e"/>
+      <text x="64" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">1</text>
+      <text x="52" y="196" font-size="21" font-weight="700" fill="#10213a">Levantar</text>
+      <text x="52" y="218" font-size="12" font-weight="600" letter-spacing="1" fill="#9a4f1d">CON EL CLIENTE</text>
+      <circle cx="56" cy="254" r="3" fill="#b8642e"/>
+      <text x="66" y="259" font-size="13.5" fill="#10213a">Notas → historias</text>
+      <circle cx="56" cy="282" r="3" fill="#b8642e"/>
+      <text x="66" y="287" font-size="13.5" fill="#10213a">Plantillas por tipo</text>
+      <circle cx="56" cy="310" r="3" fill="#b8642e"/>
+      <text x="66" y="315" font-size="13.5" fill="#10213a">Revisión INVEST</text>
+      <circle cx="56" cy="338" r="3" fill="#b8642e"/>
+      <text x="66" y="343" font-size="13.5" fill="#10213a">Casos borde</text>
+      <path d="M 211 164 l 9 0 m -4 -5 l 5 5 l -5 5" fill="none" stroke="#b8642e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g>
+      <rect x="226" y="104" width="172" height="268" rx="14" fill="#ffffff" stroke="#e3e9f1"/>
+      <rect x="226" y="104" width="172" height="5" rx="2.5" fill="#b8642e"/>
+      <circle cx="256" cy="146" r="16" fill="#b8642e"/>
+      <text x="256" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">2</text>
+      <text x="244" y="196" font-size="21" font-weight="700" fill="#10213a">Acordar</text>
+      <text x="244" y="218" font-size="12" font-weight="600" letter-spacing="1" fill="#9a4f1d">ALCANCE Y PRECIO</text>
+      <circle cx="248" cy="254" r="3" fill="#b8642e"/>
+      <text x="258" y="259" font-size="13.5" fill="#10213a">Incluye / no incluye</text>
+      <circle cx="248" cy="282" r="3" fill="#b8642e"/>
+      <text x="258" y="287" font-size="13.5" fill="#10213a">Horas y valor en UF</text>
+      <circle cx="248" cy="310" r="3" fill="#b8642e"/>
+      <text x="258" y="315" font-size="13.5" fill="#10213a">Hitos de pago</text>
+      <circle cx="248" cy="338" r="3" fill="#b8642e"/>
+      <text x="258" y="343" font-size="13.5" fill="#10213a">Propuesta lista</text>
+      <path d="M 403 164 l 9 0 m -4 -5 l 5 5 l -5 5" fill="none" stroke="#b8642e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g>
+      <rect x="418" y="104" width="172" height="268" rx="14" fill="#ffffff" stroke="#e3e9f1"/>
+      <rect x="418" y="104" width="172" height="5" rx="2.5" fill="#b8642e"/>
+      <circle cx="448" cy="146" r="16" fill="#b8642e"/>
+      <text x="448" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">3</text>
+      <text x="436" y="196" font-size="21" font-weight="700" fill="#10213a">Ordenar</text>
+      <text x="436" y="218" font-size="12" font-weight="600" letter-spacing="1" fill="#9a4f1d">QUÉ VA PRIMERO</text>
+      <circle cx="440" cy="254" r="3" fill="#b8642e"/>
+      <text x="450" y="259" font-size="13.5" fill="#10213a">WSJF y RICE</text>
+      <circle cx="440" cy="282" r="3" fill="#b8642e"/>
+      <text x="450" y="287" font-size="13.5" fill="#10213a">Roadmap y OKR</text>
+      <circle cx="440" cy="310" r="3" fill="#b8642e"/>
+      <text x="450" y="315" font-size="13.5" fill="#10213a">Pronóstico con rango</text>
+      <circle cx="440" cy="338" r="3" fill="#b8642e"/>
+      <text x="450" y="343" font-size="13.5" fill="#10213a">Dependencias</text>
+      <path d="M 595 164 l 9 0 m -4 -5 l 5 5 l -5 5" fill="none" stroke="#b8642e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g>
+      <rect x="610" y="104" width="172" height="268" rx="14" fill="#ffffff" stroke="#e3e9f1"/>
+      <rect x="610" y="104" width="172" height="5" rx="2.5" fill="#b8642e"/>
+      <circle cx="640" cy="146" r="16" fill="#b8642e"/>
+      <text x="640" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">4</text>
+      <text x="628" y="196" font-size="21" font-weight="700" fill="#10213a">Construir</text>
+      <text x="628" y="218" font-size="12" font-weight="600" letter-spacing="1" fill="#9a4f1d">EN SPRINTS</text>
+      <circle cx="632" cy="254" r="3" fill="#b8642e"/>
+      <text x="642" y="259" font-size="13.5" fill="#10213a">Tablero y límite WIP</text>
+      <circle cx="632" cy="282" r="3" fill="#b8642e"/>
+      <text x="642" y="287" font-size="13.5" fill="#10213a">Bloqueos y ciclo</text>
+      <circle cx="632" cy="310" r="3" fill="#b8642e"/>
+      <text x="642" y="315" font-size="13.5" fill="#10213a">Definition of Done</text>
+      <circle cx="632" cy="338" r="3" fill="#b8642e"/>
+      <text x="642" y="343" font-size="13.5" fill="#10213a">Burndown</text>
+      <path d="M 787 164 l 9 0 m -4 -5 l 5 5 l -5 5" fill="none" stroke="#b8642e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g>
+      <rect x="802" y="104" width="172" height="268" rx="14" fill="#ffffff" stroke="#e3e9f1"/>
+      <rect x="802" y="104" width="172" height="5" rx="2.5" fill="#b8642e"/>
+      <circle cx="832" cy="146" r="16" fill="#b8642e"/>
+      <text x="832" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">5</text>
+      <text x="820" y="196" font-size="21" font-weight="700" fill="#10213a">Entregar</text>
+      <text x="820" y="218" font-size="12" font-weight="600" letter-spacing="1" fill="#9a4f1d">Y COBRAR</text>
+      <circle cx="824" cy="254" r="3" fill="#b8642e"/>
+      <text x="834" y="259" font-size="13.5" fill="#10213a">Acta de aceptación</text>
+      <circle cx="824" cy="282" r="3" fill="#b8642e"/>
+      <text x="834" y="287" font-size="13.5" fill="#10213a">Informe al cliente</text>
+      <circle cx="824" cy="310" r="3" fill="#b8642e"/>
+      <text x="834" y="315" font-size="13.5" fill="#10213a">Notas de versión</text>
+      <circle cx="824" cy="338" r="3" fill="#b8642e"/>
+      <text x="834" y="343" font-size="13.5" fill="#10213a">Issues GitHub/Linear</text>
+      <path d="M 979 164 l 9 0 m -4 -5 l 5 5 l -5 5" fill="none" stroke="#b8642e" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+    </g>
+    <g>
+      <rect x="994" y="104" width="172" height="268" rx="14" fill="#ffffff" stroke="#e3e9f1"/>
+      <rect x="994" y="104" width="172" height="5" rx="2.5" fill="#b8642e"/>
+      <circle cx="1024" cy="146" r="16" fill="#b8642e"/>
+      <text x="1024" y="152" text-anchor="middle" font-size="16" font-weight="700" fill="#ffffff">6</text>
+      <text x="1012" y="196" font-size="21" font-weight="700" fill="#10213a">Aprender</text>
+      <text x="1012" y="218" font-size="12" font-weight="600" letter-spacing="1" fill="#9a4f1d">Y MEJORAR</text>
+      <circle cx="1016" cy="254" r="3" fill="#b8642e"/>
+      <text x="1026" y="259" font-size="13.5" fill="#10213a">Retrospectiva</text>
+      <circle cx="1016" cy="282" r="3" fill="#b8642e"/>
+      <text x="1026" y="287" font-size="13.5" fill="#10213a">Hipótesis medidas</text>
+      <circle cx="1016" cy="310" r="3" fill="#b8642e"/>
+      <text x="1026" y="315" font-size="13.5" fill="#10213a">Feedback de Review</text>
+      <circle cx="1016" cy="338" r="3" fill="#b8642e"/>
+      <text x="1026" y="343" font-size="13.5" fill="#10213a">Taller y trivia</text>
+      
+    </g>
+    <path d="M 1080 378 V 422 Q 1080 434 1068 434 H 516 Q 504 434 504 422 V 386"
+      fill="none" stroke="#b8642e" stroke-width="2.5" stroke-dasharray="7 6" stroke-linecap="round"/>
+    <path d="M 497 392 L 504 381 L 511 392" fill="none" stroke="#b8642e" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+    <rect x="577" y="420" width="430" height="28" rx="14" fill="#f5f7fa"/>
+    <text x="792" y="439" text-anchor="middle" font-size="14" font-weight="600" fill="#9a4f1d">Cambios del cliente y aprendizajes vuelven al backlog</text>
+  <text x="1166" y="498" text-anchor="end" font-size="12.5" fill="#5a6b82">Libre (MIT) · funciona sin conexión · IA opcional y tuya</text>
+</svg>

@@ -1,0 +1,488 @@
+{
+  "version": 1,
+  "id": "p-mvaz7q88-1x4fc",
+  "nombre": "Pastelería de Carla",
+  "rolPorDefecto": "clienta",
+  "notas": "",
+  "historias": [
+    {
+      "id": "h-mvaz7q89-2lhlg",
+      "titulo": "Ver el detalle de cada producto antes de…",
+      "rol": "clienta",
+      "quiero": "ver el detalle de cada producto antes de comprarlo",
+      "para": "decidir con toda la información",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento ver el detalle de cada producto antes de comprarlo, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Catálogo",
+      "puntos": 3,
+      "prioridad": "should",
+      "estado": "done",
+      "sprintId": "s1",
+      "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
+      "creada": "2026-10-16T13:01:11.433Z",
+      "iniciada": "2026-09-19T13:01:11.430Z",
+      "terminada": "2026-09-22T13:01:11.430Z",
+      "bloqueo": null
+    },
+    {
+      "id": "h-mvaz7q89-351j1",
+      "titulo": "Buscar y filtrar por categoría",
+      "rol": "clienta",
+      "quiero": "buscar y filtrar por categoría",
+      "para": "encontrar rápido lo que busco",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento buscar y filtrar por categoría, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Catálogo",
+      "puntos": 5,
+      "prioridad": "should",
+      "estado": "done",
+      "sprintId": "s1",
+      "notaOriginal": "Como clienta, quiero buscar y filtrar por categoría, para encontrar rápido lo que busco",
+      "creada": "2026-10-16T13:01:11.433Z",
+      "iniciada": "2026-09-22T13:01:11.430Z",
+      "terminada": "2026-09-29T13:01:11.430Z",
+      "bloqueo": null
+    },
+    {
+      "id": "h-mvaz7q89-48vea",
+      "titulo": "Agregar productos al carro y ver el total…",
+      "rol": "clienta",
+      "quiero": "agregar productos al carro y ver el total con despacho",
+      "para": "saber cuánto pagaré",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento agregar productos al carro y ver el total con despacho, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Compra",
+      "puntos": 5,
+      "prioridad": "should",
+      "estado": "done",
+      "sprintId": "s2",
+      "notaOriginal": "Como clienta, quiero agregar productos al carro y ver el total con despacho, para saber cuánto pagaré",
+      "creada": "2026-10-16T13:01:11.433Z",
+      "iniciada": "2026-10-03T13:01:11.430Z",
+      "terminada": "2026-10-07T13:01:11.430Z",
+      "bloqueo": null
+    },
+    {
+      "id": "h-mvaz7q89-51jha",
+      "titulo": "Pagar con tarjeta o transferencia",
+      "rol": "clienta",
+      "quiero": "pagar con tarjeta o transferencia",
+      "para": "comprar sin salir de la tienda",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento pagar con tarjeta o transferencia, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Compra",
+      "puntos": 8,
+      "prioridad": "should",
+      "estado": "doing",
+      "sprintId": "s3",
+      "notaOriginal": "Como clienta, quiero pagar con tarjeta o transferencia, para comprar sin salir de la tienda",
+      "creada": "2026-10-16T13:01:11.433Z",
+      "iniciada": "2026-10-16T13:01:11.430Z",
+      "terminada": null,
+      "bloqueo": null
+    },
+    {
+      "id": "h-mvaz7q89-6ap4e",
+      "titulo": "Recibir un correo con el detalle de mi…",
+      "rol": "clienta",
+      "quiero": "recibir un correo con el detalle de mi compra",
+      "para": "tener un respaldo",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento recibir un correo con el detalle de mi compra, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Compra",
+      "puntos": 3,
+      "prioridad": "should",
+      "estado": "doing",
+      "sprintId": "s3",
+      "notaOriginal": "Como clienta, quiero recibir un correo con el detalle de mi compra, para tener un respaldo",
+      "creada": "2026-10-16T13:01:11.433Z",
+      "iniciada": "2026-10-16T13:01:11.430Z",
+      "terminada": null,
+      "bloqueo": {
+        "motivo": "Falta la cuenta de la pasarela de pago a nombre de Carla",
+        "desde": "2026-10-15T13:01:11.430Z"
+      }
+    },
+    {
+      "id": "h-mvaz7q89-77uyz",
+      "titulo": "Cargar y editar productos",
+      "rol": "dueña",
+      "quiero": "cargar y editar productos",
+      "para": "mantener el catálogo al día",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento cargar y editar productos, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Administración",
+      "puntos": 5,
+      "prioridad": "should",
+      "estado": "todo",
+      "sprintId": "s3",
+      "notaOriginal": "Como dueña, quiero cargar y editar productos, para mantener el catálogo al día",
+      "creada": "2026-10-16T13:01:11.433Z"
+    },
+    {
+      "id": "h-mvaz7q89-8ift0",
+      "titulo": "Ver los pedidos del día con su estado",
+      "rol": "dueña",
+      "quiero": "ver los pedidos del día con su estado",
+      "para": "despacharlos a tiempo",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento ver los pedidos del día con su estado, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Administración",
+      "puntos": 3,
+      "prioridad": "should",
+      "estado": "done",
+      "sprintId": "s2",
+      "notaOriginal": "Como dueña, quiero ver los pedidos del día con su estado, para despacharlos a tiempo",
+      "creada": "2026-10-16T13:01:11.433Z",
+      "iniciada": "2026-10-07T13:01:11.430Z",
+      "terminada": "2026-10-13T13:01:11.430Z",
+      "bloqueo": null
+    },
+    {
+      "id": "h-extra-1",
+      "titulo": "Pagar en cuotas",
+      "rol": "clienta",
+      "quiero": "pagar en cuotas sin interés",
+      "para": "comprar tortas para eventos grandes",
+      "criterios": [
+        "Dado un total mayor a $30.000, cuando pago, entonces puedo elegir 3 cuotas."
+      ],
+      "epica": "Compra",
+      "puntos": 5,
+      "prioridad": "must",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
+      "creada": "2026-10-16T13:01:11.433Z",
+      "dependeDe": [
+        "h-mvaz7q89-51jha"
+      ]
+    },
+    {
+      "id": "h-mvaz7q8a-9200e",
+      "titulo": "Acumular puntos por cada compra",
+      "rol": "clienta frecuente",
+      "quiero": "acumular puntos por cada compra",
+      "para": "obtener descuentos",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento acumular puntos por cada compra, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Fidelización",
+      "puntos": 8,
+      "prioridad": "should",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como clienta frecuente, quiero acumular puntos por cada compra, para obtener descuentos",
+      "creada": "2026-10-16T13:01:11.434Z"
+    },
+    {
+      "id": "h-mvaz7q8a-a3s65",
+      "titulo": "Crear cupones de descuento",
+      "rol": "dueña",
+      "quiero": "crear cupones de descuento",
+      "para": "atraer clientas en fechas especiales",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento crear cupones de descuento, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Fidelización",
+      "puntos": 5,
+      "prioridad": "could",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como dueña, quiero crear cupones de descuento, para atraer clientas en fechas especiales",
+      "creada": "2026-10-16T13:01:11.434Z"
+    },
+    {
+      "id": "h-mvaz7q8a-b4ue9",
+      "titulo": "Ver las ventas del mes por producto",
+      "rol": "dueña",
+      "quiero": "ver las ventas del mes por producto",
+      "para": "saber qué hornear más",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento ver las ventas del mes por producto, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Reportes",
+      "puntos": 5,
+      "prioridad": "should",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como dueña, quiero ver las ventas del mes por producto, para saber qué hornear más",
+      "creada": "2026-10-16T13:01:11.434Z"
+    },
+    {
+      "id": "h-mvaz7q8a-cykoz",
+      "titulo": "Comparar las ventas con el mes anterior",
+      "rol": "dueña",
+      "quiero": "comparar las ventas con el mes anterior",
+      "para": "medir si la tienda funciona",
+      "criterios": [
+        "Dado que tengo acceso, cuando intento comparar las ventas con el mes anterior, entonces el sistema me confirma que se realizó."
+      ],
+      "epica": "Reportes",
+      "puntos": 3,
+      "prioridad": "should",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como dueña, quiero comparar las ventas con el mes anterior, para medir si la tienda funciona",
+      "creada": "2026-10-16T13:01:11.434Z"
+    },
+    {
+      "id": "h-mvaz7q8b-d5jro",
+      "titulo": "Investigar en 2 días cómo emitir boletas electrónicas…",
+      "rol": "usuario",
+      "quiero": "investigar en 2 días cómo emitir boletas electrónicas automáticamente",
+      "para": "",
+      "criterios": [
+        "Al terminar el plazo, sabemos qué proveedor usar, su costo mensual y el esfuerzo de integrarlo."
+      ],
+      "epica": "Boletas",
+      "puntos": 2,
+      "prioridad": "should",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Investigar en 2 días cómo emitir boletas electrónicas automáticamente",
+      "creada": "2026-10-16T13:01:11.435Z",
+      "tipo": "spike"
+    }
+  ],
+  "sprints": [
+    {
+      "id": "s1",
+      "nombre": "Sprint 1",
+      "objetivo": "Que las clientas vean el catálogo con precios",
+      "inicio": "2026-09-18",
+      "fin": "2026-10-01",
+      "capacidad": 10,
+      "estado": "cerrado",
+      "feedback": ""
+    },
+    {
+      "id": "s2",
+      "nombre": "Sprint 2",
+      "objetivo": "Que las clientas armen su carro",
+      "inicio": "2026-10-02",
+      "fin": "2026-10-15",
+      "capacidad": 10,
+      "estado": "cerrado",
+      "feedback": ""
+    },
+    {
+      "id": "s3",
+      "nombre": "Sprint 3",
+      "objetivo": "Que las clientas puedan pagar en línea",
+      "inicio": "2026-10-16",
+      "fin": "2026-10-29",
+      "capacidad": 13,
+      "estado": "activo",
+      "feedback": ""
+    }
+  ],
+  "retros": [
+    {
+      "id": "r-mvaz7q8c-hir8t",
+      "titulo": "Retro de Sprint 2",
+      "sprintId": "s2",
+      "fecha": "2026-10-16",
+      "notas": [
+        {
+          "id": "n-mvaz7q8c-i4oei",
+          "columna": "bien",
+          "texto": "Carla respondió las dudas el mismo día",
+          "votos": 0
+        },
+        {
+          "id": "n-mvaz7q8c-jbhvp",
+          "columna": "mejorar",
+          "texto": "Las fotos llegaron tarde y atrasaron el catálogo",
+          "votos": 2
+        },
+        {
+          "id": "n-mvaz7q8c-kgvlu",
+          "columna": "ideas",
+          "texto": "Pedir fotos y textos con una semana de anticipación",
+          "votos": 0
+        }
+      ],
+      "acciones": [
+        {
+          "id": "a-mvaz7q8c-lo74b",
+          "texto": "Pedir los materiales del siguiente sprint en la Review",
+          "responsable": "Rodrigo",
+          "hecha": false
+        }
+      ]
+    }
+  ],
+  "definiciones": {
+    "ready": [
+      "Tiene rol, acción y beneficio claros",
+      "Tiene criterios de aceptación verificables",
+      "Está estimada por el equipo",
+      "Cabe en un sprint",
+      "No depende de algo que no está listo"
+    ],
+    "done": [
+      "Cumple todos los criterios de aceptación",
+      "Revisada por otra persona del equipo",
+      "Probada (incluidos casos de error)",
+      "Documentada si cambia cómo se usa",
+      "Aceptada por el Product Owner"
+    ]
+  },
+  "objetivos": [
+    {
+      "id": "o-mvaz7q8b-eg358",
+      "objetivo": "Vender más en línea",
+      "resultados": [
+        {
+          "id": "kr-mvaz7q8b-fdcao",
+          "texto": "Pedidos por la tienda: del 0% al 40%"
+        },
+        {
+          "id": "kr-mvaz7q8b-godi6",
+          "texto": "Mensajes de consulta: bajar a la mitad"
+        }
+      ]
+    }
+  ],
+  "epicasInfo": {
+    "Catálogo": {
+      "creemos": "mostrar precio y stock",
+      "lograremos": "menos consultas por mensaje",
+      "veremos": "los mensajes bajen a la mitad",
+      "resultados": [
+        "kr-mvaz7q8b-godi6"
+      ],
+      "horizonte": "",
+      "resultadoHipotesis": "cumplida",
+      "datoReal": "de 200 a 95 mensajes por semana"
+    },
+    "Boletas": {
+      "creemos": "",
+      "lograremos": "",
+      "veremos": "",
+      "resultados": [],
+      "horizonte": "despues",
+      "resultadoHipotesis": "pendiente",
+      "datoReal": ""
+    },
+    "Compra": {
+      "creemos": "permitir pagar en línea",
+      "lograremos": "que más visitas terminen comprando",
+      "veremos": "el 40% de los pedidos llegue por la tienda",
+      "resultados": [
+        "kr-mvaz7q8b-fdcao"
+      ],
+      "horizonte": "",
+      "resultadoHipotesis": "pendiente",
+      "datoReal": ""
+    }
+  },
+  "vision": {
+    "vision": "Que la pastelería venda en línea sin depender de los mensajes de Instagram.",
+    "objetivoProducto": "Que el 40% de los pedidos llegue por la tienda antes de diciembre."
+  },
+  "flujo": {
+    "revision": true,
+    "wip": {
+      "doing": 2,
+      "review": 2
+    }
+  },
+  "alcance": {
+    "incluye": [],
+    "noIncluye": [
+      "Integración con marketplaces (Mercado Libre, Falabella)",
+      "Facturación electrónica automática con el SII",
+      "Diseño de logo o identidad de marca",
+      "Fotografía de productos",
+      "Envíos internacionales"
+    ],
+    "supuestos": [
+      "Se usa una pasarela de pago chilena con cuenta a nombre del cliente",
+      "Hasta 200 productos en la carga inicial",
+      "El despacho lo gestiona el cliente o su empresa de envíos"
+    ],
+    "cliente": [
+      "Textos, fotos y precios de los productos",
+      "Cuenta habilitada en la pasarela de pago",
+      "Dominio y correo del negocio",
+      "Políticas de despacho, cambios y devoluciones"
+    ]
+  },
+  "comercial": {
+    "moneda": "UF",
+    "valorHora": 0.6,
+    "horasPorPunto": 3,
+    "margen": 15,
+    "valorUF": 39800,
+    "horasSemana": 20
+  },
+  "hitos": [
+    {
+      "id": "hi-mvaz7q8c-mjzf2",
+      "nombre": "Hito 1: Catálogo",
+      "porcentaje": 30,
+      "historiaIds": [
+        "h-mvaz7q89-2lhlg",
+        "h-mvaz7q89-351j1",
+        "h-mvaz7q89-48vea",
+        "h-mvaz7q89-51jha"
+      ],
+      "fecha": "2026-10-29",
+      "estado": "aceptado",
+      "aceptacion": {
+        "nombre": "Carla Rojas",
+        "fecha": "2026-10-15"
+      }
+    },
+    {
+      "id": "hi-mvaz7q8c-nhx17",
+      "nombre": "Hito 2: Compra",
+      "porcentaje": 40,
+      "historiaIds": [
+        "h-mvaz7q89-6ap4e",
+        "h-mvaz7q89-77uyz",
+        "h-mvaz7q89-8ift0",
+        "h-extra-1"
+      ],
+      "fecha": "2026-11-12",
+      "estado": "pendiente",
+      "aceptacion": null
+    },
+    {
+      "id": "hi-mvaz7q8c-oa9jj",
+      "nombre": "Hito 3: Fidelización",
+      "porcentaje": 30,
+      "historiaIds": [
+        "h-mvaz7q8a-9200e",
+        "h-mvaz7q8a-a3s65",
+        "h-mvaz7q8a-b4ue9",
+        "h-mvaz7q8a-cykoz",
+        "h-mvaz7q8b-d5jro"
+      ],
+      "fecha": "2026-11-26",
+      "estado": "pendiente",
+      "aceptacion": null
+    }
+  ],
+  "cambios": [
+    {
+      "id": "cr-mvaz7q8c-p5fw4",
+      "fecha": "2026-10-16",
+      "descripcion": "Agregar un blog de recetas en la tienda",
+      "horas": 12,
+      "estado": "propuesto"
+    }
+  ],
+  "respaldado": "2026-10-16T13:01:11.436Z",
+  "creado": "2026-10-16T13:01:11.430Z",
+  "actualizado": "2026-10-16T13:01:11.430Z"
+}

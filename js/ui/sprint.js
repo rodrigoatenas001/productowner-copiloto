@@ -199,7 +199,7 @@ function tablero(app, sprint) {
   };
 
   return h('div', {},
-    h('dl', { class: 'cifras' },
+    h('dl', { class: 'cifras cifras--5' },
       h('div', { class: 'cifra' }, h('dt', {}, 'Terminado'), h('dd', {}, `${resumen.hechos} / ${resumen.puntos} pts`)),
       h('div', { class: 'cifra' }, h('dt', {}, 'Días restantes'), h('dd', {}, String(restantes))),
       h('div', { class: 'cifra' }, h('dt', {}, 'Fechas'), h('dd', {}, `${formatear(sprint.inicio)} – ${formatear(sprint.fin)}`)),

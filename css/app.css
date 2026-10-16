@@ -399,15 +399,16 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .ficha .chip { white-space: normal; }
 
 /* Kanban liviano */
-.tablero--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.tablero.tablero--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+.cifras.cifras--5 { grid-template-columns: repeat(5, 1fr); }
 .columna--review h2 { color: #1f5fa8; }
 .wip-excedido { background: var(--alerta) !important; color: #fff !important; }
 .ficha.is-bloqueada { border-color: var(--alerta); box-shadow: inset 3px 0 0 var(--alerta); }
 .bloqueo { font-size: .8rem; color: var(--alerta); }
 .ficha-bloqueo { font-size: .78rem; padding: 2px 4px; }
 .aviso-bloqueos { background: var(--alerta-suave); color: var(--alerta); border-radius: var(--radio); padding: 10px 14px; margin: 0 0 14px; font-weight: 600; }
-@media (max-width: 1000px) { .tablero--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
-@media (max-width: 640px) { .tablero--4 { grid-template-columns: 1fr; } }
+@media (max-width: 1000px) { .tablero.tablero--4 { grid-template-columns: repeat(2, minmax(0, 1fr)); } .cifras.cifras--5 { grid-template-columns: repeat(3, 1fr); } .cifras--5 .cifra:nth-child(4) { border-left: 0; } .cifras--5 .cifra:nth-child(n+4) { border-top: 1px solid var(--niebla); } }
+@media (max-width: 640px) { .tablero.tablero--4 { grid-template-columns: 1fr; } .cifras.cifras--5 { grid-template-columns: 1fr 1fr; } .cifras--5 .cifra:nth-child(odd) { border-left: 0; } .cifras--5 .cifra:nth-child(4) { border-left: 1px solid var(--niebla); } .cifras--5 .cifra:nth-child(n+3) { border-top: 1px solid var(--niebla); } }
 
 .clasificar { margin: 0 0 12px; padding-left: 20px; display: grid; gap: 12px; }
 .clasificar li { display: grid; grid-template-columns: minmax(0, 1fr) 200px; gap: 4px 12px; align-items: center; }

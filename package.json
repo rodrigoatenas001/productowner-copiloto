@@ -1,6 +1,6 @@
 {
   "name": "copiloto-po",
-  "version": "0.10.0",
+  "version": "0.11.0",
   "description": "De tus notas a historias de usuario, backlog y sprints. Libre, sin cuentas y sin conexión.",
   "private": true,
   "type": "module",
@@ -8,6 +8,7 @@
   "scripts": {
     "test": "node --test",
     "test:ui": "node scripts/pruebas-interfaz.mjs",
+    "imagenes": "node scripts/flujo-svg.mjs && node scripts/proyecto-ejemplo.mjs && node scripts/capturas.mjs",
     "start": "python -m http.server 8080"
   }
 }
