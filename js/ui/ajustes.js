@@ -3,6 +3,7 @@ import { h, campo, selector, descargar } from './dom.js';
 import { normalizarProyecto } from '../nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, nombreArchivo } from '../nucleo/exportar.js';
 import { PROVEEDORES, probarConexion } from '../ia.js';
+import { importarCsv } from '../nucleo/importar.js';
 
 export function vistaAjustes(app) {
   const p = app.proyecto;
@@ -67,6 +68,9 @@ function seccionRespaldo(app) {
       h('button', { type: 'button', class: 'btn', onclick: () => app.descargarRespaldo() }, 'Descargar respaldo (.json)'),
       entrada,
       h('label', { for: 'importar', class: 'btn btn--secundario', tabindex: '0', onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); entrada.click(); } } }, 'Importar respaldo')),
+    h('h3', {}, 'Traer un backlog que ya tienes'),
+    h('p', { class: 'ayuda' }, 'Desde un CSV de Jira, Excel u otra herramienta. Reconocemos columnas como Summary, Título, Description, Story Points, Priority, Labels o Épica. Lo terminado no se importa.'),
+    entradaCsv(app),
     h('h3', {}, 'Exportar el backlog'),
     h('div', { class: 'acciones' },
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'md'), aMarkdown(p), 'text/markdown') }, 'Markdown'),
@@ -137,4 +141,30 @@ function seccionAcerca() {
     h('h2', { id: 'aj-acerca' }, 'Acerca del copiloto'),
     h('p', {}, 'Herramienta libre (licencia MIT) para Product Owners y equipos independientes. Funciona sin conexión y sin cuentas.'),
     h('p', {}, 'Hecha por la comunidad de ', h('a', { href: 'https://productowner.cl', rel: 'noopener' }, 'ProductOwner.cl'), '.'));
+}
+
+function entradaCsv(app) {
+  const entrada = h('input', {
+    type: 'file', accept: '.csv,text/csv', class: 'sr-only', id: 'importar-csv',
+    onchange: async (e) => {
+      const archivo = e.target.files[0];
+      e.target.value = '';
+      if (!archivo) return;
+      if (archivo.size > 10 * 1024 * 1024) { app.avisar('El archivo es demasiado grande.', 'error'); return; }
+      try {
+        const { historias, omitidas, sinTitulo } = importarCsv(await archivo.text(), { rolPorDefecto: app.proyecto.rolPorDefecto });
+        if (!historias.length) { app.avisar('No encontramos historias pendientes en el archivo.', 'error'); return; }
+        const notas = [
+          omitidas ? `${omitidas} ${omitidas === 1 ? 'terminada omitida' : 'terminadas omitidas'}` : '',
+          sinTitulo ? `${sinTitulo} ${sinTitulo === 1 ? 'fila vacía' : 'filas vacías'}` : '',
+        ].filter(Boolean).join(', ');
+        app.ir('backlog');
+        app.cambiarConDeshacer(`${historias.length} ${historias.length === 1 ? 'historia importada' : 'historias importadas'}${notas ? ` (${notas})` : ''}.`, (x) => ({ ...x, historias: [...x.historias, ...historias] }));
+      } catch (err) {
+        app.avisar(err.message, 'error');
+      }
+    },
+  });
+  return h('div', { class: 'acciones' }, entrada,
+    h('label', { for: 'importar-csv', class: 'btn btn--secundario', tabindex: '0', onkeydown: (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); entrada.click(); } } }, 'Importar CSV'));
 }

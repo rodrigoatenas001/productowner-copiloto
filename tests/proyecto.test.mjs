@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { notasAHistorias } from '../js/nucleo/historias.js';
 import {
   nuevoProyecto, nuevoSprint, normalizarProyecto, mover, cambiarEstado, velocidad, sugerirSprint,
-  burndown, resumenSprint, cerrarSprint, necesitaRespaldo,
+  burndown, resumenSprint, cerrarSprint, necesitaRespaldo, resumenEpicas,
 } from '../js/nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, celdaCsv, nombreArchivo } from '../js/nucleo/exportar.js';
 
@@ -138,4 +138,17 @@ test('recuerda respaldar solo cuando hay trabajo sin respaldo reciente', () => {
   assert.equal(necesitaRespaldo(p, new Date('2026-03-20T12:00:00Z')), true);
   p.actualizado = '2026-02-28T10:00:00Z';
   assert.equal(necesitaRespaldo(p, new Date('2026-03-20T12:00:00Z')), false); // sin cambios desde el respaldo
+});
+
+test('resumenEpicas mide el avance en puntos y respeta el orden del backlog', () => {
+  const p = proyectoDeEjemplo(); // Pagos: 5, 3, 8, 2
+  p.historias.push(...notasAHistorias('Reportes:\n- ver ventas'));
+  p.historias[0] = cambiarEstado(p.historias[0], 'done');
+  const [pagos, reportes] = resumenEpicas(p);
+  assert.equal(pagos.epica, 'Pagos');
+  assert.equal(pagos.puntos, 18);
+  assert.equal(pagos.puntosHechos, 5);
+  assert.equal(pagos.avance, 28);
+  assert.equal(reportes.sinEstimar, 1);
+  assert.equal(reportes.avance, 0);
 });

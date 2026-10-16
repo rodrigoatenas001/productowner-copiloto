@@ -8,11 +8,12 @@ Pensado para Product Owners y equipos independientes que no quieren pagar una he
 
 - **Notas → historias.** Pegas lo que anotaste en una reunión y lo convierte en historias "Como… quiero… para…", con épicas según tus títulos y un criterio de aceptación de partida.
 - **Revisión INVEST.** Cada historia muestra qué le falta: el beneficio, un rol concreto, palabras que no se pueden verificar ("rápido", "fácil"), varias metas en una, criterios de aceptación o una estimación demasiado grande.
-- **Backlog priorizado.** El orden es la prioridad: arrastra o usa las flechas. Puntos (Fibonacci), prioridad MoSCoW, épicas y búsqueda.
+- **Backlog priorizado.** El orden es la prioridad: arrastra o usa las flechas. Puntos (Fibonacci), prioridad MoSCoW, épicas con su avance y búsqueda.
+- **Estimar en equipo.** Planning poker en una sola pantalla: cada persona elige su carta sin ver las demás, se revelan juntas y el copiloto sugiere el valor o pide conversar si hay mucha diferencia.
 - **Sprints.** Capacidad, sugerencia automática según prioridad y capacidad, tablero Por hacer / En curso / Hecho, burndown y velocidad de los últimos sprints.
 - **Dividir y mejorar.** Las historias que piden varias cosas se dividen en un clic (por sus partes o con IA), y la IA puede proponer criterios de aceptación con casos de error.
 - **Deshacer y respaldo.** Eliminar, dividir o cerrar un sprint se puede deshacer, y el copiloto te recuerda descargar un respaldo cuando tienes trabajo sin respaldar.
-- **Exportación.** Markdown, CSV para Excel y CSV listo para importar en Jira. Respaldo completo en JSON.
+- **Importar y exportar.** Trae tu backlog desde un CSV de Jira o Excel; exporta a Markdown, CSV para Excel y CSV listo para importar en Jira. Respaldo completo en JSON.
 - **IA opcional y tuya.** Funciona completo sin IA. Si quieres, conecta [Ollama](https://ollama.com) en tu equipo (gratis y privado) o tu propia clave de un servicio compatible con OpenAI o de Anthropic.
 
 ## Privacidad

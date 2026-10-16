@@ -213,3 +213,24 @@ export function cerrarSprint(proyecto, sprintId) {
     sprints: proyecto.sprints.map((s) => (s.id === sprintId ? { ...s, estado: 'cerrado' } : s)),
   };
 }
+
+/**
+ * Avance por épica, en el orden en que aparecen en el backlog (su prioridad).
+ * El avance se mide en puntos; si nada está estimado, en historias.
+ */
+export function resumenEpicas(proyecto) {
+  const mapa = new Map();
+  for (const h of proyecto.historias) {
+    const clave = h.epica || '';
+    if (!mapa.has(clave)) mapa.set(clave, { epica: clave, historias: 0, hechas: 0, puntos: 0, puntosHechos: 0, sinEstimar: 0 });
+    const e = mapa.get(clave);
+    e.historias += 1;
+    e.puntos += h.puntos || 0;
+    if (!h.puntos) e.sinEstimar += 1;
+    if (h.estado === 'done') { e.hechas += 1; e.puntosHechos += h.puntos || 0; }
+  }
+  return [...mapa.values()].map((e) => ({
+    ...e,
+    avance: e.puntos ? Math.round((e.puntosHechos / e.puntos) * 100) : (e.historias ? Math.round((e.hechas / e.historias) * 100) : 0),
+  }));
+}

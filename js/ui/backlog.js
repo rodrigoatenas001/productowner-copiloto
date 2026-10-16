@@ -1,11 +1,13 @@
 // Backlog priorizado: el orden es la prioridad. Se reordena arrastrando o con los botones.
 import { h, selector } from './dom.js';
-import { mover, puntosDe } from '../nucleo/proyecto.js';
+import { mover, puntosDe, resumenEpicas } from '../nucleo/proyecto.js';
 import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest } from '../nucleo/historias.js';
 import { iaConfigurada, criteriosConIa, dividirConIa } from '../ia.js';
 import { editorHistoria, insigniaCalidad } from './historia.js';
+import { vistaEstimar } from './estimar.js';
 
 const filtros = { texto: '', epica: '' };
+let modo = 'lista'; // 'lista' | 'epicas' | 'estimar'
 let abierta = null;
 let arrastrando = null;
 
@@ -91,12 +93,19 @@ export function vistaBacklog(app) {
       h('p', { class: 'eyebrow' }, p.nombre),
       h('h1', {}, 'Backlog'),
       h('p', { class: 'bajada' }, 'Arriba lo más importante. Arrastra para reordenar o usa las flechas.')),
-    h('dl', { class: 'cifras' },
+    h('div', { class: 'pestanas', role: 'tablist', 'aria-label': 'Vista del backlog' },
+      Object.entries({ lista: 'Lista priorizada', epicas: 'Épicas', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
+        type: 'button', role: 'tab', 'aria-selected': String(modo === m), class: 'pestana',
+        onclick: () => { modo = m; app.render(); },
+      }, texto))),
+    modo === 'epicas' ? vistaEpicas(app) : null,
+    modo === 'estimar' ? vistaEstimar(app) : null,
+    modo !== 'lista' ? null : h('dl', { class: 'cifras' },
       cifra('Historias', backlog.length),
       cifra('Puntos estimados', puntosDe(backlog)),
       cifra('Sin estimar', sinEstimar),
       cifra('Por mejorar', porMejorar)),
-    h('div', { class: 'barra-filtros', role: 'search' },
+    modo !== 'lista' ? null : h('div', { class: 'barra-filtros', role: 'search' },
       h('input', {
         type: 'search', placeholder: 'Buscar historias', 'aria-label': 'Buscar historias', value: filtros.texto,
         oninput: (e) => { filtros.texto = e.target.value; app.render(); document.querySelector('.barra-filtros input')?.focus(); },
@@ -116,8 +125,8 @@ export function vistaBacklog(app) {
           app.cambiar((x) => ({ ...x, historias: [nueva, ...x.historias] }));
         },
       }, '+ Historia')),
-    filtrando ? h('p', { class: 'ayuda' }, 'Con filtros activos no se puede reordenar.') : null,
-    backlog.length
+    modo !== 'lista' ? null : filtrando ? h('p', { class: 'ayuda' }, 'Con filtros activos no se puede reordenar.') : null,
+    modo !== 'lista' ? null : backlog.length
       ? (visibles.length ? h('ol', { class: 'lista-tarjetas' }, visibles.map(tarjeta)) : h('p', { class: 'vacio' }, 'Ninguna historia coincide con el filtro.'))
       : h('div', { class: 'vacio' },
         h('p', {}, 'El backlog está vacío.'),
@@ -178,4 +187,23 @@ function accionesInteligentes(app, historia) {
     }, 'Mejorar criterios con IA'));
   }
   return botones;
+}
+
+/** Épicas con su avance; al elegir una se vuelve a la lista filtrada por ella. */
+function vistaEpicas(app) {
+  const epicas = resumenEpicas(app.proyecto);
+  if (!epicas.length) return h('p', { class: 'vacio' }, 'Aún no hay historias.');
+  return h('ul', { class: 'lista-epicas' }, epicas.map((e) => h('li', { class: 'epica' },
+    h('div', { class: 'epica-cabecera' },
+      h('button', {
+        type: 'button', class: 'epica-nombre',
+        onclick: () => { filtros.epica = e.epica; modo = 'lista'; app.render(); },
+        disabled: !e.epica,
+      }, e.epica || 'Sin épica'),
+      h('span', { class: 'epica-avance' }, `${e.avance}%`)),
+    h('div', { class: 'capacidad-barra', role: 'progressbar', 'aria-valuemin': 0, 'aria-valuemax': 100, 'aria-valuenow': e.avance, 'aria-label': `Avance de ${e.epica || 'sin épica'}` },
+      h('span', { class: `relleno-${Math.round(e.avance / 5) * 5}` })),
+    h('p', { class: 'tarjeta-meta' },
+      `${e.hechas} de ${e.historias} historias · ${e.puntosHechos} de ${e.puntos} pts`,
+      e.sinEstimar ? ` · ${e.sinEstimar} sin estimar` : ''))));
 }

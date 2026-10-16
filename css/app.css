@@ -174,6 +174,41 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .tarjeta-cuerpo { padding: 4px 18px 18px; border-top: 1px solid var(--niebla); }
 .tarjeta-cuerpo .editor { padding-top: 16px; }
 
+/* Pestañas y épicas */
+.pestanas { display: inline-flex; gap: 4px; background: var(--niebla); padding: 4px; border-radius: 10px; margin: 0 0 18px; }
+.pestana { background: none; border: 0; padding: 7px 14px; border-radius: 7px; font: 600 .9rem var(--f-texto); color: var(--pizarra); cursor: pointer; }
+.pestana[aria-selected="true"] { background: var(--superficie); color: var(--texto); box-shadow: 0 1px 2px rgba(16, 33, 58, .12); }
+.lista-epicas { list-style: none; margin: 0; padding: 0; display: grid; gap: 10px; }
+.epica { background: var(--superficie); border: 1px solid var(--niebla); border-radius: var(--radio); padding: 14px 18px; display: grid; gap: 8px; }
+.epica-cabecera { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+.epica-nombre { background: none; border: 0; padding: 0; font: 600 1.05rem var(--f-display); color: var(--texto); cursor: pointer; text-align: left; }
+.epica-nombre:hover:not(:disabled) { color: var(--cobre-texto); text-decoration: underline; }
+.epica-nombre:disabled { cursor: default; color: var(--pizarra); }
+.epica-avance { font: 700 1.1rem var(--f-display); font-variant-numeric: tabular-nums; }
+.epica .tarjeta-meta { margin: 0; }
+
+/* Estimar en equipo */
+.participantes summary { cursor: pointer; font-weight: 600; }
+.participantes input { margin-top: 6px; }
+.criterios { margin: 0 0 18px; padding-left: 20px; color: var(--pizarra); font-size: .92rem; }
+.votantes { list-style: none; margin: 0 0 6px; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 12px; }
+.votantes li { display: grid; justify-items: center; gap: 8px; padding: 14px 8px; border: 1px solid var(--niebla); border-radius: var(--radio); }
+.votante-nombre { font-weight: 600; text-align: center; overflow-wrap: anywhere; }
+.carta { width: 56px; height: 76px; border-radius: 10px; border: 2px solid var(--tinta); background: var(--superficie); color: var(--texto); font: 700 1.4rem var(--f-display); cursor: pointer; display: inline-grid; place-items: center; }
+.carta:hover { transform: translateY(-2px); box-shadow: var(--sombra); }
+.carta--boca-abajo { background: repeating-linear-gradient(45deg, var(--tinta), var(--tinta) 6px, var(--tinta-2) 6px, var(--tinta-2) 12px); color: #f0b98f; border-color: var(--tinta); }
+.carta--revelada { cursor: default; border-color: var(--cobre); color: var(--cobre-texto); }
+.carta--revelada:hover { transform: none; box-shadow: none; }
+.carta--vacia { border-style: dashed; border-color: var(--niebla); color: var(--pizarra); }
+.carta--mini { width: 36px; height: 44px; font-size: .95rem; margin: 0 3px 4px 0; border-width: 1.5px; vertical-align: middle; }
+.mazo { display: flex; flex-wrap: wrap; gap: 10px; margin: 12px 0 14px; }
+.eleccion { background: var(--papel); border-radius: var(--radio); padding: 16px 18px; }
+.resultado { margin-top: 16px; padding: 14px 18px; border-radius: var(--radio); background: var(--bosque-suave); }
+.resultado > p:first-child { margin: 0; font-weight: 600; }
+.resultado--conversar { background: var(--ambar-suave); color: var(--ambar-texto); }
+.resultado .acciones { margin-top: 10px; }
+@media (prefers-reduced-motion: reduce) { .carta:hover { transform: none; } }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }
