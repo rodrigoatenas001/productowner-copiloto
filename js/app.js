@@ -7,11 +7,13 @@ import { vistaNotas } from './ui/notas.js';
 import { vistaBacklog } from './ui/backlog.js';
 import { vistaSprint } from './ui/sprint.js';
 import { vistaAjustes } from './ui/ajustes.js';
+import { vistaTaller } from './ui/taller.js';
 
 const VISTAS = {
   notas: { titulo: 'Notas', render: vistaNotas },
   backlog: { titulo: 'Backlog', render: vistaBacklog },
   sprint: { titulo: 'Sprint', render: vistaSprint },
+  taller: { titulo: 'Taller', render: vistaTaller },
   ajustes: { titulo: 'Ajustes', render: vistaAjustes },
 };
 
@@ -21,6 +23,7 @@ const app = {
   vista: 'notas',
   candidatos: [],
   ia: { proveedor: 'ninguno' },
+  preguntasPropias: [],
   avisar,
 
   /** Aplica un cambio al proyecto actual, guarda (con pausa) y vuelve a dibujar. */
@@ -78,6 +81,11 @@ const app = {
     this.candidatos = [];
     await guardarAjuste('proyectoActivo', this.proyecto.id);
     this.render();
+  },
+
+  async guardarPreguntas(lista) {
+    this.preguntasPropias = lista;
+    await guardarAjuste('preguntasPropias', lista);
   },
 
   async guardarIa(config) {
@@ -187,6 +195,7 @@ async function iniciar() {
   try {
     app.proyectos = await listarProyectos();
     app.ia = (await leerAjuste('ia')) || { proveedor: 'ninguno' };
+    app.preguntasPropias = (await leerAjuste('preguntasPropias')) || [];
     if (!app.proyectos.length) {
       const p = nuevoProyecto('Mi proyecto');
       await guardarProyecto(p);
