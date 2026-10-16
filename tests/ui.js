@@ -298,6 +298,16 @@ const PRUEBAS = [
     await clic('Listo');
     await esperar(() => !uno('dialog.dialogo-ficha') && todos('.ficha-titulo').some((t) => t.textContent.startsWith('Pagar con Webpay')), 'el tablero muestra el cambio');
   }],
+  ['Sprint: mover con el teclado', async () => {
+    await ir('sprint');
+    const ficha = uno('.columna--todo .ficha');
+    const id = ficha.dataset.id;
+    ficha.focus();
+    ficha.dispatchEvent(new KeyboardEvent('keydown', { key: 'ArrowRight', bubbles: true }));
+    await pausa(100);
+    verdad(!uno(`.columna--todo .ficha[data-id="${id}"]`), 'la tarjeta salió de Por hacer');
+    verdad(doc().activeElement?.dataset?.id === id, 'el foco sigue en la tarjeta');
+  }],
   ['Celular: sin desplazamiento horizontal', async () => {
     marco.style.width = '375px';
     await pausa(150);

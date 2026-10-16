@@ -548,3 +548,6 @@ button.ficha-titulo:hover { text-decoration: underline; }
 .dialogo-ficha { width: min(680px, calc(100vw - 32px)); max-height: calc(100vh - 48px); border: 1px solid var(--niebla); border-radius: var(--radio); padding: 20px 22px; background: var(--fondo, var(--superficie)); color: var(--texto); }
 .dialogo-ficha::backdrop { background: rgb(10 20 35 / .55); }
 .dialogo-cabecera { display: flex; justify-content: space-between; align-items: center; }
+.ficha:focus-visible { outline: 2px solid var(--cobre); outline-offset: 2px; }
+.tarjeta, .ficha { transition: box-shadow .15s; }
+.ficha:hover { box-shadow: 0 2px 8px rgb(10 20 35 / .12); }

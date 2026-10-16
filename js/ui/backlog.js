@@ -49,6 +49,7 @@ export function vistaBacklog(app) {
       dataset: { id: historia.id },
       ondragstart: (e) => { arrastrando = historia.id; e.dataTransfer.effectAllowed = 'move'; li.classList.add('is-arrastrando'); },
       ondragend: () => li.classList.remove('is-arrastrando'),
+      ondblclick: (e) => { if (!esAbierta && !e.target.closest('button, input, textarea, select, a, label')) { abierta = historia.id; app.render(); } },
       ondragover: (e) => { if (arrastrando && arrastrando !== historia.id) { e.preventDefault(); li.classList.add('is-destino'); } },
       ondragleave: () => li.classList.remove('is-destino'),
       ondrop: (e) => {

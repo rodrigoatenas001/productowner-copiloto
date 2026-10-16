@@ -33,9 +33,9 @@ export const ID_EJEMPLO = 'ejemplo-pasteleria';
 // Para qué sirve cada sección: tooltip del menú y caja informativa (se puede cerrar)
 const AYUDAS = {
   notas: 'Pega lo que te pidió el cliente y conviértelo en historias de usuario.',
-  backlog: 'La lista ordenada de lo que hay que hacer: arriba lo más importante. Aquí priorizas, estimas y ves el roadmap.',
+  backlog: 'La lista ordenada de lo que hay que hacer: arriba lo más importante. Arrastra para reordenar y abre una historia con clic en su título o doble clic. Aquí priorizas, estimas y ves el roadmap.',
   cliente: 'Lo que acuerdas con tu cliente: qué incluye y qué no, cuánto cuesta, cuándo se paga y qué cambios pidió.',
-  sprint: 'El trabajo de las próximas semanas en un tablero, con el avance y el informe para el cliente.',
+  sprint: 'El trabajo de las próximas semanas en un tablero, con el avance y el informe para el cliente. Arrastra las tarjetas o usa las flechas ← →; doble clic o Enter abre la ficha.',
   retro: 'Al cerrar un sprint: qué salió bien, qué mejorar y qué acciones tomar.',
   taller: 'Para aprender o enseñar: trivia en grupo, ejercicios y desafíos de Scrum e historias.',
   ajustes: 'Respaldos, importar y exportar, la IA opcional y tus preguntas propias.',

@@ -174,7 +174,20 @@ function tablero(app, sprint) {
       class: `ficha${x.bloqueo ? ' is-bloqueada' : ''}`, draggable: 'true',
       ondragstart: (e) => { arrastrando = x.id; e.dataTransfer.effectAllowed = 'move'; },
       ondblclick: (e) => { if (!e.target.closest('button, input, label, a')) abrirFicha(app, x.id); },
-      title: 'Doble clic para ver y editar',
+      ondragend: () => document.querySelectorAll('.columna.is-destino').forEach((c) => c.classList.remove('is-destino')),
+      // Teclado: Enter abre la ficha; flechas mueven de columna
+      tabindex: '0', dataset: { id: x.id },
+      'aria-label': `${x.titulo}. Enter para abrir; flechas izquierda y derecha para mover de columna.`,
+      onkeydown: (e) => {
+        if (e.target !== e.currentTarget) return;
+        if (e.key === 'Enter') { e.preventDefault(); abrirFicha(app, x.id); return; }
+        const destino = e.key === 'ArrowLeft' ? COLUMNAS[i - 1] : e.key === 'ArrowRight' ? COLUMNAS[i + 1] : null;
+        if (!destino) return;
+        e.preventDefault();
+        moverA(x.id, destino);
+        document.querySelector(`.ficha[data-id="${x.id}"]`)?.focus();
+      },
+      title: 'Doble clic o Enter para abrir · flechas ← → para mover',
     },
     h('button', { type: 'button', class: 'ficha-titulo', onclick: () => abrirFicha(app, x.id) }, x.titulo),
     x.bloqueo ? h('span', { class: 'bloqueo' }, h('strong', {}, 'Bloqueada'), ` hace ${diasBloqueada(x)} ${diasBloqueada(x) === 1 ? 'día' : 'días'}: ${x.bloqueo.motivo}`) : null,
