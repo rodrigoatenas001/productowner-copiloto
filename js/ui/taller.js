@@ -1,6 +1,7 @@
 // Taller: herramientas para cursos, bootcamps y reuniones de equipo.
 import { h } from './dom.js';
 import { vistaTrivia } from './trivia.js';
+import { vistaDesafios } from './desafios.js';
 import { CASOS, evaluarEjercicio } from '../nucleo/ejercicios.js';
 import { insigniaCalidad, listaAvisos } from './historia.js';
 import { enunciado } from '../nucleo/historias.js';
@@ -15,11 +16,11 @@ export function vistaTaller(app) {
       h('h1', {}, 'Taller'),
       h('p', { class: 'bajada' }, 'Trivia para proyectar en una clase o retrospectiva, y ejercicios prácticos de historias de usuario con retroalimentación inmediata.')),
     h('div', { class: 'pestanas', role: 'tablist', 'aria-label': 'Herramientas del taller' },
-      Object.entries({ trivia: 'Trivia', ejercicios: 'Ejercicios de historias' }).map(([clave, texto]) => h('button', {
+      Object.entries({ trivia: 'Trivia', ejercicios: 'Ejercicios de historias', desafios: 'Desafíos' }).map(([clave, texto]) => h('button', {
         type: 'button', role: 'tab', class: 'pestana', 'aria-selected': String(pestana === clave),
         onclick: () => { pestana = clave; app.render(); },
       }, texto))),
-    pestana === 'trivia' ? vistaTrivia(app) : vistaEjercicios(app));
+    pestana === 'trivia' ? vistaTrivia(app) : pestana === 'desafios' ? vistaDesafios(app) : vistaEjercicios(app));
 }
 
 function vistaEjercicios(app) {

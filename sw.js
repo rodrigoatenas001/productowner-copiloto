@@ -37,6 +37,8 @@ const ARCHIVOS = [
   './js/nucleo/roadmap.js',
   './js/nucleo/dependencias.js',
   './js/nucleo/flujo.js',
+  './js/nucleo/desafios.js',
+  './js/ui/desafios.js',
   './js/ui/roadmap.js',
   './js/ui/dom.js',
   './js/ui/historia.js',

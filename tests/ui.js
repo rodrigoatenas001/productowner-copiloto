@@ -178,6 +178,50 @@ const PRUEBAS = [
     todos('.tarjeta.is-abierta [aria-label="Crear issue"] button').find((b) => b.textContent === 'Linear').click();
     verdad(abiertas[0]?.startsWith('https://linear.new?title='), 'abre linear.new');
   }],
+  ['Pronóstico y roadmap tras cerrar un sprint', async () => {
+    await ir('backlog');
+    await pestana('Épicas');
+    verdad(uno('.pronostico')?.textContent.includes('¿Cuándo va a estar?'), 'aparece el pronóstico');
+    await pestana('Roadmap');
+    escribir(uno('.roadmap textarea'), 'Que las pymes vendan en línea', 'change');
+    await pausa(80);
+    verdad(todos('.roadmap-epica').length > 0, 'hay épicas en el roadmap');
+  }],
+  ['Informe para el cliente', async () => {
+    copiado = '';
+    todos('.compartir-md').find((g) => g.getAttribute('aria-label') === 'Informe para el cliente').querySelector('button').click();
+    await esperar(() => copiado.includes('· Informe de avance'), 'se copió el informe');
+    verdad(copiado.includes('Que las pymes vendan en línea') && copiado.includes('## Necesitamos de ti'), 'el informe trae visión y pedidos');
+  }],
+  ['Dependencias en la historia', async () => {
+    await pestana('Lista priorizada');
+    if (!uno('.tarjeta.is-abierta')) { todos('.tarjeta-abrir')[0].click(); await pausa(60); }
+    const sel = uno('[aria-label="Agregar dependencia"]');
+    escribir(sel, sel.options[1].value, 'change');
+    await pausa(80);
+    verdad(uno('.dependencias li'), 'la dependencia quedó registrada');
+  }],
+  ['Kanban liviano: columna de revisión y bloqueo', async () => {
+    await ir('ajustes');
+    const casilla = todos('label.opcion').find((l) => l.textContent.includes('En revisión')).querySelector('input');
+    casilla.click(); await pausa(80);
+    await ir('sprint');
+    await clic('Planificar un sprint');
+    todos('.lista-elegir input')[0].click(); await pausa(80);
+    await clic('Iniciar sprint');
+    verdad(uno('.columna--review'), 'aparece la columna En revisión');
+    todos('.ficha-bloqueo').find((b) => b.textContent === 'Bloquear').click(); await pausa(80);
+    verdad(uno('.ficha.is-bloqueada') && uno('.aviso-bloqueos'), 'la ficha queda bloqueada con aviso');
+  }],
+  ['Desafíos del taller', async () => {
+    await ir('taller');
+    await pestana('Desafíos');
+    escribir(uno('[aria-label="Sprints que faltan (probable)"]'), '5');
+    await clic('Responder');
+    verdad(uno('.desafios .resultado'), 'responde el pronóstico');
+    await clic('Se cumplió');
+    verdad(todos('.desafios .resultado').length === 2, 'responde la hipótesis');
+  }],
   ['Celular: sin desplazamiento horizontal', async () => {
     marco.style.width = '375px';
     await pausa(150);
