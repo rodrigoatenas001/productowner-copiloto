@@ -115,6 +115,7 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .icono { background: none; border: 1px solid transparent; width: 30px; height: 30px; color: var(--pizarra); font-size: 1rem; line-height: 1; }
 .icono:hover:not(:disabled) { border-color: var(--niebla); color: var(--texto); }
 .acciones-ia { display: contents; }
+.acciones--compactas { margin: -6px 0 6px; gap: 4px 14px; }
 .acciones { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 14px; }
 @media (prefers-color-scheme: dark) { .btn { background: #e8eef7; color: var(--tinta); border-color: #e8eef7; } .btn:hover { background: #fff; } .btn--cobre { background: var(--cobre); color: #fff; border-color: var(--cobre); } }
 

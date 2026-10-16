@@ -10,6 +10,7 @@ import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
 import { vistaPriorizar } from './priorizar.js';
 import { panelObjetivos, detalleEpica } from './okr.js';
+import { issueDe, issueMarkdown, urlGithub, urlLinear } from '../nucleo/issues.js';
 import { botonesMarkdown } from './compartir.js';
 import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../nucleo/reportes.js';
 
@@ -78,7 +79,8 @@ export function vistaBacklog(app) {
       }), { redibujar: false })),
       revision?.historiaId === historia.id ? panelRevision(app, historia) : null,
       h('div', { class: 'compartir' },
-        botonesMarkdown(app, 'Especificación para agente', `spec-${historia.titulo}`, () => especificacionHistoria(app.proyecto, historia.id))),
+        botonesMarkdown(app, 'Especificación para agente', `spec-${historia.titulo}`, () => especificacionHistoria(app.proyecto, historia.id)),
+        enlacesIssue(app, historia)),
       h('div', { class: 'acciones' },
         zonaIa,
         sprintAbierto ? h('button', {
@@ -332,4 +334,31 @@ function panelRevision(app, historia) {
         },
       }, 'Aceptar cambios') : null,
       r.estado !== 'corriendo' ? h('button', { type: 'button', class: 'btn-texto', onclick: cerrar }, resultado?.cambio ? 'Descartar' : 'Cerrar') : null));
+}
+
+/** Crear la issue en GitHub o Linear: abre el formulario ya lleno (la persona revisa y crea) o copia el Markdown. */
+function enlacesIssue(app, historia) {
+  const abrir = (generarUrl) => {
+    try {
+      const actual = app.proyecto.historias.find((y) => y.id === historia.id) || historia;
+      window.open(generarUrl(issueDe(app.proyecto, actual)), '_blank', 'noopener');
+    } catch (e) {
+      app.avisar(e.message, 'error');
+    }
+  };
+  return h('span', { class: 'compartir-md', role: 'group', 'aria-label': 'Crear issue' },
+    h('span', { class: 'compartir-etiqueta' }, 'Issue'),
+    h('button', {
+      type: 'button', class: 'btn-texto',
+      title: app.proyecto.github ? `Abre una issue nueva en ${app.proyecto.github}` : 'Configura el repositorio en Ajustes',
+      onclick: () => (app.proyecto.github ? abrir((i) => urlGithub(app.proyecto.github, i)) : app.avisar('Indica el repositorio de GitHub en Ajustes → Proyecto.', 'error')),
+    }, 'GitHub'),
+    h('button', { type: 'button', class: 'btn-texto', onclick: () => abrir(urlLinear) }, 'Linear'),
+    h('button', {
+      type: 'button', class: 'btn-texto',
+      onclick: async () => {
+        const actual = app.proyecto.historias.find((y) => y.id === historia.id) || historia;
+        try { await navigator.clipboard.writeText(issueMarkdown(issueDe(app.proyecto, actual))); app.avisar('Issue copiada en Markdown.'); } catch { app.avisar('El navegador no permitió copiar.', 'error'); }
+      },
+    }, 'Copiar'));
 }

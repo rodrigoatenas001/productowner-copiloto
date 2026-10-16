@@ -4,6 +4,10 @@ import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
 import { listaVerificacion } from './historia.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteSprint, notasDeVersion } from '../nucleo/reportes.js';
+import { sugerirObjetivo } from '../nucleo/objetivo.js';
+import { iaConfigurada, objetivoConIa, notasConIa } from '../ia.js';
+
+let notasIa = null; // { sprintId, estado: 'corriendo'|'lista'|'error', texto, error }
 import {
   nuevoSprint, sugerirSprint, resumenSprint, burndown, cerrarSprint, cambiarEstado, velocidad, puntosDe, ESTADOS,
 } from '../nucleo/proyecto.js';
@@ -60,9 +64,31 @@ function planificar(app, sprint) {
           onchange: (e) => editarSprint({ capacidad: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }, true),
         }), velocidad(p) ? `Velocidad promedio: ${velocidad(p)} pts.` : 'Sin sprints anteriores: estima cuánto alcanzan a terminar.')),
       campo('Objetivo del sprint', h('input', {
-        type: 'text', value: sprint.objetivo, placeholder: 'Qué valor entregamos al terminar', maxlength: 300,
+        id: 'objetivo-sprint', type: 'text', value: sprint.objetivo, placeholder: 'Qué valor entregamos al terminar', maxlength: 300,
         oninput: (e) => editarSprint({ objetivo: e.target.value }),
-      }))),
+      })),
+      h('div', { class: 'acciones acciones--compactas' },
+        h('button', {
+          type: 'button', class: 'btn-texto', disabled: !resumen.historias,
+          title: resumen.historias ? null : 'Elige historias primero',
+          onclick: () => { const o = sugerirObjetivo(app.proyecto, sprint.id); if (o) editarSprint({ objetivo: o }, true); },
+        }, 'Sugerir un objetivo'),
+        iaConfigurada(app.ia) ? h('button', {
+          type: 'button', class: 'btn-texto', disabled: !resumen.historias,
+          onclick: async (e) => {
+            const boton = e.currentTarget;
+            boton.disabled = true;
+            boton.textContent = 'Pensando…';
+            try {
+              const hs = app.proyecto.historias.filter((x) => x.sprintId === sprint.id);
+              editarSprint({ objetivo: await objetivoConIa(app.ia, hs, `Proyecto: ${app.proyecto.nombre}`) }, true);
+            } catch (err) {
+              app.avisar(err.message, 'error');
+              boton.disabled = false;
+              boton.textContent = 'Sugerir con IA';
+            }
+          },
+        }, 'Sugerir con IA') : null)),
     h('section', { class: 'panel', 'aria-labelledby': 'elegir-historias' },
       h('div', { class: 'candidatas-cabecera' },
         h('h2', { id: 'elegir-historias' }, 'Historias del sprint'),
@@ -166,7 +192,23 @@ function tablero(app, sprint) {
       }, 'Cerrar sprint')),
     h('div', { class: 'compartir' },
       botonesMarkdown(app, 'Reporte del sprint', sprint.nombre, () => reporteSprint(app.proyecto, sprint.id)),
-      botonesMarkdown(app, 'Notas de versión', `notas-${sprint.nombre}`, () => notasDeVersion(app.proyecto, { sprintId: sprint.id }))));
+      botonesMarkdown(app, 'Notas de versión', `notas-${sprint.nombre}`, () => notasDeVersion(app.proyecto, { sprintId: sprint.id })),
+      iaConfigurada(app.ia) ? h('button', {
+        type: 'button', class: 'btn-texto', disabled: notasIa?.estado === 'corriendo',
+        onclick: async () => {
+          notasIa = { sprintId: sprint.id, estado: 'corriendo', texto: '', error: '' };
+          app.render();
+          try {
+            notasIa.texto = await notasConIa(app.ia, notasDeVersion(app.proyecto, { sprintId: sprint.id }));
+            notasIa.estado = 'lista';
+          } catch (err) {
+            notasIa.estado = 'error';
+            notasIa.error = err.message;
+          }
+          app.render();
+        },
+      }, 'Redactar notas con IA') : null),
+    notasIa?.sprintId === sprint.id ? panelNotasIa(app) : null);
 }
 
 /** Gráfico SVG accesible: línea ideal y real, con tabla equivalente para lectores de pantalla. */
@@ -227,4 +269,18 @@ function historial(app, cerrados) {
 function formatear(iso) {
   const [a, m, d] = String(iso).split('-');
   return a && m && d ? `${d}-${m}` : iso;
+}
+
+/** Notas de versión redactadas por la IA: se pueden editar antes de copiarlas. */
+function panelNotasIa(app) {
+  if (notasIa.estado === 'corriendo') return h('p', { class: 'revision-paso--pensando', role: 'status' }, 'Redactando las notas de versión…');
+  if (notasIa.estado === 'error') return h('p', { class: 'error', role: 'alert' }, notasIa.error);
+  const area = h('textarea', { rows: 12, 'aria-label': 'Notas de versión redactadas con IA', oninput: (e) => { notasIa.texto = e.target.value; } }, notasIa.texto);
+  return h('section', { class: 'panel', 'aria-label': 'Notas de versión con IA' },
+    h('h2', {}, 'Notas de versión (borrador de la IA)'),
+    h('p', { class: 'ayuda' }, 'Revísalas y corrígelas antes de publicarlas: la IA puede exagerar o equivocarse.'),
+    area,
+    h('div', { class: 'compartir' },
+      botonesMarkdown(app, 'Notas', 'notas-version', () => notasIa.texto),
+      h('button', { type: 'button', class: 'btn-texto', onclick: () => { notasIa = null; app.render(); } }, 'Cerrar')));
 }

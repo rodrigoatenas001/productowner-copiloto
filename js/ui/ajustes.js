@@ -4,6 +4,7 @@ import { normalizarProyecto } from '../nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, nombreArchivo, GUIA_JQL } from '../nucleo/exportar.js';
 import { PROVEEDORES, probarConexion, iaConfigurada } from '../ia.js';
 import { importarCsv } from '../nucleo/importar.js';
+import { repoGithub } from '../nucleo/issues.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteEpicas, notasDeVersion } from '../nucleo/reportes.js';
 import { definicionesDe, listaDesdeTexto, NOMBRES, DEFINICIONES_INICIALES } from '../nucleo/definiciones.js';
@@ -34,7 +35,16 @@ function seccionProyecto(app) {
       campo('Rol por defecto', h('input', {
         type: 'text', value: p.rolPorDefecto, maxlength: 120,
         onchange: (e) => app.cambiar((x) => ({ ...x, rolPorDefecto: e.target.value.trim() || 'usuario' }), { redibujar: false }),
-      }), 'Se usa cuando una nota no dice quién se beneficia.')),
+      }), 'Se usa cuando una nota no dice quién se beneficia.'),
+      campo('Repositorio de GitHub (opcional)', h('input', {
+        type: 'text', value: p.github || '', placeholder: 'dueño/repositorio', maxlength: 160,
+        onchange: (e) => {
+          const valor = e.target.value.trim();
+          const repo = repoGithub(valor);
+          if (valor && !repo) { app.avisar('Escríbelo como dueño/repositorio, por ejemplo antox/grc.', 'error'); return; }
+          app.cambiar((x) => ({ ...x, github: repo || '' }), { redibujar: false });
+        },
+      }), 'Para abrir cada historia como issue nueva en GitHub, ya completa.')),
     h('div', { class: 'acciones' },
       h('button', {
         type: 'button', class: 'btn-texto btn-peligro',

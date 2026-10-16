@@ -4,6 +4,7 @@ import { normalizarRetros } from './retro.js';
 import { DEFINICIONES_INICIALES, normalizarDefiniciones, normalizarChecks } from './definiciones.js';
 import { normalizarPriorizacion } from './priorizacion.js';
 import { normalizarOkr } from './okr.js';
+import { repoGithub } from './issues.js';
 
 export const VERSION_DATOS = 1;
 export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', done: 'Hecho' };
@@ -109,6 +110,7 @@ export function normalizarProyecto(datos) {
     id: texto(datos.id, 60) || nuevoId('p'),
     nombre: texto(datos.nombre, 120) || 'Proyecto importado',
     rolPorDefecto: texto(datos.rolPorDefecto, 120) || 'usuario',
+    github: repoGithub(datos.github) || '',
     notas: texto(datos.notas, 100000),
     historias,
     sprints,

@@ -1,6 +1,6 @@
 {
   "name": "copiloto-po",
-  "version": "0.7.0",
+  "version": "0.8.0",
   "description": "De tus notas a historias de usuario, backlog y sprints. Libre, sin cuentas y sin conexión.",
   "private": true,
   "type": "module",

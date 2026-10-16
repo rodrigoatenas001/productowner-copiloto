@@ -22,6 +22,8 @@ Pensado para Product Owners y equipos independientes que no quieren pagar una he
 - **Retrospectiva.** Notas anónimas en tres columnas, votos, acciones con responsable y revisión de las acciones pendientes de la retro anterior.
 - **Taller para cursos y equipos.** Trivia tipo Kahoot para proyectar (Scrum, PO, historias, estimación, Jira y agilidad; puntaje por rapidez y racha; preguntas propias por JSON) y ejercicios de historias de usuario sobre casos reales, con retroalimentación INVEST inmediata.
 - **Reportes en Markdown.** Reporte de sprint, avance por épica, retrospectiva y notas de versión, para copiar o descargar. Y la **especificación para agente**: una historia o épica lista para pegar en Claude Code, Antigravity o Cursor, con criterios, Definition of Done, lo que queda fuera de alcance e instrucciones para no implementar de más.
+- **Objetivo del sprint y notas de versión.** Borrador del objetivo a partir de las historias elegidas (con reglas o con IA) y notas de versión reescritas por la IA para usuarios finales, editables antes de publicar.
+- **GitHub y Linear.** Cada historia se abre como issue nueva, ya completa con criterios y DoD, con un clic (sin tokens: tú revisas y creas), o se copia en Markdown.
 - **Importar y exportar.** Trae tu backlog desde un CSV de Jira o Excel; exporta a Markdown, CSV para Excel y CSV para Jira con épicas enlazadas y sprints, más una guía rápida de JQL. Respaldo completo en JSON.
 - **IA opcional y tuya.** Funciona completo sin IA. Si quieres, conecta [Ollama](https://ollama.com) en tu equipo (gratis y privado) o tu propia clave de un servicio compatible con OpenAI o de Anthropic.
 

@@ -199,3 +199,27 @@ export async function redactarConIa(config, historia, observaciones) {
   const mensaje = `${textoHistoria(historia)}\n\nObservaciones de la revisión:\n${observaciones.map((o) => `- ${o}`).join('\n')}`;
   return extraerJson(await llamar(config, mensaje, { maxTokens: 1500, sistema: INSTRUCCIONES_REDACTOR }));
 }
+
+/** Objetivo del sprint en una frase, a partir de sus historias. */
+export async function objetivoConIa(config, historias, contexto = '') {
+  const sistema = `Eres un Product Owner senior que escribe en español de Chile.
+Escribe el objetivo del sprint en UNA frase (máximo 25 palabras): el valor que se entrega a alguien, no la lista de tareas.
+No inventes alcance. Responde SOLO con JSON válido: {"objetivo": ""}`;
+  const mensaje = `${contexto ? `${contexto}\n\n` : ''}Historias del sprint:\n${historias.map((h) => `- ${enunciado(h)}`).join('\n')}`;
+  const datos = extraerJson(await llamar(config, mensaje, { maxTokens: 300, sistema }));
+  const objetivo = typeof datos?.objetivo === 'string' ? datos.objetivo.trim().slice(0, 300) : '';
+  if (!objetivo) throw new Error('La IA no propuso un objetivo.');
+  return objetivo;
+}
+
+/** Reescribe las notas de versión para usuarios finales, en Markdown. */
+export async function notasConIa(config, borradorMarkdown, publico = 'usuarios del producto') {
+  const sistema = `Eres responsable de comunicación de producto y escribes en español de Chile.
+Reescribe estas notas de versión para ${publico}: tono cercano y claro, beneficios antes que funciones,
+sin jerga técnica, sin inventar nada que no esté en el borrador. Mantén los títulos por tema.
+Responde SOLO con JSON válido: {"markdown": ""}`;
+  const datos = extraerJson(await llamar(config, borradorMarkdown.slice(0, 15000), { maxTokens: 2500, sistema }));
+  const md = typeof datos?.markdown === 'string' ? datos.markdown.trim() : '';
+  if (!md) throw new Error('La IA no devolvió las notas.');
+  return md;
+}
