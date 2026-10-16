@@ -11,6 +11,8 @@ Pensado para Product Owners y equipos independientes que no quieren pagar una he
 - **Backlog priorizado.** El orden es la prioridad: arrastra o usa las flechas. Puntos (Fibonacci), prioridad MoSCoW, épicas con su avance y búsqueda.
 - **Estimar en equipo.** Planning poker en una sola pantalla: cada persona elige su carta sin ver las demás, se revelan juntas y el copiloto sugiere el valor o pide conversar si hay mucha diferencia.
 - **Sprints.** Capacidad, sugerencia automática según prioridad y capacidad, tablero Por hacer / En curso / Hecho, burndown y velocidad de los últimos sprints.
+- **Priorizar con números.** WSJF o RICE por historia, orden del backlog por puntaje (con deshacer) y matriz valor/esfuerzo: victorias rápidas, apuestas grandes, relleno y trampas de tiempo.
+- **Revisión en dos voces.** Una IA revisa como QA o desarrollo y otra corrige como PO; las reglas INVEST deciden si hace falta otra vuelta (máximo 2). Puedes usar dos IAs distintas, por ejemplo Ollama para redactar y una API para revisar. Ves la conversación, el antes y el después, y decides.
 - **Dividir y mejorar.** Las historias que piden varias cosas se dividen en un clic (por sus partes o con IA), y la IA puede proponer criterios de aceptación con casos de error.
 - **Deshacer y respaldo.** Eliminar, dividir o cerrar un sprint se puede deshacer, y el copiloto te recuerda descargar un respaldo cuando tienes trabajo sin respaldar.
 - **Definition of Ready y Done.** Listas del equipo, editables, que cada historia marca en el backlog y en el tablero; avisa si algo pasa a Hecho sin cumplir la DoD.

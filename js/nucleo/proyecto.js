@@ -2,6 +2,7 @@
 import { nuevoId, ESCALA_PUNTOS, PRIORIDADES } from './historias.js';
 import { normalizarRetros } from './retro.js';
 import { DEFINICIONES_INICIALES, normalizarDefiniciones, normalizarChecks } from './definiciones.js';
+import { normalizarPriorizacion } from './priorizacion.js';
 
 export const VERSION_DATOS = 1;
 export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', done: 'Hecho' };
@@ -97,6 +98,7 @@ export function normalizarProyecto(datos) {
     creada: texto(h.creada, 40) || new Date().toISOString(),
     terminada: texto(h.terminada, 40) || null,
     checks: normalizarChecks(h.checks),
+    priorizacion: normalizarPriorizacion(h.priorizacion),
   }));
 
   return {

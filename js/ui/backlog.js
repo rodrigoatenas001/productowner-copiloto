@@ -7,12 +7,13 @@ import { revisarEnDosVoces, llamadasMaximas } from '../nucleo/dosvoces.js';
 import { editorHistoria, insigniaCalidad, listaVerificacion } from './historia.js';
 import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
+import { vistaPriorizar } from './priorizar.js';
 import { botonesMarkdown } from './compartir.js';
 import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../nucleo/reportes.js';
 
 const filtros = { texto: '', epica: '' };
 let revision = null; // { historiaId, pasos, estado: 'corriendo'|'lista'|'error', resultado, error }
-let modo = 'lista'; // 'lista' | 'epicas' | 'mapa' | 'estimar'
+let modo = 'lista'; // 'lista' | 'epicas' | 'mapa' | 'estimar' | 'priorizar'
 let abierta = null;
 let arrastrando = null;
 
@@ -105,13 +106,14 @@ export function vistaBacklog(app) {
       h('h1', {}, 'Backlog'),
       h('p', { class: 'bajada' }, 'Arriba lo más importante. Arrastra para reordenar o usa las flechas.')),
     h('div', { class: 'pestanas', role: 'tablist', 'aria-label': 'Vista del backlog' },
-      Object.entries({ lista: 'Lista priorizada', epicas: 'Épicas', mapa: 'Mapa', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
+      Object.entries({ lista: 'Lista priorizada', priorizar: 'Priorizar', epicas: 'Épicas', mapa: 'Mapa', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
         type: 'button', role: 'tab', 'aria-selected': String(modo === m), class: 'pestana',
         onclick: () => { modo = m; app.render(); },
       }, texto))),
     modo === 'epicas' ? vistaEpicas(app) : null,
     modo === 'estimar' ? vistaEstimar(app) : null,
     modo === 'mapa' ? vistaMapa(app) : null,
+    modo === 'priorizar' ? vistaPriorizar(app) : null,
     modo !== 'lista' ? null : h('dl', { class: 'cifras' },
       cifra('Historias', backlog.length),
       cifra('Puntos estimados', puntosDe(backlog)),

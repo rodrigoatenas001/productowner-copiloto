@@ -337,6 +337,28 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 @media (max-width: 720px) { .comparacion { grid-template-columns: 1fr; } .revision-paso { grid-template-columns: 1fr; } .revision-paso > ul { grid-column: 1; } }
 @media (prefers-reduced-motion: reduce) { .revision-paso--pensando { animation: none; } }
 
+/* Priorizar */
+.pestanas { flex-wrap: wrap; }
+.pestanas--chicas { margin: 0; }
+.tabla-priorizar th[scope="row"] { font: 600 .92rem var(--f-texto); text-transform: none; letter-spacing: 0; color: var(--texto); min-width: 200px; }
+.tabla-priorizar select, .tabla-priorizar input { min-width: 70px; padding: 6px 8px; }
+.tabla-priorizar thead th { white-space: normal; min-width: 90px; }
+.puntaje-celda { font: 700 1.05rem var(--f-display); font-variant-numeric: tabular-nums; text-align: right; }
+.matriz-panel { margin-top: 20px; }
+.matriz { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; position: relative; padding: 0 0 22px 22px; }
+.matriz-eje { position: absolute; font: 500 .72rem var(--f-mono); color: var(--pizarra); }
+.matriz-eje--y { left: -4px; top: 0; writing-mode: vertical-rl; transform: rotate(180deg); }
+.matriz-eje--x { right: 0; bottom: 0; }
+.cuadrante { border-radius: var(--radio); padding: 12px 14px; min-height: 120px; border: 1px solid var(--niebla); }
+.cuadrante h3 { margin: 0; display: flex; justify-content: space-between; align-items: center; font-size: .95rem; }
+.cuadrante .ayuda { margin: 2px 0 8px; font-size: .8rem; }
+.cuadrante ul { margin: 0; padding-left: 18px; font-size: .88rem; display: grid; gap: 2px; }
+.cuadrante--rapida { background: var(--bosque-suave); }
+.cuadrante--grande { background: var(--cobre-suave); }
+.cuadrante--relleno { background: var(--papel); }
+.cuadrante--trampa { background: var(--alerta-suave); }
+@media (max-width: 640px) { .matriz { grid-template-columns: 1fr; } }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }
