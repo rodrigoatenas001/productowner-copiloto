@@ -319,6 +319,24 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .compartir-etiqueta::after { content: ":"; }
 .tabla .compartir-md { display: flex; }
 
+/* Revisión en dos voces */
+.revision { margin: 16px 0 0; padding: 14px 16px; border: 1px solid var(--niebla); border-radius: var(--radio); background: var(--papel); }
+.revision h3 { margin: 0 0 10px; }
+.revision-pasos { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.revision-paso { display: grid; grid-template-columns: 110px minmax(0, 1fr); gap: 2px 10px; align-items: baseline; }
+.revision-paso > ul { grid-column: 2; margin: 2px 0 0; padding-left: 18px; font-size: .9rem; color: var(--pizarra); }
+.revision-voz { font: 600 .72rem var(--f-mono); letter-spacing: .06em; text-transform: uppercase; }
+.revision-paso--revisor .revision-voz { color: #1f5fa8; }
+.revision-paso--redactor .revision-voz { color: var(--cobre-texto); }
+.revision-paso--reglas .revision-voz { color: var(--ambar-texto); }
+.revision-paso--pensando { color: var(--pizarra); animation: latido 1.2s ease-in-out infinite; }
+@keyframes latido { 50% { opacity: .45; } }
+.comparacion { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-top: 14px; }
+.comparacion ul { margin: 0; padding-left: 18px; font-size: .88rem; }
+.comparacion > div:last-child .enunciado { border-left-color: var(--bosque); }
+@media (max-width: 720px) { .comparacion { grid-template-columns: 1fr; } .revision-paso { grid-template-columns: 1fr; } .revision-paso > ul { grid-column: 1; } }
+@media (prefers-reduced-motion: reduce) { .revision-paso--pensando { animation: none; } }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }

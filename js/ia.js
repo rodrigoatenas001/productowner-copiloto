@@ -165,3 +165,37 @@ export async function dividirConIa(config, historia) {
   if (partes.length < 2) throw new Error('La IA no encontró cómo dividirla.');
   return partes;
 }
+
+const INSTRUCCIONES_REVISOR = `Eres una persona senior de QA y desarrollo en una sesión de refinamiento. Escribes en español de Chile.
+Revisa la historia de usuario y sus criterios de aceptación como lo haría quien tiene que construirla y probarla:
+- ambigüedades o palabras que no se pueden medir,
+- casos borde o de error que faltan en los criterios,
+- criterios que no se pueden verificar,
+- si es demasiado grande o mezcla varias cosas,
+- si el beneficio ("para") no se entiende.
+Máximo 5 observaciones, concretas y accionables. No reescribas la historia.
+Si está lista para construirse, responde aprobada true y sin observaciones.
+Responde SOLO con JSON válido: {"aprobada": false, "observaciones": [""]}`;
+
+const INSTRUCCIONES_REDACTOR = `Eres un Product Owner senior que escribe en español de Chile.
+Corrige la historia de usuario atendiendo las observaciones de la revisión.
+Reglas: mantén el mismo alcance (no agregues funcionalidades nuevas); "quiero" empieza con verbo en infinitivo;
+"para" es el beneficio real; 2 a 5 criterios "Dado…, cuando…, entonces…" que incluyan al menos un caso de error.
+Responde SOLO con JSON válido: {"rol": "", "quiero": "", "para": "", "criterios": [""]}`;
+
+const textoHistoria = (h) => `Historia: ${enunciado(h)}\nCriterios de aceptación:\n${(h.criterios || []).map((c) => `- ${c}`).join('\n') || '(ninguno)'}`;
+
+/** Voz revisora: crítica, sin reescribir. */
+export async function revisarConIa(config, historia) {
+  const datos = extraerJson(await llamar(config, textoHistoria(historia), { maxTokens: 900, sistema: INSTRUCCIONES_REVISOR }));
+  return {
+    aprobada: datos?.aprobada === true,
+    observaciones: (Array.isArray(datos?.observaciones) ? datos.observaciones : []).filter((o) => typeof o === 'string').map((o) => o.trim().slice(0, 400)),
+  };
+}
+
+/** Voz redactora: corrige con las observaciones. */
+export async function redactarConIa(config, historia, observaciones) {
+  const mensaje = `${textoHistoria(historia)}\n\nObservaciones de la revisión:\n${observaciones.map((o) => `- ${o}`).join('\n')}`;
+  return extraerJson(await llamar(config, mensaje, { maxTokens: 1500, sistema: INSTRUCCIONES_REDACTOR }));
+}

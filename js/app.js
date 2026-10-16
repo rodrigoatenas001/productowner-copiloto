@@ -25,6 +25,7 @@ const app = {
   vista: 'notas',
   candidatos: [],
   ia: { proveedor: 'ninguno' },
+  iaRevisor: { proveedor: 'misma' },
   preguntasPropias: [],
   avisar,
 
@@ -90,10 +91,17 @@ const app = {
     await guardarAjuste('preguntasPropias', lista);
   },
 
-  async guardarIa(config) {
-    this.ia = config;
-    await guardarAjuste('ia', config);
+  /** Guarda la configuración de la IA principal ('ia') o de la revisora ('iaRevisor'). */
+  async guardarIa(config, clave = 'ia') {
+    this[clave] = config;
+    await guardarAjuste(clave, config);
   },
+
+  /** IA que hace de revisora: la propia si está configurada, si no la principal. */
+  configRevisor() {
+    return this.iaRevisor?.proveedor && this.iaRevisor.proveedor !== 'misma' ? this.iaRevisor : this.ia;
+  },
+
 
   ir(vista) {
     if (!VISTAS[vista]) return;
@@ -197,6 +205,7 @@ async function iniciar() {
   try {
     app.proyectos = await listarProyectos();
     app.ia = (await leerAjuste('ia')) || { proveedor: 'ninguno' };
+    app.iaRevisor = (await leerAjuste('iaRevisor')) || { proveedor: 'misma' };
     app.preguntasPropias = (await leerAjuste('preguntasPropias')) || [];
     if (!app.proyectos.length) {
       const p = nuevoProyecto('Mi proyecto');

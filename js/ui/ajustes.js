@@ -2,7 +2,7 @@
 import { h, campo, selector, descargar } from './dom.js';
 import { normalizarProyecto } from '../nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, nombreArchivo, GUIA_JQL } from '../nucleo/exportar.js';
-import { PROVEEDORES, probarConexion } from '../ia.js';
+import { PROVEEDORES, probarConexion, iaConfigurada } from '../ia.js';
 import { importarCsv } from '../nucleo/importar.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteEpicas, notasDeVersion } from '../nucleo/reportes.js';
@@ -18,6 +18,7 @@ export function vistaAjustes(app) {
     seccionDefiniciones(app),
     seccionRespaldo(app),
     seccionIa(app),
+    iaConfigurada(app.ia) ? seccionIa(app, 'iaRevisor') : null,
     seccionAcerca());
 }
 
@@ -98,18 +99,22 @@ function seccionRespaldo(app) {
         }, 'Copiar'))))));
 }
 
-function seccionIa(app) {
-  const c = { proveedor: 'ninguno', ...app.ia };
+function seccionIa(app, clave = 'ia') {
+  const esRevisor = clave === 'iaRevisor';
+  const c = { proveedor: esRevisor ? 'misma' : 'ninguno', ...app[clave] };
+  const opciones = esRevisor
+    ? { misma: 'La misma IA de arriba', ...Object.fromEntries(Object.entries(PROVEEDORES).filter(([k]) => k !== 'ninguno').map(([k, v]) => [k, v.nombre])) }
+    : Object.fromEntries(Object.entries(PROVEEDORES).map(([k, v]) => [k, v.nombre]));
   const def = PROVEEDORES[c.proveedor] || PROVEEDORES.ninguno;
   const estado = h('p', { class: 'ayuda', 'aria-live': 'polite' });
 
   const guardar = async (cambios, redibujar = false) => {
-    await app.guardarIa({ ...c, ...cambios });
+    await app.guardarIa({ ...c, ...cambios }, clave);
     if (redibujar) app.render();
   };
 
   const campos = [];
-  if (c.proveedor !== 'ninguno') {
+  if (c.proveedor !== 'ninguno' && c.proveedor !== 'misma') {
     campos.push(h('div', { class: 'editor-fila' },
       campo('Dirección', h('input', { type: 'url', value: c.url || def.url, onchange: (e) => guardar({ url: e.target.value.trim() }) })),
       campo('Modelo', h('input', { type: 'text', value: c.modelo || def.modelo, onchange: (e) => guardar({ modelo: e.target.value.trim() }) }))));
@@ -143,12 +148,15 @@ function seccionIa(app) {
       }, 'Probar conexión')), estado);
   }
 
-  return h('section', { class: 'panel', 'aria-labelledby': 'aj-ia' },
-    h('h2', { id: 'aj-ia' }, 'IA (opcional)'),
-    h('p', { class: 'ayuda' }, 'El copiloto funciona completo sin IA. Si conectas una, la usarás con el botón "Convertir con IA" en Notas. No tenemos servidor: la conexión es directa entre tu navegador y el servicio que elijas.'),
-    campo('Servicio', selector(Object.fromEntries(Object.entries(PROVEEDORES).map(([k, v]) => [k, v.nombre])), c.proveedor, {
+  const id = esRevisor ? 'aj-ia-revisor' : 'aj-ia';
+  return h('section', { class: 'panel', 'aria-labelledby': id },
+    h('h2', { id }, esRevisor ? 'IA revisora (opcional)' : 'IA (opcional)'),
+    h('p', { class: 'ayuda' }, esRevisor
+      ? 'En "Revisar en dos voces", una IA revisa la historia como lo haría QA o desarrollo y la principal la corrige. Dos modelos distintos se equivocan de formas distintas: por ejemplo, Ollama redacta gratis y una API revisa.'
+      : 'El copiloto funciona completo sin IA. Si conectas una, la usarás en Notas y en el Backlog. No tenemos servidor: la conexión es directa entre tu navegador y el servicio que elijas.'),
+    campo('Servicio', selector(opciones, c.proveedor, {
       onchange: (e) => {
-        const nuevo = PROVEEDORES[e.target.value];
+        const nuevo = PROVEEDORES[e.target.value] || {};
         guardar({ proveedor: e.target.value, url: nuevo.url || '', modelo: nuevo.modelo || '', clave: e.target.value === c.proveedor ? c.clave : '' }, true);
       },
     })),

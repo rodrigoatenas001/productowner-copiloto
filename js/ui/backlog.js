@@ -1,8 +1,9 @@
 // Backlog priorizado: el orden es la prioridad. Se reordena arrastrando o con los botones.
 import { h, selector } from './dom.js';
 import { mover, puntosDe, resumenEpicas, mapaHistorias, moverEnMapa } from '../nucleo/proyecto.js';
-import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest } from '../nucleo/historias.js';
-import { iaConfigurada, criteriosConIa, dividirConIa } from '../ia.js';
+import { calidad, nuevoId, PRIORIDADES, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest, enunciado } from '../nucleo/historias.js';
+import { iaConfigurada, criteriosConIa, dividirConIa, revisarConIa, redactarConIa, nombreProveedor } from '../ia.js';
+import { revisarEnDosVoces, llamadasMaximas } from '../nucleo/dosvoces.js';
 import { editorHistoria, insigniaCalidad, listaVerificacion } from './historia.js';
 import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
@@ -10,6 +11,7 @@ import { botonesMarkdown } from './compartir.js';
 import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../nucleo/reportes.js';
 
 const filtros = { texto: '', epica: '' };
+let revision = null; // { historiaId, pasos, estado: 'corriendo'|'lista'|'error', resultado, error }
 let modo = 'lista'; // 'lista' | 'epicas' | 'mapa' | 'estimar'
 let abierta = null;
 let arrastrando = null;
@@ -71,6 +73,7 @@ export function vistaBacklog(app) {
       listaVerificacion(historia, definicionesDe(app.proyecto).ready, 'ready', (item, valor) => app.cambiar((x) => ({
         ...x, historias: x.historias.map((y) => (y.id === historia.id ? marcar(y, 'ready', item, valor) : y)),
       }), { redibujar: false })),
+      revision?.historiaId === historia.id ? panelRevision(app, historia) : null,
       h('div', { class: 'compartir' },
         botonesMarkdown(app, 'Especificación para agente', `spec-${historia.titulo}`, () => especificacionHistoria(app.proyecto, historia.id))),
       h('div', { class: 'acciones' },
@@ -187,6 +190,13 @@ function accionesInteligentes(app, historia) {
       `Dividir en ${porReglas.length}`));
   }
   if (conIa) {
+    const revisora = app.configRevisor();
+    botones.push(h('button', {
+      type: 'button', class: 'btn btn--secundario',
+      title: `Revisa ${nombreProveedor(revisora)} y corrige ${nombreProveedor(app.ia)}. Hasta ${llamadasMaximas()} llamadas.`,
+      disabled: revision?.estado === 'corriendo',
+      onclick: () => iniciarRevision(app, historia),
+    }, 'Revisar en dos voces'));
     botones.push(h('button', {
       type: 'button', class: 'btn btn--secundario',
       onclick: (e) => ocupado(e.currentTarget, 'Escribiendo…', async () => {
@@ -253,4 +263,57 @@ function vistaMapa(app) {
         h('tbody', {}, filas.map((fila) => h('tr', { class: `mapa-fila mapa-fila--${fila.prioridad}` },
           h('th', { scope: 'row' }, fila.nombre, h('span', { class: 'tarjeta-meta' }, `${fila.puntos} pts pendientes`)),
           epicas.map((e) => celda(fila, e))))))));
+}
+
+async function iniciarRevision(app, historia) {
+  revision = { historiaId: historia.id, pasos: [], estado: 'corriendo', resultado: null, error: null };
+  app.render();
+  try {
+    revision.resultado = await revisarEnDosVoces(historia, {
+      revisar: (h) => revisarConIa(app.configRevisor(), h),
+      redactar: (h, obs) => redactarConIa(app.ia, h, obs),
+      alPaso: (paso) => { if (revision?.historiaId === historia.id) { revision.pasos.push(paso); app.render(); } },
+    });
+    if (revision?.historiaId === historia.id) revision.estado = 'lista';
+  } catch (err) {
+    if (revision?.historiaId === historia.id) { revision.estado = 'error'; revision.error = err.message; }
+  }
+  app.render();
+}
+
+const VOCES = { revisor: 'Revisor', redactor: 'Redactor', reglas: 'Reglas INVEST' };
+
+/** Conversación entre las dos voces y, al final, la comparación para aceptar o descartar. */
+function panelRevision(app, historia) {
+  const r = revision;
+  const cerrar = () => { revision = null; app.render(); };
+  const resultado = r.resultado;
+
+  return h('section', { class: 'revision', 'aria-label': 'Revisión en dos voces', 'aria-busy': String(r.estado === 'corriendo') },
+    h('h3', {}, 'Revisión en dos voces'),
+    h('ol', { class: 'revision-pasos' },
+      r.pasos.map((p) => h('li', { class: `revision-paso revision-paso--${p.voz}` },
+        h('span', { class: 'revision-voz' }, VOCES[p.voz]),
+        h('span', {}, p.texto),
+        p.detalle?.length ? h('ul', {}, p.detalle.map((d) => h('li', {}, d))) : null)),
+      r.estado === 'corriendo' ? h('li', { class: 'revision-paso revision-paso--pensando' }, h('span', { class: 'revision-voz' }, '…'), 'Pensando') : null),
+    r.estado === 'error' ? h('p', { class: 'error', role: 'alert' }, r.error) : null,
+    r.estado === 'lista' && resultado ? h('div', {},
+      resultado.cambio ? h('div', { class: 'comparacion' },
+        h('div', {}, h('p', { class: 'eyebrow' }, 'Antes'), h('p', { class: 'enunciado' }, enunciado(historia)), h('ul', {}, historia.criterios.map((c) => h('li', {}, c)))),
+        h('div', {}, h('p', { class: 'eyebrow' }, 'Después'), h('p', { class: 'enunciado' }, enunciado(resultado.final)), h('ul', {}, resultado.final.criterios.map((c) => h('li', {}, c)))))
+        : h('p', {}, 'No hubo cambios que proponer.'),
+      h('p', { class: 'ayuda' }, `${resultado.llamadas} ${resultado.llamadas === 1 ? 'llamada' : 'llamadas'} a la IA.`)) : null,
+    h('div', { class: 'acciones' },
+      r.estado === 'lista' && resultado?.cambio ? h('button', {
+        type: 'button', class: 'btn btn--cobre',
+        onclick: () => {
+          const { rol, quiero, para, criterios, titulo } = resultado.final;
+          revision = null;
+          app.cambiarConDeshacer('Cambios de la revisión aplicados.', (x) => ({
+            ...x, historias: x.historias.map((y) => (y.id === historia.id ? { ...y, rol, quiero, para, criterios, titulo } : y)),
+          }));
+        },
+      }, 'Aceptar cambios') : null,
+      r.estado !== 'corriendo' ? h('button', { type: 'button', class: 'btn-texto', onclick: cerrar }, resultado?.cambio ? 'Descartar' : 'Cerrar') : null));
 }
