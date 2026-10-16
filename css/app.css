@@ -381,6 +381,17 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .pronostico-linea { margin: 0; font-size: .9rem; display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; }
 .pronostico-linea .eyebrow { margin: 0; }
 
+/* Roadmap */
+.roadmap textarea { min-height: 3em; }
+.roadmap-columnas .columna { min-height: 200px; }
+.roadmap-columnas .columna > .ayuda { margin: -4px 0 10px; font-size: .8rem; }
+.roadmap-columna--ahora { border-top: 3px solid var(--cobre); }
+.roadmap-columna--siguiente { border-top: 3px solid #1f5fa8; }
+.roadmap-columna--despues { border-top: 3px solid var(--niebla); }
+.roadmap-epica { background: var(--superficie); border: 1px solid var(--niebla); border-radius: 8px; padding: 10px 12px; display: grid; gap: 6px; }
+.roadmap-epica .tarjeta-meta { margin: 0; }
+.roadmap-mover { font-size: .82rem; padding: 4px 8px; }
+
 /* Sprint */
 .capacidad { margin: 4px 0 14px; }
 .capacidad p { margin: 6px 0 0; font-size: .88rem; color: var(--pizarra); }

@@ -4,7 +4,8 @@ import { enunciado, revisarInvest, PRIORIDADES } from './historias.js';
 import { ESTADOS, resumenSprint, burndown, puntosDe, resumenEpicas, velocidad } from './proyecto.js';
 import { definicionesDe, avance } from './definiciones.js';
 import { COLUMNAS_RETRO, notasDe } from './retro.js';
-import { infoEpica, hipotesis, resultadosDeEpica, cobertura } from './okr.js';
+import { infoEpica, hipotesis, resultadosDeEpica, cobertura, RESULTADOS_HIPOTESIS } from './okr.js';
+import { roadmap, visionDe, HORIZONTES } from './roadmap.js';
 
 const fecha = (iso) => String(iso || '').slice(0, 10).split('-').reverse().join('-');
 const lista = (items, vacio = '_Nada._') => (items.length ? items : [vacio]);
@@ -246,4 +247,29 @@ function contextoNegocio(proyecto, epica) {
     h ? `**Hipótesis:** ${h}` : null,
     krs.length ? `**Aporta a:** ${krs.map((r) => `${r.texto} (${r.objetivo})`).join('; ')}` : null,
   ].filter(Boolean);
+}
+
+/** Roadmap en Markdown: visión, objetivo y épicas por horizonte. */
+export function reporteRoadmap(proyecto, hoy = new Date()) {
+  const v = visionDe(proyecto);
+  const r = roadmap(proyecto, hoy);
+  const epica = (e) => [
+    `### ${e.epica} · ${e.avance}%`,
+    '',
+    e.pronostico ? `- Pronóstico: ${e.pronostico}` : null,
+    e.resultados.length ? `- Aporta a: ${e.resultados.map((x) => x.texto).join('; ')}` : null,
+    e.hipotesis ? `- Hipótesis: ${e.hipotesis} _(${RESULTADOS_HIPOTESIS[e.resultadoHipotesis].toLowerCase()})_` : null,
+    '',
+  ].filter((l) => l !== null);
+  return [
+    `# ${proyecto.nombre} · Roadmap`,
+    '',
+    v.vision ? `**Visión:** ${v.vision}` : null,
+    v.objetivoProducto ? `**Objetivo del Producto:** ${v.objetivoProducto}` : null,
+    '',
+    ...Object.entries(HORIZONTES).flatMap(([clave, x]) => [`## ${x.nombre}`, '', ...(r[clave].length ? r[clave].flatMap(epica) : ['_Sin épicas._', ''])]),
+    r.terminadas.length ? `**Terminado:** ${r.terminadas.map((e) => e.epica).join(', ')}.` : null,
+    '',
+    `_Generado con Copiloto PO el ${fecha(new Date(hoy).toISOString())}. Las fechas son un pronóstico con la velocidad real, no un compromiso._`,
+  ].filter((l) => l !== null).join('\n');
 }

@@ -4,6 +4,14 @@ import { nuevoId } from './historias.js';
 
 const txt = (v, max) => (typeof v === 'string' ? v.trim().slice(0, max) : '');
 
+/** Cómo resultó la hipótesis de una épica, una vez medida. */
+export const RESULTADOS_HIPOTESIS = {
+  pendiente: 'Por medir',
+  cumplida: 'Se cumplió',
+  parcial: 'Se cumplió en parte',
+  no: 'No se cumplió',
+};
+
 export function agregarObjetivo(proyecto, texto) {
   const objetivo = txt(texto, 200);
   if (!objetivo) return proyecto;
@@ -39,7 +47,10 @@ function limpiarVinculos(proyecto, quitados) {
 /** Datos de una épica (hipótesis y resultados clave vinculados). */
 export function infoEpica(proyecto, epica) {
   const i = (proyecto.epicasInfo || {})[epica] || {};
-  return { creemos: i.creemos || '', lograremos: i.lograremos || '', veremos: i.veremos || '', resultados: i.resultados || [] };
+  return {
+    creemos: i.creemos || '', lograremos: i.lograremos || '', veremos: i.veremos || '', resultados: i.resultados || [],
+    horizonte: i.horizonte || '', resultadoHipotesis: i.resultadoHipotesis || 'pendiente', datoReal: i.datoReal || '',
+  };
 }
 
 export function editarEpica(proyecto, epica, cambios) {
@@ -90,6 +101,9 @@ export function normalizarOkr(objetivos, epicasInfo) {
     info[nombre] = {
       creemos: txt(i.creemos, 300), lograremos: txt(i.lograremos, 300), veremos: txt(i.veremos, 300),
       resultados: (Array.isArray(i.resultados) ? i.resultados : []).filter((r) => ids.has(r)),
+      horizonte: ['ahora', 'siguiente', 'despues'].includes(i.horizonte) ? i.horizonte : '',
+      resultadoHipotesis: Object.hasOwn(RESULTADOS_HIPOTESIS, i.resultadoHipotesis) ? i.resultadoHipotesis : 'pendiente',
+      datoReal: txt(i.datoReal, 300),
     };
   }
   return { objetivos: lista, epicasInfo: info };
