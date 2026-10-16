@@ -9,7 +9,11 @@ De tus notas a historias de usuario, backlog y sprints. Libre (MIT), sin cuentas
 
 **[Ábrelo en línea](https://rodrigoatenas001.github.io/productowner-copiloto/)** · **[Descárgalo para usarlo en tu equipo](https://github.com/rodrigoatenas001/productowner-copiloto/releases/latest)**
 
-Pensado para **Product Owners independientes**: una persona que trabaja con uno o varios clientes, a veces con un par de desarrolladores, y que no necesita (ni quiere pagar) una herramienta corporativa como Jira para ordenar el trabajo y mostrar avance. Es parte de la comunidad de [ProductOwner.cl](https://productowner.cl).
+Pensado para **Product Owners independientes**: una persona que trabaja con uno o varios clientes, a veces con un par de desarrolladores, y que no necesita (ni quiere pagar) una herramienta corporativa como Jira para ordenar el trabajo y mostrar avance. Es parte de la comunidad de [ProductOwner.cl](https://productowner.cl), donde profesionales TI independientes y clientes se encuentran.
+
+> **Versión inicial.** Al abrirlo verás qué es, qué no es y sus límites, un proyecto de ejemplo con un recorrido de 4 pasos y una encuesta corta en **Comentar**. Es libre porque queremos que crezca con lo que aportan quienes lo usan: [deja tu comentario](https://github.com/rodrigoatenas001/productowner-copiloto/issues/new?template=comentario.md) aunque sea para decir que no te calza.
+
+![Inicio de Copiloto PO: qué es, cómo empezar con un ejemplo, tus notas o una plantilla](docs/img/captura-inicio.png)
 
 ## Qué hace, etapa por etapa
 
@@ -59,7 +63,7 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 
 ## Así se ve
 
-Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/ejemplo/pasteleria-carla.json), que puedes importar desde Ajustes → Importar respaldo para probarlo.
+Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/ejemplo/pasteleria-carla.json), que puedes abrir desde Inicio → Ver el ejemplo (o importarlo desde Ajustes → Importar respaldo).
 
 | | |
 |---|---|

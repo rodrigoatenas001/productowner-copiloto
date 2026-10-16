@@ -5,6 +5,7 @@ import { join } from 'node:path';
 import { servir, abrir, pausa, RAIZ } from './navegador.mjs';
 
 const CAPTURAS = [
+  { archivo: 'captura-inicio.png', vista: 'inicio', pasos: '' },
   { archivo: 'captura-backlog.png', vista: 'backlog', pasos: '' },
   { archivo: 'captura-cliente.png', vista: 'cliente', pasos: 'pestana("Hitos de pago")' },
   { archivo: 'captura-roadmap.png', vista: 'backlog', pasos: 'pestana("Roadmap")' },
@@ -41,6 +42,7 @@ try {
       location.hash = '${c.vista}'; await pausa(500);
       ${c.pasos ? `await ${c.pasos};` : ''}
       document.getElementById('avisos').replaceChildren();
+      document.querySelectorAll('.caja-info, .aviso-ejemplo').forEach((x) => x.remove());
       window.scrollTo(0, 0); await pausa(200);
     })()`);
     const { data } = await navegador.enviar('Page.captureScreenshot', { format: 'png', clip: { x: 0, y: 0, width: 1280, height: 820, scale: 1 } });

@@ -1,12 +1,12 @@
 {
   "version": 1,
-  "id": "p-mvaz7q88-1x4fc",
-  "nombre": "Pastelería de Carla",
+  "id": "ejemplo-pasteleria",
+  "nombre": "Pastelería de Carla (ejemplo)",
   "rolPorDefecto": "clienta",
-  "notas": "",
+  "notas": "Reunión con Carla (pastelería, Ñuñoa)\n- Hoy todo llega por Instagram y WhatsApp, se le pierden pedidos\n- Quiere que vean las tortas con precio y si quedan\n- Que paguen en línea, con tarjeta, y si se puede en cuotas para eventos\n- Despacho solo en Ñuñoa y Providencia, o retiro en tienda\n- Le gustaría premiar a las clientas frecuentes\n- Necesita saber qué se vende más para hornear mejor\n- Pregunta por boletas electrónicas automáticas (no sabe cómo)\n- Presupuesto acotado, quiere partir antes de fiestas patrias",
   "historias": [
     {
-      "id": "h-mvaz7q89-2lhlg",
+      "id": "h-mvb076tc-2jlci",
       "titulo": "Ver el detalle de cada producto antes de…",
       "rol": "clienta",
       "quiero": "ver el detalle de cada producto antes de comprarlo",
@@ -20,13 +20,13 @@
       "estado": "done",
       "sprintId": "s1",
       "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
-      "creada": "2026-10-16T13:01:11.433Z",
-      "iniciada": "2026-09-19T13:01:11.430Z",
-      "terminada": "2026-09-22T13:01:11.430Z",
+      "creada": "2026-10-16T13:28:45.888Z",
+      "iniciada": "2026-09-19T13:28:45.886Z",
+      "terminada": "2026-09-22T13:28:45.886Z",
       "bloqueo": null
     },
     {
-      "id": "h-mvaz7q89-351j1",
+      "id": "h-mvb076tc-3hm0j",
       "titulo": "Buscar y filtrar por categoría",
       "rol": "clienta",
       "quiero": "buscar y filtrar por categoría",
@@ -40,13 +40,13 @@
       "estado": "done",
       "sprintId": "s1",
       "notaOriginal": "Como clienta, quiero buscar y filtrar por categoría, para encontrar rápido lo que busco",
-      "creada": "2026-10-16T13:01:11.433Z",
-      "iniciada": "2026-09-22T13:01:11.430Z",
-      "terminada": "2026-09-29T13:01:11.430Z",
+      "creada": "2026-10-16T13:28:45.888Z",
+      "iniciada": "2026-09-22T13:28:45.886Z",
+      "terminada": "2026-09-29T13:28:45.886Z",
       "bloqueo": null
     },
     {
-      "id": "h-mvaz7q89-48vea",
+      "id": "h-mvb076tc-4667p",
       "titulo": "Agregar productos al carro y ver el total…",
       "rol": "clienta",
       "quiero": "agregar productos al carro y ver el total con despacho",
@@ -60,13 +60,13 @@
       "estado": "done",
       "sprintId": "s2",
       "notaOriginal": "Como clienta, quiero agregar productos al carro y ver el total con despacho, para saber cuánto pagaré",
-      "creada": "2026-10-16T13:01:11.433Z",
-      "iniciada": "2026-10-03T13:01:11.430Z",
-      "terminada": "2026-10-07T13:01:11.430Z",
+      "creada": "2026-10-16T13:28:45.888Z",
+      "iniciada": "2026-10-03T13:28:45.886Z",
+      "terminada": "2026-10-07T13:28:45.886Z",
       "bloqueo": null
     },
     {
-      "id": "h-mvaz7q89-51jha",
+      "id": "h-mvb076tc-5tixd",
       "titulo": "Pagar con tarjeta o transferencia",
       "rol": "clienta",
       "quiero": "pagar con tarjeta o transferencia",
@@ -80,13 +80,13 @@
       "estado": "doing",
       "sprintId": "s3",
       "notaOriginal": "Como clienta, quiero pagar con tarjeta o transferencia, para comprar sin salir de la tienda",
-      "creada": "2026-10-16T13:01:11.433Z",
-      "iniciada": "2026-10-16T13:01:11.430Z",
+      "creada": "2026-10-16T13:28:45.888Z",
+      "iniciada": "2026-10-16T13:28:45.886Z",
       "terminada": null,
       "bloqueo": null
     },
     {
-      "id": "h-mvaz7q89-6ap4e",
+      "id": "h-mvb076td-6ubq2",
       "titulo": "Recibir un correo con el detalle de mi…",
       "rol": "clienta",
       "quiero": "recibir un correo con el detalle de mi compra",
@@ -100,16 +100,16 @@
       "estado": "doing",
       "sprintId": "s3",
       "notaOriginal": "Como clienta, quiero recibir un correo con el detalle de mi compra, para tener un respaldo",
-      "creada": "2026-10-16T13:01:11.433Z",
-      "iniciada": "2026-10-16T13:01:11.430Z",
+      "creada": "2026-10-16T13:28:45.889Z",
+      "iniciada": "2026-10-16T13:28:45.886Z",
       "terminada": null,
       "bloqueo": {
         "motivo": "Falta la cuenta de la pasarela de pago a nombre de Carla",
-        "desde": "2026-10-15T13:01:11.430Z"
+        "desde": "2026-10-15T13:28:45.886Z"
       }
     },
     {
-      "id": "h-mvaz7q89-77uyz",
+      "id": "h-mvb076td-71m6f",
       "titulo": "Cargar y editar productos",
       "rol": "dueña",
       "quiero": "cargar y editar productos",
@@ -123,10 +123,10 @@
       "estado": "todo",
       "sprintId": "s3",
       "notaOriginal": "Como dueña, quiero cargar y editar productos, para mantener el catálogo al día",
-      "creada": "2026-10-16T13:01:11.433Z"
+      "creada": "2026-10-16T13:28:45.889Z"
     },
     {
-      "id": "h-mvaz7q89-8ift0",
+      "id": "h-mvb076td-8jqd4",
       "titulo": "Ver los pedidos del día con su estado",
       "rol": "dueña",
       "quiero": "ver los pedidos del día con su estado",
@@ -140,9 +140,9 @@
       "estado": "done",
       "sprintId": "s2",
       "notaOriginal": "Como dueña, quiero ver los pedidos del día con su estado, para despacharlos a tiempo",
-      "creada": "2026-10-16T13:01:11.433Z",
-      "iniciada": "2026-10-07T13:01:11.430Z",
-      "terminada": "2026-10-13T13:01:11.430Z",
+      "creada": "2026-10-16T13:28:45.889Z",
+      "iniciada": "2026-10-07T13:28:45.886Z",
+      "terminada": "2026-10-13T13:28:45.886Z",
       "bloqueo": null
     },
     {
@@ -160,13 +160,13 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
-      "creada": "2026-10-16T13:01:11.433Z",
+      "creada": "2026-10-16T13:28:45.888Z",
       "dependeDe": [
-        "h-mvaz7q89-51jha"
+        "h-mvb076tc-5tixd"
       ]
     },
     {
-      "id": "h-mvaz7q8a-9200e",
+      "id": "h-mvb076td-9k3cy",
       "titulo": "Acumular puntos por cada compra",
       "rol": "clienta frecuente",
       "quiero": "acumular puntos por cada compra",
@@ -180,10 +180,10 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como clienta frecuente, quiero acumular puntos por cada compra, para obtener descuentos",
-      "creada": "2026-10-16T13:01:11.434Z"
+      "creada": "2026-10-16T13:28:45.889Z"
     },
     {
-      "id": "h-mvaz7q8a-a3s65",
+      "id": "h-mvb076td-a8y6p",
       "titulo": "Crear cupones de descuento",
       "rol": "dueña",
       "quiero": "crear cupones de descuento",
@@ -197,10 +197,10 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero crear cupones de descuento, para atraer clientas en fechas especiales",
-      "creada": "2026-10-16T13:01:11.434Z"
+      "creada": "2026-10-16T13:28:45.889Z"
     },
     {
-      "id": "h-mvaz7q8a-b4ue9",
+      "id": "h-mvb076td-bn5dh",
       "titulo": "Ver las ventas del mes por producto",
       "rol": "dueña",
       "quiero": "ver las ventas del mes por producto",
@@ -214,10 +214,10 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero ver las ventas del mes por producto, para saber qué hornear más",
-      "creada": "2026-10-16T13:01:11.434Z"
+      "creada": "2026-10-16T13:28:45.889Z"
     },
     {
-      "id": "h-mvaz7q8a-cykoz",
+      "id": "h-mvb076td-c2ljd",
       "titulo": "Comparar las ventas con el mes anterior",
       "rol": "dueña",
       "quiero": "comparar las ventas con el mes anterior",
@@ -231,10 +231,10 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero comparar las ventas con el mes anterior, para medir si la tienda funciona",
-      "creada": "2026-10-16T13:01:11.434Z"
+      "creada": "2026-10-16T13:28:45.889Z"
     },
     {
-      "id": "h-mvaz7q8b-d5jro",
+      "id": "h-mvb076te-d40lq",
       "titulo": "Investigar en 2 días cómo emitir boletas electrónicas…",
       "rol": "usuario",
       "quiero": "investigar en 2 días cómo emitir boletas electrónicas automáticamente",
@@ -248,7 +248,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Investigar en 2 días cómo emitir boletas electrónicas automáticamente",
-      "creada": "2026-10-16T13:01:11.435Z",
+      "creada": "2026-10-16T13:28:45.890Z",
       "tipo": "spike"
     }
   ],
@@ -286,25 +286,25 @@
   ],
   "retros": [
     {
-      "id": "r-mvaz7q8c-hir8t",
+      "id": "r-mvb076tf-h0mog",
       "titulo": "Retro de Sprint 2",
       "sprintId": "s2",
       "fecha": "2026-10-16",
       "notas": [
         {
-          "id": "n-mvaz7q8c-i4oei",
+          "id": "n-mvb076tf-i03b6",
           "columna": "bien",
           "texto": "Carla respondió las dudas el mismo día",
           "votos": 0
         },
         {
-          "id": "n-mvaz7q8c-jbhvp",
+          "id": "n-mvb076tf-jku4q",
           "columna": "mejorar",
           "texto": "Las fotos llegaron tarde y atrasaron el catálogo",
           "votos": 2
         },
         {
-          "id": "n-mvaz7q8c-kgvlu",
+          "id": "n-mvb076tf-kmuhn",
           "columna": "ideas",
           "texto": "Pedir fotos y textos con una semana de anticipación",
           "votos": 0
@@ -312,7 +312,7 @@
       ],
       "acciones": [
         {
-          "id": "a-mvaz7q8c-lo74b",
+          "id": "a-mvb076tf-lhs6f",
           "texto": "Pedir los materiales del siguiente sprint en la Review",
           "responsable": "Rodrigo",
           "hecha": false
@@ -338,15 +338,15 @@
   },
   "objetivos": [
     {
-      "id": "o-mvaz7q8b-eg358",
+      "id": "o-mvb076te-ecqfb",
       "objetivo": "Vender más en línea",
       "resultados": [
         {
-          "id": "kr-mvaz7q8b-fdcao",
+          "id": "kr-mvb076te-fbo3i",
           "texto": "Pedidos por la tienda: del 0% al 40%"
         },
         {
-          "id": "kr-mvaz7q8b-godi6",
+          "id": "kr-mvb076te-gob7c",
           "texto": "Mensajes de consulta: bajar a la mitad"
         }
       ]
@@ -358,7 +358,7 @@
       "lograremos": "menos consultas por mensaje",
       "veremos": "los mensajes bajen a la mitad",
       "resultados": [
-        "kr-mvaz7q8b-godi6"
+        "kr-mvb076te-gob7c"
       ],
       "horizonte": "",
       "resultadoHipotesis": "cumplida",
@@ -378,7 +378,7 @@
       "lograremos": "que más visitas terminen comprando",
       "veremos": "el 40% de los pedidos llegue por la tienda",
       "resultados": [
-        "kr-mvaz7q8b-fdcao"
+        "kr-mvb076te-fbo3i"
       ],
       "horizonte": "",
       "resultadoHipotesis": "pendiente",
@@ -427,14 +427,14 @@
   },
   "hitos": [
     {
-      "id": "hi-mvaz7q8c-mjzf2",
+      "id": "hi-mvb076tf-mads1",
       "nombre": "Hito 1: Catálogo",
       "porcentaje": 30,
       "historiaIds": [
-        "h-mvaz7q89-2lhlg",
-        "h-mvaz7q89-351j1",
-        "h-mvaz7q89-48vea",
-        "h-mvaz7q89-51jha"
+        "h-mvb076tc-2jlci",
+        "h-mvb076tc-3hm0j",
+        "h-mvb076tc-4667p",
+        "h-mvb076tc-5tixd"
       ],
       "fecha": "2026-10-29",
       "estado": "aceptado",
@@ -444,13 +444,13 @@
       }
     },
     {
-      "id": "hi-mvaz7q8c-nhx17",
+      "id": "hi-mvb076tf-n2tpv",
       "nombre": "Hito 2: Compra",
       "porcentaje": 40,
       "historiaIds": [
-        "h-mvaz7q89-6ap4e",
-        "h-mvaz7q89-77uyz",
-        "h-mvaz7q89-8ift0",
+        "h-mvb076td-6ubq2",
+        "h-mvb076td-71m6f",
+        "h-mvb076td-8jqd4",
         "h-extra-1"
       ],
       "fecha": "2026-11-12",
@@ -458,15 +458,15 @@
       "aceptacion": null
     },
     {
-      "id": "hi-mvaz7q8c-oa9jj",
+      "id": "hi-mvb076tf-oydx2",
       "nombre": "Hito 3: Fidelización",
       "porcentaje": 30,
       "historiaIds": [
-        "h-mvaz7q8a-9200e",
-        "h-mvaz7q8a-a3s65",
-        "h-mvaz7q8a-b4ue9",
-        "h-mvaz7q8a-cykoz",
-        "h-mvaz7q8b-d5jro"
+        "h-mvb076td-9k3cy",
+        "h-mvb076td-a8y6p",
+        "h-mvb076td-bn5dh",
+        "h-mvb076td-c2ljd",
+        "h-mvb076te-d40lq"
       ],
       "fecha": "2026-11-26",
       "estado": "pendiente",
@@ -475,14 +475,14 @@
   ],
   "cambios": [
     {
-      "id": "cr-mvaz7q8c-p5fw4",
+      "id": "cr-mvb076tf-pzn53",
       "fecha": "2026-10-16",
       "descripcion": "Agregar un blog de recetas en la tienda",
       "horas": 12,
       "estado": "propuesto"
     }
   ],
-  "respaldado": "2026-10-16T13:01:11.436Z",
-  "creado": "2026-10-16T13:01:11.430Z",
-  "actualizado": "2026-10-16T13:01:11.430Z"
+  "respaldado": "2026-10-16T13:28:45.891Z",
+  "creado": "2026-10-16T13:28:45.886Z",
+  "actualizado": "2026-10-16T13:28:45.886Z"
 }

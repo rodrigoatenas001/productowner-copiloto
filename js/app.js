@@ -10,8 +10,13 @@ import { vistaAjustes } from './ui/ajustes.js';
 import { vistaTaller } from './ui/taller.js';
 import { vistaRetro } from './ui/retro.js';
 import { vistaCliente } from './ui/cliente.js';
+import { vistaBienvenida } from './ui/bienvenida.js';
+import { vistaComentar } from './ui/comentar.js';
+import { cajaRecorrido, avisoEjemplo, cajaInfo, PASOS_RECORRIDO } from './ui/ayuda.js';
+import { normalizarProyecto } from './nucleo/proyecto.js';
 
 const VISTAS = {
+  inicio: { titulo: 'Inicio', render: vistaBienvenida },
   notas: { titulo: 'Notas', render: vistaNotas },
   backlog: { titulo: 'Backlog', render: vistaBacklog },
   cliente: { titulo: 'Cliente', render: vistaCliente },
@@ -19,6 +24,25 @@ const VISTAS = {
   retro: { titulo: 'Retro', render: vistaRetro },
   taller: { titulo: 'Taller', render: vistaTaller },
   ajustes: { titulo: 'Ajustes', render: vistaAjustes },
+  comentar: { titulo: 'Comentar', render: vistaComentar },
+};
+// Con el modo simple se ocultan del menú (siguen accesibles por enlace)
+const AVANZADAS = new Set(['retro', 'taller']);
+export const ID_EJEMPLO = 'ejemplo-pasteleria';
+
+// Para qué sirve cada sección: tooltip del menú y caja informativa (se puede cerrar)
+const AYUDAS = {
+  notas: 'Pega lo que te pidió el cliente y conviértelo en historias de usuario.',
+  backlog: 'La lista ordenada de lo que hay que hacer: arriba lo más importante. Aquí priorizas, estimas y ves el roadmap.',
+  cliente: 'Lo que acuerdas con tu cliente: qué incluye y qué no, cuánto cuesta, cuándo se paga y qué cambios pidió.',
+  sprint: 'El trabajo de las próximas semanas en un tablero, con el avance y el informe para el cliente.',
+  retro: 'Al cerrar un sprint: qué salió bien, qué mejorar y qué acciones tomar.',
+  taller: 'Para aprender o enseñar: trivia en grupo, ejercicios y desafíos de Scrum e historias.',
+  ajustes: 'Respaldos, importar y exportar, la IA opcional y tus preguntas propias.',
+  comentar: 'Una encuesta de 2 minutos para mejorar el copiloto.',
+};
+const EXTRA_AYUDA = {
+  cliente: () => [' Si aún no tienes cliente, o buscas a alguien que te ayude en el proyecto, ', h('a', { href: 'https://productowner.cl', target: '_blank', rel: 'noopener' }, 'ProductOwner.cl'), ' conecta a profesionales TI independientes con clientes en Chile.'],
 };
 
 const app = {
@@ -29,7 +53,52 @@ const app = {
   ia: { proveedor: 'ninguno' },
   iaRevisor: { proveedor: 'misma' },
   preguntasPropias: [],
+  cajasCerradas: new Set(),
+  modoSimple: false,
+  recorrido: null,
   avisar,
+
+  async cerrarCaja(clave) {
+    this.cajasCerradas.add(clave);
+    await guardarAjuste('cajasCerradas', [...this.cajasCerradas]);
+    this.render();
+  },
+
+  async reabrirCajas() {
+    this.cajasCerradas = new Set();
+    await guardarAjuste('cajasCerradas', []);
+    avisar('Las cajas de ayuda vuelven a aparecer en cada sección.');
+    this.render();
+  },
+
+  async cambiarModoSimple(activo) {
+    this.modoSimple = activo;
+    await guardarAjuste('modoSimple', activo);
+    this.render();
+  },
+
+  iniciarRecorrido() {
+    this.recorrido = 0;
+    this.ir(PASOS_RECORRIDO[0].vista);
+  },
+
+  terminarRecorrido() {
+    this.recorrido = null;
+    this.render();
+  },
+
+  /** Abre el proyecto de ejemplo; si no está, lo descarga de docs/ejemplo. */
+  async cargarEjemplo() {
+    if (this.proyectos.some((p) => p.id === ID_EJEMPLO)) return this.abrir(ID_EJEMPLO);
+    try {
+      const resp = await fetch('./docs/ejemplo/pasteleria-carla.json');
+      if (!resp.ok) throw new Error(`respuesta ${resp.status}`);
+      const p = normalizarProyecto({ ...(await resp.json()), id: ID_EJEMPLO });
+      await this.importarProyecto(p);
+    } catch (e) {
+      avisar(`No se pudo cargar el ejemplo (${e.message}). Revisa tu conexión e inténtalo de nuevo.`, 'error');
+    }
+  },
 
   /** Aplica un cambio al proyecto actual, guarda (con pausa) y vuelve a dibujar. */
   cambiar(transformar, { redibujar = true } = {}) {
@@ -123,7 +192,9 @@ const app = {
   render() {
     renderNavegacion();
     const principal = document.getElementById('principal');
-    vaciar(principal, avisoRespaldo(this), VISTAS[this.vista].render(this));
+    const v = this.vista;
+    const caja = AYUDAS[v] && v !== 'comentar' && this.recorrido === null ? cajaInfo(this, v, `Para qué sirve ${VISTAS[v].titulo}`, AYUDAS[v], EXTRA_AYUDA[v]?.()) : null;
+    vaciar(principal, avisoEjemplo(this), cajaRecorrido(this), caja, this.proyecto.id === ID_EJEMPLO ? null : avisoRespaldo(this), VISTAS[this.vista].render(this));
     document.title = `${VISTAS[this.vista].titulo} · ${this.proyecto.nombre} · Copiloto PO`;
   },
 };
@@ -185,9 +256,10 @@ function renderNavegacion() {
   vaciar(document.getElementById('navegacion'),
     h('div', { class: 'nav-proyecto' }, selectorProyecto),
     h('nav', { 'aria-label': 'Secciones' },
-      h('ul', {}, Object.entries(VISTAS).map(([clave, v]) => h('li', {},
+      h('ul', {}, Object.entries(VISTAS).filter(([clave]) => clave === app.vista || !(app.modoSimple && AVANZADAS.has(clave))).map(([clave, v]) => h('li', { class: clave === 'comentar' ? 'nav-comentar' : null },
         h('a', {
           href: `#${clave}`,
+          title: AYUDAS[clave] || null,
           'aria-current': app.vista === clave ? 'page' : null,
           onclick: (e) => { e.preventDefault(); app.ir(clave); },
         }, v.titulo, conteos[clave] ? h('span', { class: 'nav-conteo' }, String(conteos[clave])) : null))))),
@@ -209,6 +281,9 @@ async function iniciar() {
     app.ia = (await leerAjuste('ia')) || { proveedor: 'ninguno' };
     app.iaRevisor = (await leerAjuste('iaRevisor')) || { proveedor: 'misma' };
     app.preguntasPropias = (await leerAjuste('preguntasPropias')) || [];
+    app.cajasCerradas = new Set((await leerAjuste('cajasCerradas')) || []);
+    app.modoSimple = Boolean(await leerAjuste('modoSimple'));
+    const primeraVez = !(await leerAjuste('bienvenidaVista'));
     if (!app.proyectos.length) {
       const p = nuevoProyecto('Mi proyecto');
       await guardarProyecto(p);
@@ -218,8 +293,10 @@ async function iniciar() {
     app.proyecto = app.proyectos.find((p) => p.id === activo) || app.proyectos[0];
     const desdeUrl = location.hash.slice(1);
     if (VISTAS[desdeUrl]) app.vista = desdeUrl;
+    else if (primeraVez) app.vista = 'inicio';
     else if (app.proyecto.historias.length) app.vista = 'backlog';
     app.render();
+    if (primeraVez) await guardarAjuste('bienvenidaVista', true);
     pedirPersistencia();
   } catch (e) {
     vaciar(document.getElementById('principal'),

@@ -14,9 +14,19 @@ const DIA = 86400000;
 const hoy = new Date();
 const dias = (n) => new Date(hoy.getTime() + n * DIA);
 
-let p = nuevoProyecto('Pastelería de Carla');
+let p = nuevoProyecto('Pastelería de Carla (ejemplo)');
+p.id = 'ejemplo-pasteleria';
 p = aplicarPlantilla(p, 'ecommerce');
 p.rolPorDefecto = 'clienta';
+p.notas = `Reunión con Carla (pastelería, Ñuñoa)
+- Hoy todo llega por Instagram y WhatsApp, se le pierden pedidos
+- Quiere que vean las tortas con precio y si quedan
+- Que paguen en línea, con tarjeta, y si se puede en cuotas para eventos
+- Despacho solo en Ñuñoa y Providencia, o retiro en tienda
+- Le gustaría premiar a las clientas frecuentes
+- Necesita saber qué se vende más para hornear mejor
+- Pregunta por boletas electrónicas automáticas (no sabe cómo)
+- Presupuesto acotado, quiere partir antes de fiestas patrias`;
 p.vision = { vision: 'Que la pastelería venda en línea sin depender de los mensajes de Instagram.', objetivoProducto: 'Que el 40% de los pedidos llegue por la tienda antes de diciembre.' };
 p.comercial = { ...comercialDe(p), moneda: 'UF', valorHora: 0.6, horasPorPunto: 3, margen: 15, valorUF: 39800, horasSemana: 20 };
 [3, 5, 5, 8, 3, 5, 3].forEach((pts, i) => { p.historias[i].puntos = pts; });

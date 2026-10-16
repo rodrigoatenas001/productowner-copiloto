@@ -45,7 +45,9 @@ async function cargar(ruta = '#notas') {
   w.open = (url) => { abiertas.push(url); };
   w.confirm = () => true;
   w.prompt = () => 'Proyecto de prueba';
+  const fetchReal = w.fetch.bind(w);
   w.fetch = async (_url, op) => {
+    if (!op?.body) return fetchReal(_url, op); // archivos de la app (por ejemplo, el proyecto de ejemplo)
     const c = JSON.parse(op.body);
     const sistema = c.system || c.messages[0].content;
     const usuario = c.messages[c.messages.length - 1].content;
@@ -248,10 +250,49 @@ const PRUEBAS = [
     await clic('El cliente aprobó');
     verdad(uno('.cambio--aprobado'), 'el cambio quedó aprobado');
   }],
+  ['Inicio: ejemplo con recorrido de 4 pasos', async () => {
+    await ir('inicio');
+    verdad(doc().body.textContent.includes('Qué no es'), 'el inicio explica qué no es');
+    await clic('Ver el ejemplo con un recorrido');
+    await esperar(() => uno('.aviso-ejemplo') && uno('.recorrido'), 'se abrió el ejemplo con el recorrido');
+    igual(uno('#proyecto-activo option:checked').textContent, 'Pastelería de Carla (ejemplo)', 'proyecto activo');
+    for (const vista of ['backlog', 'cliente', 'sprint']) {
+      await clic('Siguiente paso →');
+      await esperar(() => ventana().location.hash === `#${vista}`, `el recorrido pasó a ${vista}`);
+    }
+    await clic('Terminar y comentar');
+    await esperar(() => ventana().location.hash === '#comentar', 'terminó en Comentar');
+    verdad(!uno('.recorrido'), 'el recorrido se cerró');
+  }],
+  ['Comentar: arma el texto y el enlace a GitHub', async () => {
+    await ir('comentar');
+    todos('input[name="nota"]')[3].click();
+    todos('input[name="usaria"]')[0].click();
+    escribir(todos('.encuesta textarea')[1], 'Firma electrónica');
+    const enlace = todos('a').find((a) => a.textContent === 'Publicar en GitHub');
+    verdad(enlace.href.includes('/issues/new') && decodeURIComponent(enlace.href).includes('Firma electrónica'), 'el enlace lleva el comentario');
+    copiado = '';
+    await clic('Copiar texto');
+    await esperar(() => copiado.includes('**Nota (1 a 5):** 4'), 'se copió el comentario');
+  }],
+  ['Modo simple y cajas de ayuda', async () => {
+    await ir('backlog');
+    verdad(uno('.caja-info'), 'hay caja de ayuda');
+    uno('.caja-info button').click();
+    await esperar(() => !uno('.caja-info'), 'la caja se cerró');
+    await ir('inicio');
+    uno('.bienvenida input[type="checkbox"]').click();
+    await esperar(() => !todos('#navegacion a').some((a) => a.textContent === 'Taller'), 'el modo simple oculta Taller');
+    uno('.bienvenida input[type="checkbox"]').click();
+    await esperar(() => todos('#navegacion a').some((a) => a.textContent === 'Taller'), 'Taller vuelve');
+    await clic('Volver a mostrar las cajas de ayuda');
+    await ir('backlog');
+    verdad(uno('.caja-info'), 'la caja volvió');
+  }],
   ['Celular: sin desplazamiento horizontal', async () => {
     marco.style.width = '375px';
     await pausa(150);
-    for (const vista of ['notas', 'backlog', 'cliente', 'sprint', 'retro', 'taller', 'ajustes']) {
+    for (const vista of ['inicio', 'comentar', 'notas', 'backlog', 'cliente', 'sprint', 'retro', 'taller', 'ajustes']) {
       await ir(vista);
       const ancho = doc().documentElement.scrollWidth;
       verdad(ancho <= 376, `${vista} mide ${ancho}px en un celular de 375px`);
