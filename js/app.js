@@ -17,6 +17,7 @@ import { cajaRecorrido, avisoEjemplo, cajaInfo, PASOS_RECORRIDO } from './ui/ayu
 import { normalizarProyecto, resumenSprint } from './nucleo/proyecto.js';
 import { activarAtajos, abrirBuscador } from './ui/buscador.js';
 import { esKanban } from './nucleo/kanban.js';
+import { iniciarEquipo, conectarProyectoActivo, enviar as enviarAlEquipo, estadoEquipo } from './ui/equipo.js';
 import { iniciarCarpeta, alGuardarEnCarpeta, alBorrarEnCarpeta, avisoCarpeta, carpetaLista, nombreCarpeta, sincronizar } from './ui/carpeta.js';
 
 const VISTAS = {
@@ -202,6 +203,7 @@ const app = {
     this.proyecto = this.proyectos.find((p) => p.id === id) || this.proyectos[0];
     this.candidatos = [];
     await guardarAjuste('proyectoActivo', this.proyecto.id);
+    conectarProyectoActivo();
     this.render();
   },
 
@@ -285,6 +287,7 @@ async function guardarAhora() {
     app.proyecto.actualizado = guardado.actualizado;
     marcarEstadoGuardado(carpetaLista() ? `Guardado aquí y en «${nombreCarpeta()}»` : 'Guardado en este navegador');
     alGuardarEnCarpeta(app, app.proyecto);
+    enviarAlEquipo();
   } catch (e) {
     marcarEstadoGuardado('No se pudo guardar');
     avisar(`No se pudo guardar: ${e.message}. Descarga un respaldo desde Ajustes.`, 'error');
@@ -325,7 +328,8 @@ function renderNavegacion() {
           onclick: (e) => { e.preventDefault(); app.ir(clave); },
         }, v.titulo, conteos[clave] ? h('span', { class: 'nav-conteo', title: clave === 'sprint' ? `${activo.nombre}: ${r.hechos} de ${r.puntos} puntos terminados` : null }, String(conteos[clave])) : null,
         clave === 'sprint' && r ? h('span', { class: 'nav-avance', 'aria-hidden': 'true' }, h('span', { class: `nav-avance-${Math.min(10, Math.round(avanceSprint / 10))}` })) : null))))),
-    h('p', { class: 'nav-estado', id: 'estado-guardado', 'aria-live': 'polite' }, 'Guardado en este navegador'));
+    h('p', { class: 'nav-estado', id: 'estado-guardado', 'aria-live': 'polite' }, 'Guardado en este navegador'),
+    h('p', { class: 'nav-estado nav-equipo', id: 'estado-equipo', 'aria-live': 'polite' }, estadoEquipo()));
 }
 
 // Barra inferior para el pulgar (solo se ve en pantallas angostas)
@@ -366,6 +370,7 @@ async function iniciar() {
     if (primeraVez) await guardarAjuste('bienvenidaVista', true);
     pedirPersistencia();
     iniciarCarpeta(app);
+    iniciarEquipo(app);
   } catch (e) {
     vaciar(document.getElementById('principal'),
       h('div', { class: 'vacio' },

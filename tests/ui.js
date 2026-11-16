@@ -35,6 +35,7 @@ function verdad(cond, que) { if (!cond) throw new Error(que); }
 let copiado = '';
 let abiertas = [];
 let responderDialogos = true;
+let sala = null;
 
 async function cargar(ruta = '#notas') {
   marco.src = `../index.html?prueba&carga=${Date.now()}${ruta}`; // cambia la dirección para forzar una recarga real
@@ -55,6 +56,27 @@ async function cargar(ruta = '#notas') {
     if (entrada) entrada.value = 'Proyecto de prueba';
     d.querySelector('[type=submit]').click();
   }).observe(doc().body, { childList: true });
+  // Servidor del equipo simulado: misma regla que servidor/src/protocolo.js, dentro de la página
+  sala = { version: 0, datos: null, sockets: [] };
+  w.WebSocket = class {
+    constructor(url) {
+      this.url = url;
+      sala.sockets.push(this);
+      setTimeout(() => this.onopen?.(), 10);
+    }
+    send(texto) {
+      const m = JSON.parse(texto);
+      const responder = (r) => setTimeout(() => this.onmessage?.({ data: JSON.stringify(r) }), 5);
+      if (m.t === 'hola') responder({ t: 'estado', version: sala.version, datos: sala.datos });
+      else if (m.t === 'guardar') {
+        if (m.base !== sala.version) { responder({ t: 'rechazo', version: sala.version, datos: sala.datos }); return; }
+        sala.version += 1;
+        sala.datos = m.datos;
+        responder({ t: 'ok', version: sala.version });
+      }
+    }
+    close() { sala.sockets = sala.sockets.filter((x) => x !== this); }
+  };
   const fetchReal = w.fetch.bind(w);
   w.fetch = async (_url, op) => {
     if (!op?.body) return fetchReal(_url, op); // archivos de la app (por ejemplo, el proyecto de ejemplo)
@@ -516,6 +538,42 @@ const PRUEBAS = [
     await ir('ajustes');
     interruptorKanban().click();
     await esperar(() => uno('#navegacion a[href="#sprint"]')?.textContent.startsWith('Sprint'), 'vuelve a sprints');
+  }],
+  ['Equipo en tiempo real: compartir, recibir un cambio cifrado y mezclarlo', async () => {
+    const select = uno('#proyecto-activo');
+    select.value = [...select.options].find((o) => o.value !== '__nuevo' && !o.text.includes('(ejemplo)')).value;
+    select.dispatchEvent(new Event('change'));
+    await pausa(200);
+    await ir('ajustes');
+    const seccion = () => uno('#aj-equipo').closest('section');
+    const [nombre, servidor] = seccion().querySelectorAll('input');
+    nombre.value = 'Rodrigo'; nombre.dispatchEvent(new Event('change'));
+    servidor.value = 'salas.ejemplo.workers.dev'; servidor.dispatchEvent(new Event('change'));
+    await esperar(() => [...seccion().querySelectorAll('button')].some((b) => b.textContent === 'Compartir este proyecto' && !b.disabled), 'con servidor se puede compartir');
+    igual(seccion().querySelectorAll('input')[1].value, 'https://salas.ejemplo.workers.dev', 'normaliza la dirección');
+    [...seccion().querySelectorAll('button')].find((b) => b.textContent === 'Compartir este proyecto').click();
+    await esperar(() => sala.version === 1, 'sube la primera versión a la sala');
+    const enlace = seccion().querySelector('.enlace-equipo').value;
+    verdad(enlace.includes('#equipo=https%3A%2F%2Fsalas.ejemplo.workers.dev~'), 'muestra el enlace de invitación');
+    verdad(sala.sockets[0].url.startsWith('wss://salas.ejemplo.workers.dev/sala/'), 'se conecta por wss a la sala');
+    const { descifrar, cifrar, leerInvitacion } = await import('../js/nucleo/sala.js');
+    const { clave } = leerInvitacion(enlace.slice(enlace.indexOf('#')));
+    const enSala = await descifrar(clave, sala.datos);
+    igual(enSala.id, ventana().__equipo.de, 'la sala tiene el proyecto, cifrado');
+    verdad(!sala.datos.includes(enSala.nombre), 'el servidor no ve el nombre del proyecto');
+    // Otra persona agrega una historia: llega por la sala y aparece aquí
+    const otra = { ...enSala, historias: [...enSala.historias, { ...enSala.historias[0], id: 'remota-1', titulo: 'Historia que agregó Ana', quiero: 'ver lo que agregó Ana', estado: 'backlog', sprintId: null, prioridad: 'must' }] };
+    sala.version += 1;
+    sala.datos = await cifrar(clave, otra);
+    sala.sockets[0].onmessage({ data: JSON.stringify({ t: 'nuevo', version: sala.version, datos: sala.datos }) });
+    const eq = ventana().__equipo;
+    await esperar(() => eq.salas[eq.de].version === sala.version, `aplica la versión remota (cola: ${Boolean(eq.cola)}, en vuelo: ${Boolean(eq.enVuelo)}, foco: ${doc().activeElement.tagName})`);
+    await ir('backlog');
+    await pestana('Lista priorizada');
+    await esperar(() => todos('.tarjeta-abrir').some((b) => b.textContent.includes('Historia que agregó Ana')), 'la historia de Ana aparece aquí');
+    await ir('ajustes');
+    [...seccion().querySelectorAll('button')].find((b) => b.textContent === 'Dejar de compartir aquí').click();
+    await esperar(() => [...seccion().querySelectorAll('button')].some((b) => b.textContent === 'Compartir este proyecto'), 'deja de compartir');
   }],
 ];
 

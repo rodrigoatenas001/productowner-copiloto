@@ -10,6 +10,7 @@ import { cambiarModo } from '../nucleo/kanban.js';
 import { botonesMarkdown } from './compartir.js';
 import { imprimirDocumento } from './imprimir.js';
 import { seccionCarpeta, carpetaLista, nombreCarpeta } from './carpeta.js';
+import { seccionEquipo } from './equipo.js';
 import { excelBacklog, excelProyecto, documentoProyecto } from '../nucleo/informe.js';
 import { documentoWord } from '../nucleo/docx.js';
 import { reporteEpicas, notasDeVersion, informeCliente } from '../nucleo/reportes.js';
@@ -28,6 +29,7 @@ export function vistaAjustes(app) {
     seccionDefiniciones(app),
     seccionFlujo(app),
     seccionCarpeta(app),
+    seccionEquipo(app),
     seccionRespaldo(app),
     seccionIa(app),
     iaConfigurada(app.ia) ? seccionIa(app, 'iaRevisor') : null,

@@ -1,0 +1,18 @@
+# Servidor de salas del Copiloto PO. Se instala en tu propia cuenta de Cloudflare:
+#   cd servidor && npx wrangler deploy
+name = "copiloto-po-salas"
+main = "src/index.js"
+compatibility_date = "2025-04-01"
+
+[[durable_objects.bindings]]
+name = "SALAS"
+class_name = "Sala"
+
+[[migrations]]
+tag = "v1"
+new_sqlite_classes = ["Sala"]
+
+[vars]
+# Opcional: solo aceptar conexiones desde estas direcciones (separadas por coma).
+# Ej.: "https://rodrigoatenas001.github.io,https://copiloto.miempresa.cl". Vacío = cualquiera.
+ORIGENES = ""
