@@ -1,4 +1,5 @@
 // Exportaciones: Markdown para compartir, CSV genérico y CSV listo para importar en Jira.
+// Las reglas de negocio viajan junto a los criterios para no perder el contexto en la otra herramienta.
 import { enunciado, PRIORIDADES } from './historias.js';
 import { ESTADOS } from './proyecto.js';
 
@@ -13,10 +14,10 @@ const fila = (celdas) => celdas.map(celdaCsv).join(',');
 
 export function aCsv(proyecto) {
   const sprints = Object.fromEntries(proyecto.sprints.map((s) => [s.id, s.nombre]));
-  const lineas = [fila(['Título', 'Historia', 'Criterios de aceptación', 'Épica', 'Puntos', 'Prioridad', 'Estado', 'Sprint'])];
+  const lineas = [fila(['Título', 'Historia', 'Criterios de aceptación', 'Reglas de negocio', 'Épica', 'Puntos', 'Prioridad', 'Estado', 'Sprint'])];
   for (const h of proyecto.historias) {
     lineas.push(fila([
-      h.titulo, enunciado(h), h.criterios.join('\n'), h.epica, h.puntos ?? '',
+      h.titulo, enunciado(h), h.criterios.join('\n'), (h.reglas || []).join('\n'), h.epica, h.puntos ?? '',
       PRIORIDADES[h.prioridad] || h.prioridad, ESTADOS[h.estado] || h.estado, sprints[h.sprintId] || '',
     ]));
   }
@@ -46,7 +47,8 @@ export function aJiraCsv(proyecto) {
     lineas.push(fila([idEpica[e], '', e, `Épica de ${proyecto.nombre}`, 'Epic', '', 'Medium', etiquetaDe(e), '']));
   }
   proyecto.historias.forEach((h, i) => {
-    const descripcion = `${enunciado(h)}\n\nCriterios de aceptación:\n${h.criterios.map((c) => `* ${c}`).join('\n')}`;
+    const reglas = h.reglas?.length ? `\n\nReglas de negocio:\n${h.reglas.map((r) => `* ${r}`).join('\n')}` : '';
+    const descripcion = `${enunciado(h)}\n\nCriterios de aceptación:\n${h.criterios.map((c) => `* ${c}`).join('\n')}${reglas}`;
     lineas.push(fila([
       String(epicas.length + i + 1), h.epica ? idEpica[h.epica] : '', h.titulo, descripcion, TIPO_JIRA[h.tipo] || 'Story',
       h.puntos ?? '', prioridadJira[h.prioridad] || 'Medium', [h.epica ? etiquetaDe(h.epica) : '', ETIQUETA_TIPO[h.tipo] || ''].filter(Boolean).join(' '), sprints[h.sprintId] || '',
@@ -84,6 +86,9 @@ export function aMarkdown(proyecto) {
       partes.push(`### ${h.titulo}`, '', `> ${enunciado(h)}`, '', `_${meta}_`, '');
       if (h.criterios.length) {
         partes.push('**Criterios de aceptación**', '', ...h.criterios.map((c) => `- [ ] ${c}`), '');
+      }
+      if (h.reglas?.length) {
+        partes.push('**Reglas de negocio**', '', ...h.reglas.map((r) => `- ${r}`), '');
       }
     }
   }

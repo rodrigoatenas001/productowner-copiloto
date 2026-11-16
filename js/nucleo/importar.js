@@ -43,6 +43,7 @@ const COLUMNAS = {
   titulo: ['summary', 'resumen', 'titulo', 'title', 'nombre', 'name', 'tarea'],
   historia: ['historia', 'user story', 'historia de usuario', 'description', 'descripcion', 'detalle'],
   criterios: ['criterios de aceptacion', 'acceptance criteria', 'criterios', 'ac'],
+  reglas: ['reglas de negocio', 'business rules', 'reglas'],
   puntos: ['story points', 'puntos', 'estimacion', 'points', 'story point estimate', 'custom field (story points)'],
   prioridad: ['priority', 'prioridad'],
   epica: ['epic', 'epica', 'epic name', 'epic link', 'labels', 'etiquetas', 'parent summary'],
@@ -82,7 +83,7 @@ function extraerCriterios(texto) {
   return String(texto || '')
     .split(/\r?\n/)
     .map((l) => l.replace(/^\s*(?:[-*•]|\d+[.)]|\[[ x]\])\s*/i, '').trim())
-    .filter((l) => l && !/^criterios de aceptaci[oó]n:?$/i.test(l) && !/^acceptance criteria:?$/i.test(l));
+    .filter((l) => l && !/^(criterios de aceptaci[oó]n|acceptance criteria|reglas de negocio):?$/i.test(l));
 }
 
 /**
@@ -120,7 +121,9 @@ export function importarCsv(texto, { rolPorDefecto = 'usuario' } = {}) {
     if (!titulo && !descripcion) { sinTitulo++; continue; }
 
     // La descripción puede traer "Como… quiero… para…" seguido de criterios
-    const [enunciado, ...resto] = descripcion.split(/\r?\n\s*\r?\n|criterios de aceptaci[oó]n:?/i);
+    // y la sección "Reglas de negocio:" que agrega nuestra exportación a Jira
+    const [sinReglas, reglasDesc = ''] = descripcion.split(/reglas de negocio:?/i);
+    const [enunciado, ...resto] = sinReglas.split(/\r?\n\s*\r?\n|criterios de aceptaci[oó]n:?/i);
     const base = /^\s*como\s+/i.test(enunciado || '')
       ? aHistoria({ texto: enunciado.trim() }, { rolPorDefecto })
       : aHistoria({ texto: titulo || enunciado }, { rolPorDefecto });
@@ -133,6 +136,7 @@ export function importarCsv(texto, { rolPorDefecto = 'usuario' } = {}) {
       id: nuevoId('h'),
       titulo: (titulo || resumirTitulo(base.quiero)).slice(0, 200),
       criterios: criterios.length ? criterios.slice(0, 20) : sugerirCriterios(base.quiero),
+      reglas: extraerCriterios(celda(fila, 'reglas') || reglasDesc).slice(0, 20),
       epica: epica.slice(0, 120),
       puntos: aEscala(celda(fila, 'puntos')),
       prioridad: PRIORIDAD[sinAcentos(celda(fila, 'prioridad'))] || 'should',

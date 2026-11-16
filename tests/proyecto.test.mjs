@@ -175,3 +175,23 @@ test('mapa de historias: épicas como columnas, prioridades como versiones', () 
   const movidas = moverEnMapa(p.historias, p.historias[4].id, 'Pagos', 'could');
   assert.deepEqual([movidas[4].epica, movidas[4].prioridad], ['Pagos', 'could']);
 });
+
+test('normalizar conserva las reglas de negocio y descarta lo que no es texto', () => {
+  const p = proyectoDeEjemplo();
+  p.historias[0].reglas = ['Despacho solo a Ñuñoa', '', 42];
+  const otra = normalizarProyecto(JSON.parse(JSON.stringify(p)));
+  assert.deepEqual(otra.historias[0].reglas, ['Despacho solo a Ñuñoa']);
+  assert.deepEqual(otra.historias[1].reglas, []);
+});
+
+test('el ejemplo de Carla separa valor y reglas, y prioriza con MoSCoW y WSJF', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const p = normalizarProyecto(JSON.parse(await readFile(new URL('../docs/ejemplo/pasteleria-carla.json', import.meta.url), 'utf8')));
+  const historias = p.historias.filter((h) => h.tipo === 'historia');
+  assert.ok(historias.every((h) => h.rol && h.quiero && h.para), 'todas tienen rol, acción y beneficio');
+  assert.ok(historias.every((h) => h.criterios.every((c) => /^Dad[oa]s? .+, cuando .+, entonces /.test(c))), 'criterios Dado/Cuando/Entonces');
+  assert.ok(historias.every((h) => h.criterios.length >= 1 && !h.criterios.some((c) => /el sistema me confirma que se realizó/.test(c))), 'sin criterios genéricos');
+  assert.ok(['Pedidos y producción', 'Entrega'].every((e) => p.historias.some((h) => h.epica === e)), 'cubre el proceso operativo');
+  assert.equal(new Set(p.historias.map((h) => h.prioridad)).size, 4, 'usa las cuatro categorías MoSCoW');
+  assert.ok(p.historias.filter((h) => h.reglas.length).length >= 10);
+});

@@ -1,7 +1,7 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { leerCsv, mapearColumnas, importarCsv } from '../js/nucleo/importar.js';
-import { aCsv, aJiraCsv } from '../js/nucleo/exportar.js';
+import { aCsv, aJiraCsv, aMarkdown } from '../js/nucleo/exportar.js';
 import { nuevoProyecto } from '../js/nucleo/proyecto.js';
 import { notasAHistorias } from '../js/nucleo/historias.js';
 
@@ -59,4 +59,16 @@ test('las épicas del CSV agrupan a sus historias y no se importan como historia
   const csv = 'Issue ID,Parent ID,Summary,Issue Type,Labels\n1,,Pagos en línea,Epic,pagos\n2,1,Pagar con tarjeta,Story,pagos\n3,2,Probar Visa,Sub-task,\n4,,Ver catálogo,Story,';
   const { historias } = importarCsv(csv);
   assert.deepEqual(historias.map((x) => [x.titulo, x.epica]), [['Pagar con tarjeta', 'Pagos en línea'], ['Ver catálogo', '']]);
+});
+
+test('las reglas de negocio viajan en CSV, Jira y Markdown y vuelven al importar', () => {
+  const p = nuevoProyecto('X');
+  p.historias = notasAHistorias('Pedidos:\n- Como dueña, quiero ver cuánto hornear mañana, para no producir de más');
+  p.historias[0].reglas = ['Tortas con 48 horas de anticipación', 'Hasta 12 tortas por día'];
+  for (const csv of [aCsv(p), aJiraCsv(p)]) {
+    const [h] = importarCsv(csv).historias;
+    assert.deepEqual(h.reglas, p.historias[0].reglas);
+    assert.ok(h.criterios.every((c) => !c.includes('48 horas')), 'las reglas no se mezclan con los criterios');
+  }
+  assert.ok(aMarkdown(p).includes('**Reglas de negocio**\n\n- Tortas con 48 horas de anticipación'));
 });

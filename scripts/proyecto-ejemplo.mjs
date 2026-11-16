@@ -47,6 +47,91 @@ mas[4].tipo = 'spike';
 mas[4].criterios = ['Al terminar el plazo, sabemos qué proveedor usar, su costo mensual y el esfuerzo de integrarlo.'];
 p.historias.push(...mas);
 
+// El proceso operativo de la pastelería: del pedido a la producción y la entrega
+const operacion = notasAHistorias(`Pedidos y producción:
+- Como dueña, quiero ver cuánto hornear mañana según los pedidos confirmados, para no producir de más ni de menos
+- Como dueña, quiero marcar un producto como agotado cuando se acaba, para no vender lo que no hay
+- Como dueña, quiero registrar las mermas del día con su motivo, para saber cuánto pierdo y por qué
+Entrega:
+- Como clienta, quiero elegir el día y el bloque horario de entrega, para recibir la torta cuando estoy en casa`, { rolPorDefecto: 'clienta' });
+[5, 3, 3, 5].forEach((pts, i) => { operacion[i].puntos = pts; });
+p.historias.push(...operacion);
+
+// Criterios verificables (Dado/Cuando/Entonces), reglas de negocio y prioridad con su razón (MoSCoW + WSJF).
+// Se buscan por el inicio del "quiero" para no depender del orden de la plantilla.
+const DETALLE = [
+  ['ver el detalle', 'must', [8, 8, 3], [
+    'Dado un producto publicado, cuando la clienta abre su ficha, entonces ve foto, precio con IVA, porciones e ingredientes.',
+    'Dado un producto agotado, cuando la clienta abre su ficha, entonces ve «Agotado» y no puede agregarlo al carro.',
+    'Dado un producto con alérgenos (nueces, gluten, lactosa), cuando se muestra la ficha, entonces los alérgenos aparecen destacados.',
+  ], ['Todo producto debe declarar sus alérgenos antes de publicarse.', 'El precio se muestra siempre con IVA incluido.']],
+  ['buscar y filtrar', 'should', [5, 3, 1], [
+    'Dado el catálogo, cuando la clienta elige «Tortas», entonces solo ve tortas y el total de resultados.',
+    'Dada una búsqueda sin resultados, cuando termina, entonces se sugieren las categorías disponibles.',
+  ], []],
+  ['agregar productos al carro', 'must', [13, 8, 5], [
+    'Dado un carro con productos, cuando la clienta ingresa una comuna con despacho, entonces ve el costo de envío y el total.',
+    'Dada una comuna fuera de Ñuñoa y Providencia, cuando la ingresa, entonces se le ofrece solo retiro en tienda.',
+    'Dado un carro bajo $15.000 con despacho, cuando intenta continuar, entonces se le informa el monto mínimo.',
+  ], ['Despacho solo a Ñuñoa y Providencia; el resto, retiro en tienda.', 'Monto mínimo con despacho: $15.000.', 'Despacho gratis sobre $40.000.']],
+  ['pagar con tarjeta', 'must', [20, 13, 8], [
+    'Dado un carro válido, cuando la clienta paga con tarjeta y la pasarela aprueba, entonces el pedido queda «Confirmado» y se descuenta el stock.',
+    'Dado un pago rechazado, cuando vuelve a la tienda, entonces ve el motivo y el carro se mantiene.',
+    'Dada una transferencia, cuando no se confirma en 24 horas, entonces el pedido se anula y el stock se libera.',
+  ], ['Un pedido no se produce hasta tener el pago confirmado.', 'Las transferencias se confirman a mano y vencen a las 24 horas.']],
+  ['recibir un correo', 'should', [5, 5, 2], [
+    'Dado un pedido confirmado, cuando se confirma el pago, entonces la clienta recibe en menos de 5 minutos un correo con número de pedido, productos, total y fecha de entrega.',
+  ], ['El correo nunca incluye datos de la tarjeta.']],
+  ['cargar y editar productos', 'must', [8, 8, 5], [
+    'Dado el panel de la dueña, cuando crea un producto sin foto o sin precio, entonces no puede publicarlo.',
+    'Dado un producto publicado, cuando cambia el precio, entonces los pedidos ya confirmados mantienen el precio anterior.',
+  ], ['Un cambio de precio no afecta pedidos ya pagados.']],
+  ['ver los pedidos del día', 'must', [13, 13, 3], [
+    'Dado el día de hoy, cuando la dueña abre Pedidos, entonces ve los pedidos ordenados por bloque de entrega con su estado.',
+    'Dado un pedido listo, cuando lo marca «En camino», entonces la clienta recibe un aviso.',
+  ], ['Estados posibles: Confirmado → En producción → Listo → En camino o Retirado → Entregado.']],
+  ['pagar en cuotas', 'could', [5, 2, 1], [
+    'Dado un total sobre $30.000, cuando la clienta paga con tarjeta de crédito, entonces puede elegir hasta 3 cuotas sin interés.',
+    'Dado un total menor, cuando paga, entonces no se muestra la opción de cuotas.',
+  ], ['Las cuotas sin interés las asume la pastelería: solo sobre $30.000 y hasta 3 cuotas.']],
+  ['acumular puntos', 'could', [5, 1, 2], [
+    'Dado un pedido entregado, cuando se marca «Entregado», entonces la clienta suma 1 punto por cada $1.000 pagados.',
+    'Dado un pedido anulado, cuando se anula, entonces se descuentan los puntos que había sumado.',
+  ], ['Los puntos vencen a los 12 meses.', 'No se suman puntos por el costo de despacho.']],
+  ['crear cupones', 'wont', [3, 1, 1], [
+    'Dado un cupón vigente, cuando la clienta lo ingresa, entonces el descuento se aplica antes del despacho.',
+  ], ['Un solo cupón por pedido.', 'Queda fuera de esta versión: Carla prefiere partir con puntos.']],
+  ['ver las ventas del mes', 'should', [8, 3, 2], [
+    'Dado un mes con pedidos entregados, cuando la dueña abre Reportes, entonces ve unidades y monto por producto, de mayor a menor.',
+  ], ['Solo cuentan pedidos entregados; los anulados no.']],
+  ['comparar las ventas', 'could', [3, 1, 1], [
+    'Dados dos meses con ventas, cuando la dueña los compara, entonces ve la variación en porcentaje por producto.',
+  ], []],
+  ['investigar en 2 días', 'should', [3, 5, 8], null, ['El plazo es fijo: 2 días, aunque no haya respuesta definitiva.']],
+  ['ver cuánto hornear', 'must', [13, 13, 5], [
+    'Dados los pedidos confirmados para mañana, cuando la dueña abre Producción a las 18:00, entonces ve las unidades por producto y por bloque.',
+    'Dado un pedido confirmado después de las 18:00 para mañana, cuando se confirma, entonces la lista de producción se actualiza y avisa del cambio.',
+  ], ['Tortas por encargo: mínimo 48 horas de anticipación.', 'Productos del día (queques, galletas): se confirman hasta las 18:00 del día anterior.', 'Capacidad del horno: hasta 12 tortas por día; sobre eso no se aceptan pedidos.']],
+  ['marcar un producto como agotado', 'must', [8, 13, 8], [
+    'Dado un producto en el catálogo, cuando la dueña lo marca «Agotado», entonces deja de poder agregarse al carro de inmediato.',
+    'Dado un producto en un carro abierto, cuando se agota, entonces la clienta recibe un aviso al pagar y no se cobra.',
+  ], ['Nunca se cobra un producto agotado.']],
+  ['registrar las mermas', 'should', [5, 2, 3], [
+    'Dado el cierre del día, cuando la dueña registra una merma, entonces debe indicar producto, cantidad y motivo (vencido, dañado, error de producción).',
+    'Dado un mes con mermas, cuando abre Reportes, entonces ve el costo total de mermas por motivo.',
+  ], ['Una merma sin motivo no se puede guardar.', 'Los productos del día que no se venden se registran como merma a las 20:00.']],
+  ['elegir el día y el bloque', 'must', [13, 8, 5], [
+    'Dado un carro con despacho, cuando la clienta elige la fecha, entonces solo ve días con al menos 48 horas de anticipación y cupo disponible.',
+    'Dado un bloque con 6 entregas, cuando se llena, entonces deja de ofrecerse.',
+    'Dado un domingo, cuando la clienta elige fecha, entonces no aparece como opción.',
+  ], ['Bloques de entrega: 10–13 h y 15–19 h, de lunes a sábado.', 'Máximo 6 entregas por bloque.']],
+];
+for (const [inicio, prioridad, [valor, urgencia, riesgo], criterios, reglas] of DETALLE) {
+  const x = p.historias.find((y) => y.quiero.startsWith(inicio));
+  if (!x) throw new Error(`No encontré la historia que empieza con «${inicio}»`);
+  Object.assign(x, { prioridad, priorizacion: { valor, urgencia, riesgo }, reglas, ...(criterios ? { criterios } : {}) });
+}
+
 // OKR e hipótesis
 p = agregarObjetivo(p, 'Vender más en línea');
 p = agregarResultado(p, p.objetivos[0].id, 'Pedidos por la tienda: del 0% al 40%');

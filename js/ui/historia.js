@@ -55,6 +55,10 @@ export function editorHistoria(historia, alCambiar, { epicas = [] } = {}) {
       rows: 3,
       oninput: (e) => actualizar({ criterios: e.target.value.split('\n').map((c) => c.trim()).filter(Boolean) }),
     }, (historia.criterios || []).join('\n')), 'Uno por línea. Formato sugerido: Dado… cuando… entonces…'),
+    campo('Reglas de negocio', h('textarea', {
+      rows: 2,
+      oninput: (e) => actualizar({ reglas: e.target.value.split('\n').map((c) => c.trim()).filter(Boolean) }),
+    }, (historia.reglas || []).join('\n')), 'Una por línea: reglas, excepciones o controles que debe respetar. Ej.: «No se aceptan pedidos con menos de 48 horas de anticipación».'),
     h('div', { class: 'editor-fila' },
       campo('Épica', h('input', { type: 'text', value: historia.epica || '', list: idLista, oninput: (e) => actualizar({ epica: e.target.value.trim() }) })),
       h('datalist', { id: idLista }, epicas.map((e) => h('option', { value: e }))),

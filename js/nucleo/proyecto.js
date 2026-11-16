@@ -103,6 +103,7 @@ export function normalizarProyecto(datos) {
     quiero: texto(h.quiero, 1000),
     para: texto(h.para, 1000),
     criterios: (Array.isArray(h.criterios) ? h.criterios : []).map((c) => texto(c, 1000)).filter(Boolean).slice(0, 20),
+    reglas: (Array.isArray(h.reglas) ? h.reglas : []).map((c) => texto(c, 1000)).filter(Boolean).slice(0, 20),
     epica: texto(h.epica, 120),
     puntos: ESCALA_PUNTOS.includes(h.puntos) ? h.puntos : null,
     prioridad: h.prioridad in PRIORIDADES ? h.prioridad : 'should',

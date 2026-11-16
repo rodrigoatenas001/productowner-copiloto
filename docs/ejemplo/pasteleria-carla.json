@@ -6,33 +6,45 @@
   "notas": "Reunión con Carla (pastelería, Ñuñoa)\n- Hoy todo llega por Instagram y WhatsApp, se le pierden pedidos\n- Quiere que vean las tortas con precio y si quedan\n- Que paguen en línea, con tarjeta, y si se puede en cuotas para eventos\n- Despacho solo en Ñuñoa y Providencia, o retiro en tienda\n- Le gustaría premiar a las clientas frecuentes\n- Necesita saber qué se vende más para hornear mejor\n- Pregunta por boletas electrónicas automáticas (no sabe cómo)\n- Presupuesto acotado, quiere partir antes de fiestas patrias",
   "historias": [
     {
-      "id": "h-mvb076tc-2jlci",
+      "id": "h-mwj4dyi0-24bg3",
       "titulo": "Ver el detalle de cada producto antes de…",
       "rol": "clienta",
       "quiero": "ver el detalle de cada producto antes de comprarlo",
       "para": "decidir con toda la información",
       "criterios": [
-        "Dado que tengo acceso, cuando intento ver el detalle de cada producto antes de comprarlo, entonces el sistema me confirma que se realizó."
+        "Dado un producto publicado, cuando la clienta abre su ficha, entonces ve foto, precio con IVA, porciones e ingredientes.",
+        "Dado un producto agotado, cuando la clienta abre su ficha, entonces ve «Agotado» y no puede agregarlo al carro.",
+        "Dado un producto con alérgenos (nueces, gluten, lactosa), cuando se muestra la ficha, entonces los alérgenos aparecen destacados."
       ],
       "epica": "Catálogo",
       "puntos": 3,
-      "prioridad": "should",
+      "prioridad": "must",
       "estado": "done",
       "sprintId": "s1",
       "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
-      "creada": "2026-10-16T13:28:45.888Z",
-      "iniciada": "2026-09-19T13:28:45.886Z",
-      "terminada": "2026-09-22T13:28:45.886Z",
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 8,
+        "urgencia": 8,
+        "riesgo": 3
+      },
+      "reglas": [
+        "Todo producto debe declarar sus alérgenos antes de publicarse.",
+        "El precio se muestra siempre con IVA incluido."
+      ],
+      "iniciada": "2026-10-20T10:27:51.908Z",
+      "terminada": "2026-10-23T10:27:51.908Z",
       "bloqueo": null
     },
     {
-      "id": "h-mvb076tc-3hm0j",
+      "id": "h-mwj4dyi0-3hlz6",
       "titulo": "Buscar y filtrar por categoría",
       "rol": "clienta",
       "quiero": "buscar y filtrar por categoría",
       "para": "encontrar rápido lo que busco",
       "criterios": [
-        "Dado que tengo acceso, cuando intento buscar y filtrar por categoría, entonces el sistema me confirma que se realizó."
+        "Dado el catálogo, cuando la clienta elige «Tortas», entonces solo ve tortas y el total de resultados.",
+        "Dada una búsqueda sin resultados, cuando termina, entonces se sugieren las categorías disponibles."
       ],
       "epica": "Catálogo",
       "puntos": 5,
@@ -40,59 +52,88 @@
       "estado": "done",
       "sprintId": "s1",
       "notaOriginal": "Como clienta, quiero buscar y filtrar por categoría, para encontrar rápido lo que busco",
-      "creada": "2026-10-16T13:28:45.888Z",
-      "iniciada": "2026-09-22T13:28:45.886Z",
-      "terminada": "2026-09-29T13:28:45.886Z",
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 5,
+        "urgencia": 3,
+        "riesgo": 1
+      },
+      "reglas": [],
+      "iniciada": "2026-10-23T10:27:51.908Z",
+      "terminada": "2026-10-30T10:27:51.908Z",
       "bloqueo": null
     },
     {
-      "id": "h-mvb076tc-4667p",
+      "id": "h-mwj4dyi0-4dak5",
       "titulo": "Agregar productos al carro y ver el total…",
       "rol": "clienta",
       "quiero": "agregar productos al carro y ver el total con despacho",
       "para": "saber cuánto pagaré",
       "criterios": [
-        "Dado que tengo acceso, cuando intento agregar productos al carro y ver el total con despacho, entonces el sistema me confirma que se realizó."
+        "Dado un carro con productos, cuando la clienta ingresa una comuna con despacho, entonces ve el costo de envío y el total.",
+        "Dada una comuna fuera de Ñuñoa y Providencia, cuando la ingresa, entonces se le ofrece solo retiro en tienda.",
+        "Dado un carro bajo $15.000 con despacho, cuando intenta continuar, entonces se le informa el monto mínimo."
       ],
       "epica": "Compra",
       "puntos": 5,
-      "prioridad": "should",
+      "prioridad": "must",
       "estado": "done",
       "sprintId": "s2",
       "notaOriginal": "Como clienta, quiero agregar productos al carro y ver el total con despacho, para saber cuánto pagaré",
-      "creada": "2026-10-16T13:28:45.888Z",
-      "iniciada": "2026-10-03T13:28:45.886Z",
-      "terminada": "2026-10-07T13:28:45.886Z",
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 13,
+        "urgencia": 8,
+        "riesgo": 5
+      },
+      "reglas": [
+        "Despacho solo a Ñuñoa y Providencia; el resto, retiro en tienda.",
+        "Monto mínimo con despacho: $15.000.",
+        "Despacho gratis sobre $40.000."
+      ],
+      "iniciada": "2026-11-03T10:27:51.908Z",
+      "terminada": "2026-11-07T10:27:51.908Z",
       "bloqueo": null
     },
     {
-      "id": "h-mvb076tc-5tixd",
+      "id": "h-mwj4dyi0-5nd2k",
       "titulo": "Pagar con tarjeta o transferencia",
       "rol": "clienta",
       "quiero": "pagar con tarjeta o transferencia",
       "para": "comprar sin salir de la tienda",
       "criterios": [
-        "Dado que tengo acceso, cuando intento pagar con tarjeta o transferencia, entonces el sistema me confirma que se realizó."
+        "Dado un carro válido, cuando la clienta paga con tarjeta y la pasarela aprueba, entonces el pedido queda «Confirmado» y se descuenta el stock.",
+        "Dado un pago rechazado, cuando vuelve a la tienda, entonces ve el motivo y el carro se mantiene.",
+        "Dada una transferencia, cuando no se confirma en 24 horas, entonces el pedido se anula y el stock se libera."
       ],
       "epica": "Compra",
       "puntos": 8,
-      "prioridad": "should",
+      "prioridad": "must",
       "estado": "doing",
       "sprintId": "s3",
       "notaOriginal": "Como clienta, quiero pagar con tarjeta o transferencia, para comprar sin salir de la tienda",
-      "creada": "2026-10-16T13:28:45.888Z",
-      "iniciada": "2026-10-16T13:28:45.886Z",
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 20,
+        "urgencia": 13,
+        "riesgo": 8
+      },
+      "reglas": [
+        "Un pedido no se produce hasta tener el pago confirmado.",
+        "Las transferencias se confirman a mano y vencen a las 24 horas."
+      ],
+      "iniciada": "2026-11-16T10:27:51.908Z",
       "terminada": null,
       "bloqueo": null
     },
     {
-      "id": "h-mvb076td-6ubq2",
+      "id": "h-mwj4dyi0-6vxja",
       "titulo": "Recibir un correo con el detalle de mi…",
       "rol": "clienta",
       "quiero": "recibir un correo con el detalle de mi compra",
       "para": "tener un respaldo",
       "criterios": [
-        "Dado que tengo acceso, cuando intento recibir un correo con el detalle de mi compra, entonces el sistema me confirma que se realizó."
+        "Dado un pedido confirmado, cuando se confirma el pago, entonces la clienta recibe en menos de 5 minutos un correo con número de pedido, productos, total y fecha de entrega."
       ],
       "epica": "Compra",
       "puntos": 3,
@@ -100,49 +141,75 @@
       "estado": "doing",
       "sprintId": "s3",
       "notaOriginal": "Como clienta, quiero recibir un correo con el detalle de mi compra, para tener un respaldo",
-      "creada": "2026-10-16T13:28:45.889Z",
-      "iniciada": "2026-10-16T13:28:45.886Z",
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 5,
+        "urgencia": 5,
+        "riesgo": 2
+      },
+      "reglas": [
+        "El correo nunca incluye datos de la tarjeta."
+      ],
+      "iniciada": "2026-11-16T10:27:51.908Z",
       "terminada": null,
       "bloqueo": {
         "motivo": "Falta la cuenta de la pasarela de pago a nombre de Carla",
-        "desde": "2026-10-15T13:28:45.886Z"
+        "desde": "2026-11-15T10:27:51.908Z"
       }
     },
     {
-      "id": "h-mvb076td-71m6f",
+      "id": "h-mwj4dyi0-7t9j2",
       "titulo": "Cargar y editar productos",
       "rol": "dueña",
       "quiero": "cargar y editar productos",
       "para": "mantener el catálogo al día",
       "criterios": [
-        "Dado que tengo acceso, cuando intento cargar y editar productos, entonces el sistema me confirma que se realizó."
+        "Dado el panel de la dueña, cuando crea un producto sin foto o sin precio, entonces no puede publicarlo.",
+        "Dado un producto publicado, cuando cambia el precio, entonces los pedidos ya confirmados mantienen el precio anterior."
       ],
       "epica": "Administración",
       "puntos": 5,
-      "prioridad": "should",
+      "prioridad": "must",
       "estado": "todo",
       "sprintId": "s3",
       "notaOriginal": "Como dueña, quiero cargar y editar productos, para mantener el catálogo al día",
-      "creada": "2026-10-16T13:28:45.889Z"
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 8,
+        "urgencia": 8,
+        "riesgo": 5
+      },
+      "reglas": [
+        "Un cambio de precio no afecta pedidos ya pagados."
+      ]
     },
     {
-      "id": "h-mvb076td-8jqd4",
+      "id": "h-mwj4dyi0-895yl",
       "titulo": "Ver los pedidos del día con su estado",
       "rol": "dueña",
       "quiero": "ver los pedidos del día con su estado",
       "para": "despacharlos a tiempo",
       "criterios": [
-        "Dado que tengo acceso, cuando intento ver los pedidos del día con su estado, entonces el sistema me confirma que se realizó."
+        "Dado el día de hoy, cuando la dueña abre Pedidos, entonces ve los pedidos ordenados por bloque de entrega con su estado.",
+        "Dado un pedido listo, cuando lo marca «En camino», entonces la clienta recibe un aviso."
       ],
       "epica": "Administración",
       "puntos": 3,
-      "prioridad": "should",
+      "prioridad": "must",
       "estado": "done",
       "sprintId": "s2",
       "notaOriginal": "Como dueña, quiero ver los pedidos del día con su estado, para despacharlos a tiempo",
-      "creada": "2026-10-16T13:28:45.889Z",
-      "iniciada": "2026-10-07T13:28:45.886Z",
-      "terminada": "2026-10-13T13:28:45.886Z",
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 13,
+        "urgencia": 13,
+        "riesgo": 3
+      },
+      "reglas": [
+        "Estados posibles: Confirmado → En producción → Listo → En camino o Retirado → Entregado."
+      ],
+      "iniciada": "2026-11-07T10:27:51.908Z",
+      "terminada": "2026-11-13T10:27:51.908Z",
       "bloqueo": null
     },
     {
@@ -152,61 +219,89 @@
       "quiero": "pagar en cuotas sin interés",
       "para": "comprar tortas para eventos grandes",
       "criterios": [
-        "Dado un total mayor a $30.000, cuando pago, entonces puedo elegir 3 cuotas."
+        "Dado un total sobre $30.000, cuando la clienta paga con tarjeta de crédito, entonces puede elegir hasta 3 cuotas sin interés.",
+        "Dado un total menor, cuando paga, entonces no se muestra la opción de cuotas."
       ],
       "epica": "Compra",
       "puntos": 5,
-      "prioridad": "must",
+      "prioridad": "could",
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
-      "creada": "2026-10-16T13:28:45.888Z",
+      "creada": "2026-11-16T10:27:51.912Z",
+      "priorizacion": {
+        "valor": 5,
+        "urgencia": 2,
+        "riesgo": 1
+      },
+      "reglas": [
+        "Las cuotas sin interés las asume la pastelería: solo sobre $30.000 y hasta 3 cuotas."
+      ],
       "dependeDe": [
-        "h-mvb076tc-5tixd"
+        "h-mwj4dyi0-5nd2k"
       ]
     },
     {
-      "id": "h-mvb076td-9k3cy",
+      "id": "h-mwj4dyi1-93821",
       "titulo": "Acumular puntos por cada compra",
       "rol": "clienta frecuente",
       "quiero": "acumular puntos por cada compra",
       "para": "obtener descuentos",
       "criterios": [
-        "Dado que tengo acceso, cuando intento acumular puntos por cada compra, entonces el sistema me confirma que se realizó."
+        "Dado un pedido entregado, cuando se marca «Entregado», entonces la clienta suma 1 punto por cada $1.000 pagados.",
+        "Dado un pedido anulado, cuando se anula, entonces se descuentan los puntos que había sumado."
       ],
       "epica": "Fidelización",
       "puntos": 8,
-      "prioridad": "should",
+      "prioridad": "could",
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como clienta frecuente, quiero acumular puntos por cada compra, para obtener descuentos",
-      "creada": "2026-10-16T13:28:45.889Z"
+      "creada": "2026-11-16T10:27:51.913Z",
+      "priorizacion": {
+        "valor": 5,
+        "urgencia": 1,
+        "riesgo": 2
+      },
+      "reglas": [
+        "Los puntos vencen a los 12 meses.",
+        "No se suman puntos por el costo de despacho."
+      ]
     },
     {
-      "id": "h-mvb076td-a8y6p",
+      "id": "h-mwj4dyi1-ac744",
       "titulo": "Crear cupones de descuento",
       "rol": "dueña",
       "quiero": "crear cupones de descuento",
       "para": "atraer clientas en fechas especiales",
       "criterios": [
-        "Dado que tengo acceso, cuando intento crear cupones de descuento, entonces el sistema me confirma que se realizó."
+        "Dado un cupón vigente, cuando la clienta lo ingresa, entonces el descuento se aplica antes del despacho."
       ],
       "epica": "Fidelización",
       "puntos": 5,
-      "prioridad": "could",
+      "prioridad": "wont",
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero crear cupones de descuento, para atraer clientas en fechas especiales",
-      "creada": "2026-10-16T13:28:45.889Z"
+      "creada": "2026-11-16T10:27:51.913Z",
+      "priorizacion": {
+        "valor": 3,
+        "urgencia": 1,
+        "riesgo": 1
+      },
+      "reglas": [
+        "Un solo cupón por pedido.",
+        "Queda fuera de esta versión: Carla prefiere partir con puntos."
+      ]
     },
     {
-      "id": "h-mvb076td-bn5dh",
+      "id": "h-mwj4dyi1-bddwv",
       "titulo": "Ver las ventas del mes por producto",
       "rol": "dueña",
       "quiero": "ver las ventas del mes por producto",
       "para": "saber qué hornear más",
       "criterios": [
-        "Dado que tengo acceso, cuando intento ver las ventas del mes por producto, entonces el sistema me confirma que se realizó."
+        "Dado un mes con pedidos entregados, cuando la dueña abre Reportes, entonces ve unidades y monto por producto, de mayor a menor."
       ],
       "epica": "Reportes",
       "puntos": 5,
@@ -214,27 +309,41 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero ver las ventas del mes por producto, para saber qué hornear más",
-      "creada": "2026-10-16T13:28:45.889Z"
+      "creada": "2026-11-16T10:27:51.913Z",
+      "priorizacion": {
+        "valor": 8,
+        "urgencia": 3,
+        "riesgo": 2
+      },
+      "reglas": [
+        "Solo cuentan pedidos entregados; los anulados no."
+      ]
     },
     {
-      "id": "h-mvb076td-c2ljd",
+      "id": "h-mwj4dyi1-c5lmm",
       "titulo": "Comparar las ventas con el mes anterior",
       "rol": "dueña",
       "quiero": "comparar las ventas con el mes anterior",
       "para": "medir si la tienda funciona",
       "criterios": [
-        "Dado que tengo acceso, cuando intento comparar las ventas con el mes anterior, entonces el sistema me confirma que se realizó."
+        "Dados dos meses con ventas, cuando la dueña los compara, entonces ve la variación en porcentaje por producto."
       ],
       "epica": "Reportes",
       "puntos": 3,
-      "prioridad": "should",
+      "prioridad": "could",
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero comparar las ventas con el mes anterior, para medir si la tienda funciona",
-      "creada": "2026-10-16T13:28:45.889Z"
+      "creada": "2026-11-16T10:27:51.913Z",
+      "priorizacion": {
+        "valor": 3,
+        "urgencia": 1,
+        "riesgo": 1
+      },
+      "reglas": []
     },
     {
-      "id": "h-mvb076te-d40lq",
+      "id": "h-mwj4dyi3-dc7cf",
       "titulo": "Investigar en 2 días cómo emitir boletas electrónicas…",
       "rol": "usuario",
       "quiero": "investigar en 2 días cómo emitir boletas electrónicas automáticamente",
@@ -248,8 +357,125 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Investigar en 2 días cómo emitir boletas electrónicas automáticamente",
-      "creada": "2026-10-16T13:28:45.890Z",
-      "tipo": "spike"
+      "creada": "2026-11-16T10:27:51.915Z",
+      "tipo": "spike",
+      "priorizacion": {
+        "valor": 3,
+        "urgencia": 5,
+        "riesgo": 8
+      },
+      "reglas": [
+        "El plazo es fijo: 2 días, aunque no haya respuesta definitiva."
+      ]
+    },
+    {
+      "id": "h-mwj4dyi3-eumv4",
+      "titulo": "Ver cuánto hornear mañana según los pedidos confirmados",
+      "rol": "dueña",
+      "quiero": "ver cuánto hornear mañana según los pedidos confirmados",
+      "para": "no producir de más ni de menos",
+      "criterios": [
+        "Dados los pedidos confirmados para mañana, cuando la dueña abre Producción a las 18:00, entonces ve las unidades por producto y por bloque.",
+        "Dado un pedido confirmado después de las 18:00 para mañana, cuando se confirma, entonces la lista de producción se actualiza y avisa del cambio."
+      ],
+      "epica": "Pedidos y producción",
+      "puntos": 5,
+      "prioridad": "must",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como dueña, quiero ver cuánto hornear mañana según los pedidos confirmados, para no producir de más ni de menos",
+      "creada": "2026-11-16T10:27:51.915Z",
+      "priorizacion": {
+        "valor": 13,
+        "urgencia": 13,
+        "riesgo": 5
+      },
+      "reglas": [
+        "Tortas por encargo: mínimo 48 horas de anticipación.",
+        "Productos del día (queques, galletas): se confirman hasta las 18:00 del día anterior.",
+        "Capacidad del horno: hasta 12 tortas por día; sobre eso no se aceptan pedidos."
+      ]
+    },
+    {
+      "id": "h-mwj4dyi3-fi2sd",
+      "titulo": "Marcar un producto como agotado cuando se acaba",
+      "rol": "dueña",
+      "quiero": "marcar un producto como agotado cuando se acaba",
+      "para": "no vender lo que no hay",
+      "criterios": [
+        "Dado un producto en el catálogo, cuando la dueña lo marca «Agotado», entonces deja de poder agregarse al carro de inmediato.",
+        "Dado un producto en un carro abierto, cuando se agota, entonces la clienta recibe un aviso al pagar y no se cobra."
+      ],
+      "epica": "Pedidos y producción",
+      "puntos": 3,
+      "prioridad": "must",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como dueña, quiero marcar un producto como agotado cuando se acaba, para no vender lo que no hay",
+      "creada": "2026-11-16T10:27:51.915Z",
+      "priorizacion": {
+        "valor": 8,
+        "urgencia": 13,
+        "riesgo": 8
+      },
+      "reglas": [
+        "Nunca se cobra un producto agotado."
+      ]
+    },
+    {
+      "id": "h-mwj4dyi3-gkh1o",
+      "titulo": "Registrar las mermas del día con su motivo",
+      "rol": "dueña",
+      "quiero": "registrar las mermas del día con su motivo",
+      "para": "saber cuánto pierdo y por qué",
+      "criterios": [
+        "Dado el cierre del día, cuando la dueña registra una merma, entonces debe indicar producto, cantidad y motivo (vencido, dañado, error de producción).",
+        "Dado un mes con mermas, cuando abre Reportes, entonces ve el costo total de mermas por motivo."
+      ],
+      "epica": "Pedidos y producción",
+      "puntos": 3,
+      "prioridad": "should",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como dueña, quiero registrar las mermas del día con su motivo, para saber cuánto pierdo y por qué",
+      "creada": "2026-11-16T10:27:51.915Z",
+      "priorizacion": {
+        "valor": 5,
+        "urgencia": 2,
+        "riesgo": 3
+      },
+      "reglas": [
+        "Una merma sin motivo no se puede guardar.",
+        "Los productos del día que no se venden se registran como merma a las 20:00."
+      ]
+    },
+    {
+      "id": "h-mwj4dyi3-hdwrs",
+      "titulo": "Elegir el día y el bloque horario de…",
+      "rol": "clienta",
+      "quiero": "elegir el día y el bloque horario de entrega",
+      "para": "recibir la torta cuando estoy en casa",
+      "criterios": [
+        "Dado un carro con despacho, cuando la clienta elige la fecha, entonces solo ve días con al menos 48 horas de anticipación y cupo disponible.",
+        "Dado un bloque con 6 entregas, cuando se llena, entonces deja de ofrecerse.",
+        "Dado un domingo, cuando la clienta elige fecha, entonces no aparece como opción."
+      ],
+      "epica": "Entrega",
+      "puntos": 5,
+      "prioridad": "must",
+      "estado": "backlog",
+      "sprintId": null,
+      "notaOriginal": "Como clienta, quiero elegir el día y el bloque horario de entrega, para recibir la torta cuando estoy en casa",
+      "creada": "2026-11-16T10:27:51.915Z",
+      "priorizacion": {
+        "valor": 13,
+        "urgencia": 8,
+        "riesgo": 5
+      },
+      "reglas": [
+        "Bloques de entrega: 10–13 h y 15–19 h, de lunes a sábado.",
+        "Máximo 6 entregas por bloque."
+      ]
     }
   ],
   "sprints": [
@@ -257,8 +483,8 @@
       "id": "s1",
       "nombre": "Sprint 1",
       "objetivo": "Que las clientas vean el catálogo con precios",
-      "inicio": "2026-09-18",
-      "fin": "2026-10-01",
+      "inicio": "2026-10-19",
+      "fin": "2026-11-01",
       "capacidad": 10,
       "estado": "cerrado",
       "feedback": ""
@@ -267,8 +493,8 @@
       "id": "s2",
       "nombre": "Sprint 2",
       "objetivo": "Que las clientas armen su carro",
-      "inicio": "2026-10-02",
-      "fin": "2026-10-15",
+      "inicio": "2026-11-02",
+      "fin": "2026-11-15",
       "capacidad": 10,
       "estado": "cerrado",
       "feedback": ""
@@ -277,8 +503,8 @@
       "id": "s3",
       "nombre": "Sprint 3",
       "objetivo": "Que las clientas puedan pagar en línea",
-      "inicio": "2026-10-16",
-      "fin": "2026-10-29",
+      "inicio": "2026-11-16",
+      "fin": "2026-11-29",
       "capacidad": 13,
       "estado": "activo",
       "feedback": ""
@@ -286,25 +512,25 @@
   ],
   "retros": [
     {
-      "id": "r-mvb076tf-h0mog",
+      "id": "r-mwj4dyi4-lbxk7",
       "titulo": "Retro de Sprint 2",
       "sprintId": "s2",
-      "fecha": "2026-10-16",
+      "fecha": "2026-11-16",
       "notas": [
         {
-          "id": "n-mvb076tf-i03b6",
+          "id": "n-mwj4dyi4-m7t89",
           "columna": "bien",
           "texto": "Carla respondió las dudas el mismo día",
           "votos": 0
         },
         {
-          "id": "n-mvb076tf-jku4q",
+          "id": "n-mwj4dyi4-nlo3b",
           "columna": "mejorar",
           "texto": "Las fotos llegaron tarde y atrasaron el catálogo",
           "votos": 2
         },
         {
-          "id": "n-mvb076tf-kmuhn",
+          "id": "n-mwj4dyi4-obw3d",
           "columna": "ideas",
           "texto": "Pedir fotos y textos con una semana de anticipación",
           "votos": 0
@@ -312,7 +538,7 @@
       ],
       "acciones": [
         {
-          "id": "a-mvb076tf-lhs6f",
+          "id": "a-mwj4dyi4-pe0jz",
           "texto": "Pedir los materiales del siguiente sprint en la Review",
           "responsable": "Rodrigo",
           "hecha": false
@@ -338,15 +564,15 @@
   },
   "objetivos": [
     {
-      "id": "o-mvb076te-ecqfb",
+      "id": "o-mwj4dyi3-imt8g",
       "objetivo": "Vender más en línea",
       "resultados": [
         {
-          "id": "kr-mvb076te-fbo3i",
+          "id": "kr-mwj4dyi3-je9cp",
           "texto": "Pedidos por la tienda: del 0% al 40%"
         },
         {
-          "id": "kr-mvb076te-gob7c",
+          "id": "kr-mwj4dyi3-k9509",
           "texto": "Mensajes de consulta: bajar a la mitad"
         }
       ]
@@ -358,7 +584,7 @@
       "lograremos": "menos consultas por mensaje",
       "veremos": "los mensajes bajen a la mitad",
       "resultados": [
-        "kr-mvb076te-gob7c"
+        "kr-mwj4dyi3-k9509"
       ],
       "horizonte": "",
       "resultadoHipotesis": "cumplida",
@@ -378,7 +604,7 @@
       "lograremos": "que más visitas terminen comprando",
       "veremos": "el 40% de los pedidos llegue por la tienda",
       "resultados": [
-        "kr-mvb076te-fbo3i"
+        "kr-mwj4dyi3-je9cp"
       ],
       "horizonte": "",
       "resultadoHipotesis": "pendiente",
@@ -427,62 +653,65 @@
   },
   "hitos": [
     {
-      "id": "hi-mvb076tf-mads1",
-      "nombre": "Hito 1: Catálogo",
+      "id": "hi-mwj4dyi4-qeq7w",
+      "nombre": "Hito 1: Compra",
       "porcentaje": 30,
       "historiaIds": [
-        "h-mvb076tc-2jlci",
-        "h-mvb076tc-3hm0j",
-        "h-mvb076tc-4667p",
-        "h-mvb076tc-5tixd"
+        "h-mwj4dyi0-24bg3",
+        "h-mwj4dyi0-3hlz6",
+        "h-mwj4dyi0-4dak5",
+        "h-mwj4dyi0-5nd2k",
+        "h-mwj4dyi0-6vxja"
       ],
-      "fecha": "2026-10-29",
+      "fecha": "2026-11-29",
       "estado": "aceptado",
       "aceptacion": {
         "nombre": "Carla Rojas",
-        "fecha": "2026-10-15"
+        "fecha": "2026-11-15"
       }
     },
     {
-      "id": "hi-mvb076tf-n2tpv",
-      "nombre": "Hito 2: Compra",
+      "id": "hi-mwj4dyi4-r8w8r",
+      "nombre": "Hito 2: Administración",
       "porcentaje": 40,
       "historiaIds": [
-        "h-mvb076td-6ubq2",
-        "h-mvb076td-71m6f",
-        "h-mvb076td-8jqd4",
-        "h-extra-1"
+        "h-mwj4dyi0-7t9j2",
+        "h-mwj4dyi0-895yl",
+        "h-extra-1",
+        "h-mwj4dyi1-93821"
       ],
-      "fecha": "2026-11-12",
+      "fecha": "2026-12-13",
       "estado": "pendiente",
       "aceptacion": null
     },
     {
-      "id": "hi-mvb076tf-oydx2",
-      "nombre": "Hito 3: Fidelización",
+      "id": "hi-mwj4dyi4-sen0u",
+      "nombre": "Hito 3: Pedidos y producción",
       "porcentaje": 30,
       "historiaIds": [
-        "h-mvb076td-9k3cy",
-        "h-mvb076td-a8y6p",
-        "h-mvb076td-bn5dh",
-        "h-mvb076td-c2ljd",
-        "h-mvb076te-d40lq"
+        "h-mwj4dyi1-bddwv",
+        "h-mwj4dyi1-c5lmm",
+        "h-mwj4dyi3-dc7cf",
+        "h-mwj4dyi3-eumv4",
+        "h-mwj4dyi3-fi2sd",
+        "h-mwj4dyi3-gkh1o",
+        "h-mwj4dyi3-hdwrs"
       ],
-      "fecha": "2026-11-26",
+      "fecha": "2026-12-27",
       "estado": "pendiente",
       "aceptacion": null
     }
   ],
   "cambios": [
     {
-      "id": "cr-mvb076tf-pzn53",
-      "fecha": "2026-10-16",
+      "id": "cr-mwj4dyi4-tjlj8",
+      "fecha": "2026-11-16",
       "descripcion": "Agregar un blog de recetas en la tienda",
       "horas": 12,
       "estado": "propuesto"
     }
   ],
-  "respaldado": "2026-10-16T13:28:45.891Z",
-  "creado": "2026-10-16T13:28:45.886Z",
-  "actualizado": "2026-10-16T13:28:45.886Z"
+  "respaldado": "2026-11-16T10:27:51.916Z",
+  "creado": "2026-11-16T10:27:51.908Z",
+  "actualizado": "2026-11-16T10:27:51.908Z"
 }
