@@ -1,11 +1,11 @@
 // "Kanban liviano" dentro de Scrum: columna de revisión opcional, límites de trabajo en curso (WIP),
 // bloqueos con motivo y tiempo de ciclo (desde que se empieza hasta que se termina).
 
-export const FLUJO_INICIAL = { revision: false, wip: { doing: null, review: null } };
+export const FLUJO_INICIAL = { modo: 'scrum', revision: false, wip: { doing: null, review: null }, ultimaDaily: null };
 
 export function flujoDe(proyecto) {
   const f = proyecto.flujo || {};
-  return { revision: f.revision === true, wip: { doing: f.wip?.doing ?? null, review: f.wip?.review ?? null } };
+  return { modo: f.modo === 'kanban' ? 'kanban' : 'scrum', revision: f.revision === true, wip: { doing: f.wip?.doing ?? null, review: f.wip?.review ?? null }, ultimaDaily: f.ultimaDaily || null };
 }
 
 /** Columnas del tablero del sprint, según la configuración del proyecto. */
@@ -51,7 +51,8 @@ export function diasBloqueada(historia, hoy = new Date()) {
 
 export function normalizarFlujo(f) {
   const limite = (v) => (Number.isInteger(v) && v > 0 && v <= 50 ? v : null);
-  return { revision: f?.revision === true, wip: { doing: limite(f?.wip?.doing), review: limite(f?.wip?.review) } };
+  const fecha = typeof f?.ultimaDaily === 'string' && !Number.isNaN(new Date(f.ultimaDaily).getTime()) ? f.ultimaDaily : null;
+  return { modo: f?.modo === 'kanban' ? 'kanban' : 'scrum', revision: f?.revision === true, wip: { doing: limite(f?.wip?.doing), review: limite(f?.wip?.review) }, ultimaDaily: fecha };
 }
 
 export function normalizarBloqueo(b) {

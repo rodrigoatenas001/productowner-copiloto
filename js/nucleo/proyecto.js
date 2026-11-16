@@ -118,6 +118,7 @@ export function normalizarProyecto(datos) {
     creada: texto(h.creada, 40) || new Date().toISOString(),
     terminada: texto(h.terminada, 40) || null,
     iniciada: texto(h.iniciada, 40) || null,
+    entrada: texto(h.entrada, 40) || null,
     bloqueo: normalizarBloqueo(h.bloqueo),
     horas: Number.isFinite(h.horas) && h.horas > 0 && h.horas <= 10000 ? h.horas : null,
     cambioId: texto(h.cambioId, 60) || null,

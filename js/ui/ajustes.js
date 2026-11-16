@@ -6,6 +6,7 @@ import { PROVEEDORES, probarConexion, iaConfigurada } from '../ia.js';
 import { importarCsv } from '../nucleo/importar.js';
 import { repoGithub } from '../nucleo/issues.js';
 import { flujoDe } from '../nucleo/flujo.js';
+import { cambiarModo } from '../nucleo/kanban.js';
 import { botonesMarkdown } from './compartir.js';
 import { imprimirDocumento } from './imprimir.js';
 import { seccionCarpeta, carpetaLista, nombreCarpeta } from './carpeta.js';
@@ -264,6 +265,15 @@ function seccionFlujo(app) {
   }), null, 'wip');
   return h('section', { class: 'panel', 'aria-labelledby': 'aj-flujo' },
     h('h2', { id: 'aj-flujo' }, 'Flujo del tablero'),
+    interruptor('Flujo continuo (Kanban), sin sprints', f.modo === 'kanban', async (activo) => {
+      const hayActivo = app.proyecto.sprints.some((s) => s.estado === 'activo');
+      const pendientesTablero = app.proyecto.historias.some((h0) => !h0.sprintId && ['todo', 'doing', 'review'].includes(h0.estado));
+      const detalle = activo
+        ? (hayActivo ? 'El sprint en curso se cierra y lo que no se terminó pasa al tablero continuo.' : 'La sección Sprint pasa a llamarse Tablero: traes trabajo del backlog cuando hay capacidad.')
+        : (pendientesTablero ? 'Lo que no se terminó en el tablero vuelve al backlog, para planificarlo en un sprint.' : 'Vuelves a trabajar por sprints.');
+      if (!(await confirmar(activo ? '¿Trabajar en flujo continuo (Kanban)?' : '¿Volver a trabajar por sprints?', { detalle, aceptar: activo ? 'Usar Kanban' : 'Usar sprints' }))) { app.render(); return; }
+      app.cambiar((x) => cambiarModo(x, activo ? 'kanban' : 'scrum'));
+    }, 'Para soporte, incidencias y mejoras que llegan todos los días. Con sprints conviene cuando se construye algo nuevo y se quiere mostrar avance cada dos semanas.'),
     h('p', { class: 'ayuda' }, 'Lo mejor de Kanban dentro del sprint: limitar el trabajo en curso hace que las cosas se terminen antes. Un buen punto de partida es un límite igual al número de personas.'),
     interruptor('Columna "En revisión"', f.revision, (activa) => guardar({ revision: activa }), 'Antes de terminar, otra persona revisa la tarjeta.'),
     h('div', { class: 'editor-fila' }, limite('doing', 'Límite en "En curso"'), f.revision ? limite('review', 'Límite en "En revisión"') : null));

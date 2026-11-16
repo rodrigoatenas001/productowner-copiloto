@@ -2,6 +2,14 @@
 // Definiciones cortas, en lenguaje simple y con un ejemplo cuando ayuda.
 
 export const GLOSARIO = {
+  entrega: {
+    termino: 'Tiempo de entrega y de ciclo',
+    texto: 'Entrega: desde que el trabajo entra al tablero hasta que se termina (lo que espera quien lo pidió). Ciclo: desde que se empieza hasta que se termina. Se mira el percentil 85: «el 85% se termina en este tiempo o menos», que sirve para comprometer plazos.',
+  },
+  cfd: {
+    termino: 'Diagrama de flujo acumulado',
+    texto: 'Cuántas historias hay cada día por hacer, en curso y hechas. Si la banda «en curso» se ensancha, entra más trabajo del que sale: hay un cuello de botella o demasiado trabajo abierto.',
+  },
   daily: {
     termino: 'Daily',
     texto: 'Reunión diaria de 15 minutos del equipo para sincronizarse: qué se terminó, en qué se sigue y qué está bloqueado. No es un informe para jefaturas: los problemas se resuelven después, con quienes corresponda.',

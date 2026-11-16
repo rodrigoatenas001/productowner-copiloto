@@ -42,6 +42,10 @@ export const ETAPAS = [
     texto: 'Planificas un sprint según la capacidad, mueves las tarjetas en el tablero, marcas bloqueos y sigues el burndown.',
     destinos: [['Sprint', 'sprint']],
     estado: (p) => {
+      if (p.flujo?.modo === 'kanban') {
+        const enCurso = p.historias.filter((h) => !h.sprintId && (h.estado === 'doing' || h.estado === 'review')).length;
+        return [enCurso ? 'curso' : 'pendiente', `Flujo continuo · ${enCurso} en curso`];
+      }
       const activo = p.sprints.find((s) => s.estado === 'activo');
       const cerrados = p.sprints.filter((s) => s.estado === 'cerrado').length;
       if (activo) return ['curso', `${activo.nombre} en curso`];

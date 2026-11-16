@@ -51,7 +51,7 @@ test('flujo, bloqueos y fechas sobreviven al respaldo, limpios', () => {
   p.historias[1].bloqueo = { motivo: '' };
   p.historias[1].estado = 'review';
   const n = normalizarProyecto(JSON.parse(JSON.stringify(p)));
-  assert.deepEqual(n.flujo, { revision: true, wip: { doing: 3, review: null } });
+  assert.deepEqual(n.flujo, { modo: 'scrum', revision: true, wip: { doing: 3, review: null }, ultimaDaily: null });
   assert.equal(n.historias[0].bloqueo.motivo, 'API caída');
   assert.ok(n.historias[0].iniciada);
   assert.equal(n.historias[1].bloqueo, null);

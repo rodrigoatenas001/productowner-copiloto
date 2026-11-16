@@ -9,6 +9,8 @@ import { reporteSprint, notasDeVersion, informeCliente } from '../nucleo/reporte
 import { sugerirObjetivo } from '../nucleo/objetivo.js';
 import { iaConfigurada, objetivoConIa, notasConIa } from '../ia.js';
 import { resumenDaily, dailyMarkdown, DIAS_ESTANCADA } from '../nucleo/daily.js';
+import { esKanban } from '../nucleo/kanban.js';
+import { vistaKanban } from './kanban.js';
 
 let notasIa = null; // { sprintId, estado: 'corriendo'|'lista'|'error', texto, error }
 import {
@@ -20,6 +22,7 @@ let verDaily = false; // panel de la Daily abierto sobre el tablero
 const filtroTablero = { epica: '', bloqueadas: false };
 
 export function vistaSprint(app) {
+  if (esKanban(app.proyecto)) return vistaKanban(app);
   const p = app.proyecto;
   const activo = p.sprints.find((s) => s.estado === 'activo');
   const planificado = p.sprints.find((s) => s.estado === 'planificado');
@@ -138,7 +141,10 @@ function planificar(app, sprint) {
 }
 
 /** Los 15 minutos de la Daily: qué se terminó, qué está en curso, qué está bloqueado y si se va a tiempo. */
-function panelDaily(app, sprint) {
+export function panelDaily(app, sprint, {
+  alMarcar = (x, cuando) => ({ ...x, sprints: x.sprints.map((s) => (s.id === sprint.id ? { ...s, ultimaDaily: cuando } : s)) }),
+  alCerrar = () => { verDaily = false; app.render(); },
+} = {}) {
   const r = resumenDaily(app.proyecto, sprint);
   const dias = (n) => (n === 0 ? 'desde hoy' : `${n} ${n === 1 ? 'día' : 'días'}`);
   const grupo = (titulo, clase, items, vacioTexto) => h('div', { class: `daily-grupo daily-grupo--${clase}` },
@@ -151,7 +157,7 @@ function panelDaily(app, sprint) {
       h('h2', { id: 'daily-titulo' }, 'Daily', termino('daily')),
       ritmo ? h('span', { class: `chip ${ritmo[1]}` }, ritmo[0]) : null,
       r.pendiente !== null ? h('span', { class: 'tarjeta-meta' }, `faltan ${r.pendiente} pts; lo ideal hoy: ${r.ideal}`) : null,
-      h('button', { type: 'button', class: 'icono', 'aria-label': 'Cerrar la Daily', onclick: () => { verDaily = false; app.render(); } }, '×')),
+      h('button', { type: 'button', class: 'icono', 'aria-label': 'Cerrar la Daily', onclick: alCerrar }, '×')),
     r.objetivo ? h('p', {}, h('strong', {}, 'Objetivo: '), r.objetivo) : null,
     h('div', { class: 'daily-grupos' },
       grupo('Terminado', 'hecho', r.terminadas.map((x) => h('li', {}, x.titulo)), `Nada desde ${desde}`),
@@ -165,7 +171,7 @@ function panelDaily(app, sprint) {
       h('button', {
         type: 'button', class: 'btn',
         onclick: () => {
-          app.cambiar((x) => ({ ...x, sprints: x.sprints.map((s) => (s.id === sprint.id ? { ...s, ultimaDaily: new Date().toISOString() } : s)) }));
+          app.cambiar((x) => alMarcar(x, new Date().toISOString()));
           app.avisar('Daily registrada: la próxima mostrará lo terminado desde ahora.');
         },
       }, 'Daily hecha'),

@@ -16,6 +16,7 @@ import { vistaComentar } from './ui/comentar.js';
 import { cajaRecorrido, avisoEjemplo, cajaInfo, PASOS_RECORRIDO } from './ui/ayuda.js';
 import { normalizarProyecto, resumenSprint } from './nucleo/proyecto.js';
 import { activarAtajos, abrirBuscador } from './ui/buscador.js';
+import { esKanban } from './nucleo/kanban.js';
 import { iniciarCarpeta, alGuardarEnCarpeta, alBorrarEnCarpeta, avisoCarpeta, carpetaLista, nombreCarpeta, sincronizar } from './ui/carpeta.js';
 
 const VISTAS = {
@@ -38,11 +39,13 @@ export const ID_EJEMPLO = 'ejemplo-pasteleria';
 const VERSION_EJEMPLO = 2;
 
 // Para qué sirve cada sección: tooltip del menú y caja informativa (se puede cerrar)
+const AYUDA_SPRINT = 'El trabajo de las próximas semanas en un tablero, con el avance y el informe para el cliente. Arrastra las tarjetas o usa las flechas ← →; doble clic o Enter abre la ficha.';
+const AYUDA_TABLERO = 'Flujo continuo: trae trabajo del backlog cuando hay capacidad, respeta el límite de trabajo en curso y mira cuánto se termina por semana.';
 const AYUDAS = {
   notas: 'Pega lo que te pidió el cliente y conviértelo en historias de usuario.',
   backlog: 'La lista ordenada de lo que hay que hacer: arriba lo más importante. Arrastra para reordenar y abre una historia con clic en su título o doble clic. Aquí priorizas, estimas y ves el roadmap.',
   cliente: 'Lo que acuerdas con tu cliente: qué incluye y qué no, cuánto cuesta, cuándo se paga y qué cambios pidió.',
-  sprint: 'El trabajo de las próximas semanas en un tablero, con el avance y el informe para el cliente. Arrastra las tarjetas o usa las flechas ← →; doble clic o Enter abre la ficha.',
+  sprint: AYUDA_SPRINT,
   retro: 'Al cerrar un sprint: qué salió bien, qué mejorar y qué acciones tomar.',
   taller: 'Para aprender o enseñar: trivia en grupo, ejercicios y desafíos de Scrum e historias.',
   ajustes: 'Respaldos, importar y exportar, la IA opcional y tus preguntas propias.',
@@ -235,6 +238,9 @@ const app = {
   },
 
   render() {
+    // En flujo continuo la sección del sprint es el tablero Kanban
+    VISTAS.sprint.titulo = esKanban(this.proyecto) ? 'Tablero' : 'Sprint';
+    AYUDAS.sprint = esKanban(this.proyecto) ? AYUDA_TABLERO : AYUDA_SPRINT;
     renderNavegacion();
     renderBarraInferior();
     const principal = document.getElementById('principal');

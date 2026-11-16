@@ -11,6 +11,7 @@ import { vistaEstimar } from './estimar.js';
 import { vistaPriorizar } from './priorizar.js';
 import { vistaRoadmap } from './roadmap.js';
 import { vistaProceso } from './proceso.js';
+import { esKanban } from '../nucleo/kanban.js';
 import { panelObjetivos, detalleEpica } from './okr.js';
 import { pronosticar, textoPronostico } from '../nucleo/pronostico.js';
 import { agregarDependencia, quitarDependencia, dependenciasPendientes, creaCiclo } from '../nucleo/dependencias.js';
@@ -58,7 +59,9 @@ export function vistaBacklog(app) {
   const p = app.proyecto;
   const backlog = p.historias.filter((x) => x.estado === 'backlog');
   const epicas = [...new Set(p.historias.map((x) => x.epica).filter(Boolean))].sort();
-  const sprintAbierto = p.sprints.find((s) => s.estado === 'activo') || p.sprints.find((s) => s.estado === 'planificado');
+  // En flujo continuo, «pasar» lleva al tablero Kanban en vez de a un sprint
+  const sprintAbierto = esKanban(p) ? { id: null, nombre: 'el tablero' }
+    : p.sprints.find((s) => s.estado === 'activo') || p.sprints.find((s) => s.estado === 'planificado');
 
   const visibles = backlog.filter((x) => (!filtros.epica || x.epica === filtros.epica)
     && (!filtros.texto || `${x.titulo} ${x.quiero} ${x.para} ${x.rol}`.toLowerCase().includes(filtros.texto.toLowerCase())));
@@ -134,7 +137,7 @@ export function vistaBacklog(app) {
           type: 'button', class: 'btn btn--secundario',
           onclick: () => {
             abierta = null;
-            app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === historia.id ? { ...y, sprintId: sprintAbierto.id, estado: 'todo' } : y)) }));
+            app.cambiar((x) => ({ ...x, historias: x.historias.map((y) => (y.id === historia.id ? { ...y, sprintId: sprintAbierto.id, estado: 'todo', entrada: new Date().toISOString() } : y)) }));
             app.avisar(`Agregada a ${sprintAbierto.nombre}.`);
           },
         }, `Pasar a ${sprintAbierto.nombre}`) : null,
@@ -228,7 +231,7 @@ function barraSeleccion(app, sprintAbierto) {
         if (epica) aplicar(`Épica "${epica}" asignada a ${n}.`, { epica });
       },
     }, 'Asignar épica'),
-    sprintAbierto ? h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => aplicar(`${n} pasadas a ${sprintAbierto.nombre}.`, { sprintId: sprintAbierto.id, estado: 'todo' }) }, `Pasar a ${sprintAbierto.nombre}`) : null,
+    sprintAbierto ? h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => aplicar(`${n} pasadas a ${sprintAbierto.nombre}.`, { sprintId: sprintAbierto.id, estado: 'todo', entrada: new Date().toISOString() }) }, `Pasar a ${sprintAbierto.nombre}`) : null,
     h('button', {
       type: 'button', class: 'btn-texto btn-peligro',
       onclick: () => {

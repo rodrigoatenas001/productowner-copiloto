@@ -473,6 +473,21 @@ const PRUEBAS = [
     verdad(ventana().getComputedStyle(uno('#barra-inferior')).display !== 'none', 'en el celular se ve la barra inferior');
     marco.style.width = '';
   }],
+  // Al final: pasar a Kanban cierra el sprint del ejemplo, que las pruebas de sprint necesitan abierto
+  ['Kanban continuo: se activa, se trae trabajo del backlog y se vuelve a sprints', async () => {
+    await ir('ajustes');
+    const interruptorKanban = () => todos('label.interruptor').find((l) => l.textContent.includes('Flujo continuo')).querySelector('input');
+    interruptorKanban().click();
+    await esperar(() => uno('#navegacion a[href="#sprint"]')?.textContent.startsWith('Tablero'), 'la sección se llama Tablero');
+    await ir('sprint');
+    verdad(uno('.kanban-pull') && uno('.cfd'), 'tablero continuo con pull y flujo acumulado');
+    const antes = todos('.columna--todo .ficha').length;
+    await clic(todos('.kanban-pull button').find((b) => b.textContent.startsWith('Traer la siguiente')).textContent);
+    igual(todos('.columna--todo .ficha').length, antes + 1, 'la siguiente del backlog entra a «Por hacer»');
+    await ir('ajustes');
+    interruptorKanban().click();
+    await esperar(() => uno('#navegacion a[href="#sprint"]')?.textContent.startsWith('Sprint'), 'vuelve a sprints');
+  }],
 ];
 
 async function correr() {

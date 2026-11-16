@@ -875,3 +875,27 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .daily-grupo li.is-estancada { color: var(--ambar-texto); }
 @media (max-width: 900px) { .daily-grupos { grid-template-columns: 1fr 1fr; } }
 @media (max-width: 560px) { .daily-grupos { grid-template-columns: 1fr; } }
+
+/* ── Tablero continuo (Kanban) ── */
+.fichas { list-style: none; margin: 0; padding: 0; display: grid; gap: 8px; }
+.ficha-acciones { display: flex; align-items: center; gap: 4px; justify-content: flex-end; }
+.ficha-acciones .ficha-bloqueo { margin-right: auto; font-size: .82rem; }
+.ficha-bloqueo-texto { margin: 0; color: var(--alerta); font-size: .82rem; }
+.columna.is-excedida { border-color: var(--alerta); background: var(--alerta-suave); }
+.kanban-pull { flex-wrap: wrap; gap: 8px; }
+.kanban-pull select { max-width: 360px; }
+.kanban-metricas { display: grid; grid-template-columns: minmax(0, 2fr) minmax(0, 1fr); gap: 20px; align-items: end; }
+.kanban-metricas figure { margin: 0; }
+.cfd { width: 100%; height: auto; display: block; }
+.cfd .etiqueta-eje { font: 11px var(--f-mono); fill: var(--pizarra); }
+.cfd-hecho { fill: var(--bosque); opacity: .75; }
+.cfd-curso { fill: var(--cobre); opacity: .8; }
+.cfd-hacer { fill: var(--niebla); }
+.vsm-muestra.cfd-hecho { background: var(--bosque); }
+.vsm-muestra.cfd-curso { background: var(--cobre); }
+.vsm-muestra.cfd-hacer { background: var(--niebla); }
+.kanban-semanas { list-style: none; margin: 0; padding: 0; display: flex; align-items: flex-end; gap: 6px; height: 120px; }
+.kanban-semanas li { flex: 1; height: 100%; display: flex; flex-direction: column; justify-content: flex-end; align-items: center; gap: 2px; }
+.kanban-barra { width: 100%; min-height: 2px; background: var(--tinta-2); border-radius: 3px 3px 0 0; }
+.kanban-valor { font: 500 .72rem var(--f-mono); color: var(--pizarra); }
+@media (max-width: 760px) { .kanban-metricas { grid-template-columns: 1fr; } }
