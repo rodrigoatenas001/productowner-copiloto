@@ -401,7 +401,15 @@ window.addEventListener('hashchange', () => {
 });
 
 if ('serviceWorker' in navigator && location.protocol !== 'file:' && !MODO_PRUEBA) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
+  // Si ya había una versión instalada y llega una nueva, se recarga una vez para mostrarla
+  const habiaVersion = Boolean(navigator.serviceWorker.controller);
+  let recargando = false;
+  navigator.serviceWorker.addEventListener('controllerchange', () => {
+    if (!habiaVersion || recargando) return;
+    recargando = true;
+    location.reload();
+  });
+  navigator.serviceWorker.register('./sw.js').then((r) => r.update()).catch(() => {});
 }
 
 activarAtajos(app, VISTAS);
