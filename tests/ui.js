@@ -65,6 +65,7 @@ async function cargar(ruta = '#notas') {
     if (sistema.includes('QA y desarrollo')) r = usuario.includes('menos de 2 segundos') ? { aprobada: true, observaciones: [] } : { aprobada: false, observaciones: ['"rápido" no se puede probar'] };
     else if (sistema.includes('Corrige la historia')) r = { rol: 'clienta', quiero: 'iniciar sesión en menos de 2 segundos', para: 'comprar sin esperas', criterios: ['Dado…', 'Dado un error…'] };
     else if (sistema.includes('historias de usuario de calidad')) r = { historias: [{ rol: 'contadora', quiero: 'bajar boletas', para: 'declarar', criterios: ['Dado…'] }] };
+    else if (sistema.includes('pasos de un proceso real')) r = { historias: JSON.parse(usuario).map((x) => ({ pasoId: x.pasoId, quiero: `${x.borrador.quiero} desde el celular`, criterios: ['Dado un turno en terreno, cuando registro, entonces queda guardado sin conexión.'] })) };
     return new w.Response(JSON.stringify({ message: { content: JSON.stringify(r) } }), { status: 200 });
   };
 }
@@ -489,6 +490,17 @@ const PRUEBAS = [
     await ir('backlog');
     await pestana('Proceso');
     verdad(todos('.proceso-paso .chip--ok').length > 0, 'las tareas quedan enlazadas a sus historias');
+  }],
+  ['Del proceso al backlog con IA (simulada): mejora la redacción y mantiene el enlace', async () => {
+    await ir('backlog');
+    await pestana('Proceso');
+    // Un paso nuevo sin historias, para que haya algo que generar
+    await clic('+ Tarea');
+    escribir(todos('.proceso-editor input[type="text"]')[0], 'Registrar asistencia de la cuadrilla', 'change'); await pausa(100);
+    await clic('Generar con IA');
+    await esperar(() => ventana().location.hash === '#notas' && todos('.candidata').length > 0, 'propone historias redactadas con IA');
+    verdad(todos('.enunciado').some((e) => e.textContent.includes('registrar asistencia de la cuadrilla desde el celular')), 'usa la redacción de la IA');
+    todos('button').find((b) => /^Descartar todas$/.test(b.textContent)).click(); await pausa(80);
   }],
   // Al final: pasar a Kanban cierra el sprint del ejemplo, que las pruebas de sprint necesitan abierto
   ['Kanban continuo: se activa, se trae trabajo del backlog y se vuelve a sprints', async () => {

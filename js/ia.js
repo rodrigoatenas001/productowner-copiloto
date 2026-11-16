@@ -223,3 +223,36 @@ Responde SOLO con JSON válido: {"markdown": ""}`;
   if (!md) throw new Error('La IA no devolvió las notas.');
   return md;
 }
+
+// ── Del proceso al backlog, y plantillas adaptadas, con IA ─────────────────
+
+const INSTRUCCIONES_PROCESO = `Eres un Product Owner senior que escribe en español de Chile.
+Recibes pasos de un proceso real, cada uno con su actor, para qué sirve, dolores confirmados, reglas,
+la decisión que viene después y un borrador de historia. Mejora la redacción de cada historia sin
+inventar alcance: "quiero" con un verbo concreto; "para" con el beneficio de negocio; 2 a 5 criterios
+"Dado…, cuando…, entonces…" que cubran cada salida de la decisión y cada dolor confirmado; reglas
+de negocio solo si se desprenden del contexto. Mantén el mismo pasoId.
+Responde SOLO con JSON válido: {"historias":[{"pasoId":"","rol":"","quiero":"","para":"","criterios":[""],"reglas":[""]}]}`;
+
+/** Mejora con IA las historias que salen del proceso. Devuelve los datos crudos para `mejorarConIa`. */
+export async function historiasDelProcesoConIa(config, contexto) {
+  const texto = await llamar(config, JSON.stringify(contexto), { maxTokens: 4000, sistema: INSTRUCCIONES_PROCESO });
+  const datos = extraerJson(texto);
+  if (!Array.isArray(datos?.historias) || !datos.historias.length) throw new Error('La IA no propuso historias.');
+  return datos;
+}
+
+const INSTRUCCIONES_ADAPTAR = `Eres un consultor de procesos que escribe en español de Chile.
+Recibes una plantilla de proceso y el contexto de una empresa. Adapta los nombres a esa empresa:
+carriles (mismo número y orden), texto de cada paso, para qué sirve cada tarea y sus dolores típicos.
+No agregues ni quites pasos ni cambies el orden: usa los mismos "ref".
+Responde SOLO con JSON válido: {"carriles":[""],"pasos":[{"ref":"","texto":"","valor":"","dolores":[""]}]}`;
+
+/** Propone nombres de la plantilla para el contexto de la empresa. Devuelve los datos para `adaptarPlantilla`. */
+export async function adaptarPlantillaConIa(config, plantillaResumen, contextoEmpresa) {
+  const texto = await llamar(config, `Contexto de la empresa: ${contextoEmpresa}\nPlantilla:\n${JSON.stringify(plantillaResumen)}`,
+    { maxTokens: 3000, sistema: INSTRUCCIONES_ADAPTAR });
+  const datos = extraerJson(texto);
+  if (!Array.isArray(datos?.pasos)) throw new Error('La IA no devolvió la plantilla adaptada.');
+  return datos;
+}

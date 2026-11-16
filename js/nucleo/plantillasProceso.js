@@ -145,3 +145,36 @@ export function procesoDesdePlantilla(plantilla) {
   });
   return { carriles, pasos };
 }
+
+/**
+ * Aplica a una plantilla los nombres que propone la IA para el contexto de la empresa: carriles, pasos,
+ * su para qué y sus dolores. El circuito (tipos, flechas, decisiones y tiempos) no cambia, así el
+ * proceso no puede quedar roto. Lo que no venga bien formado se deja como estaba.
+ */
+export function adaptarPlantilla(plantilla, datos) {
+  const txt = (v, max) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
+  const carriles = Array.isArray(datos?.carriles) && datos.carriles.length === plantilla.carriles.length
+    ? plantilla.carriles.map((c, i) => txt(datos.carriles[i], 60) || c)
+    : plantilla.carriles;
+  const porRef = new Map((Array.isArray(datos?.pasos) ? datos.pasos : []).filter((x) => x && typeof x.ref === 'string').map((x) => [x.ref, x]));
+  const pasos = plantilla.pasos.map(([ref, tipo, texto, carril, o = {}]) => {
+    const ia = porRef.get(ref);
+    if (!ia) return [ref, tipo, texto, carril, o];
+    const dolores = (Array.isArray(ia.dolores) ? ia.dolores : []).map((d) => txt(d, 200)).filter(Boolean).slice(0, 6);
+    return [ref, tipo, txt(ia.texto, 160) || texto, carril, {
+      ...o,
+      ...(tipo === 'tarea' && txt(ia.valor, 200) ? { valor: txt(ia.valor, 200) } : {}),
+      ...(tipo === 'tarea' && dolores.length ? { dolores } : {}),
+    }];
+  });
+  return { ...plantilla, carriles, pasos };
+}
+
+/** Lo que se le muestra a la IA para adaptar la plantilla. */
+export function plantillaParaIa(plantilla) {
+  return {
+    nombre: plantilla.nombre,
+    carriles: plantilla.carriles,
+    pasos: plantilla.pasos.map(([ref, tipo, texto, carril, o = {}]) => ({ ref, tipo, texto, carril: plantilla.carriles[carril], valor: o.valor || '', dolores: o.dolores || [] })),
+  };
+}

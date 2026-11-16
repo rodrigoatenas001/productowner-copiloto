@@ -6,12 +6,15 @@ import {
   editarPaso, eliminarPaso, moverPaso, conectar, desconectar, revisarProceso, disposicion, aBpmn,
 } from '../nucleo/proceso.js';
 import { nombreArchivo } from '../nucleo/exportar.js';
-import { INDUSTRIAS, plantillasDe, procesoDesdePlantilla } from '../nucleo/plantillasProceso.js';
-import { historiasDesdeProceso } from '../nucleo/derivar.js';
+import { INDUSTRIAS, plantillasDe, procesoDesdePlantilla, adaptarPlantilla, plantillaParaIa } from '../nucleo/plantillasProceso.js';
+import { historiasDesdeProceso, mejorarConIa, contextoParaIa } from '../nucleo/derivar.js';
+import { iaConfigurada, historiasDelProcesoConIa, adaptarPlantillaConIa, nombreProveedor } from '../ia.js';
 
 let abierto = null; // paso con el editor desplegado
 let verPlantillas = false; // selector de plantillas por industria abierto
 let industria = 'agro';
+let contextoEmpresa = ''; // para adaptar la plantilla con IA
+let ocupado = ''; // texto del botón mientras la IA trabaja
 let enfocar = null; // tras redibujar: 'actor' (el campo para agregar otro) o el id de un paso nuevo
 
 /** Cada cambio redibuja la vista: devuelve el foco donde la persona seguía escribiendo. */
@@ -57,7 +60,12 @@ export function vistaProceso(app) {
     h('p', { class: 'ayuda' }, 'El circuito real del cliente, con un subconjunto de BPMN: inicio, tarea, decisión y fin, en carriles por actor. Enlaza cada tarea con sus historias para ver qué falta levantar. ', termino('bpmn')),
     h('div', { class: 'acciones proceso-barra' },
       h('button', { type: 'button', class: 'btn btn--secundario', 'aria-expanded': String(verPlantillas), onclick: () => { verPlantillas = !verPlantillas; app.render(); } }, 'Plantilla por industria'),
-      h('button', { type: 'button', class: 'btn', disabled: !proceso.pasos.some((x) => x.tipo === 'tarea'), onclick: () => generarHistorias(app) }, 'Generar historias del flujo')),
+      h('button', { type: 'button', class: 'btn', disabled: !proceso.pasos.some((x) => x.tipo === 'tarea') || Boolean(ocupado), onclick: () => generarHistorias(app) }, 'Generar historias del flujo'),
+      iaConfigurada(app.ia) ? h('button', {
+        type: 'button', class: 'btn btn--secundario', disabled: !proceso.pasos.some((x) => x.tipo === 'tarea') || Boolean(ocupado),
+        title: `Redacta con ${nombreProveedor(app.ia)} a partir del borrador por reglas`,
+        onclick: () => generarHistorias(app, { conIa: true }),
+      }, ocupado === 'historias' ? 'Generando con IA…' : 'Generar con IA') : null),
     verPlantillas ? selectorPlantillas(app, proceso) : null,
     seccionCarriles(proceso, cambiar),
     proceso.pasos.length ? diagrama(proceso) : null,
@@ -89,12 +97,26 @@ export function vistaProceso(app) {
  * Del proceso al backlog: propone una historia por cada tarea sin historias y las lleva a revisión
  * (en Notas, como cualquier propuesta). Al agregarlas quedan enlazadas a su paso.
  */
-function generarHistorias(app) {
-  const candidatas = historiasDesdeProceso(app.proyecto);
+async function generarHistorias(app, { conIa = false } = {}) {
+  let candidatas = historiasDesdeProceso(app.proyecto);
   if (!candidatas.length) { app.avisar('Todas las tareas del proceso ya tienen historias.'); return; }
+  let origen = 'desde el proceso';
+  if (conIa) {
+    // La IA mejora la redacción del borrador por reglas; si falla, se sigue con las reglas
+    ocupado = 'historias';
+    app.render();
+    try {
+      candidatas = mejorarConIa(candidatas, await historiasDelProcesoConIa(app.ia, contextoParaIa(app.proyecto, candidatas)));
+      origen = `desde el proceso, redactadas con ${nombreProveedor(app.ia)}`;
+    } catch (e) {
+      app.avisar(`La IA no respondió (${e.message}). Te muestro el borrador por reglas.`, 'error');
+    } finally {
+      ocupado = '';
+    }
+  }
   app.candidatos = candidatas.map((x) => ({ ...x, incluir: true }));
   app.ir('notas');
-  app.avisar(`${candidatas.length} historias propuestas desde el proceso. Revísalas antes de agregarlas: quedarán enlazadas a sus pasos.`);
+  app.avisar(`${candidatas.length} historias propuestas ${origen}. Revísalas antes de agregarlas: quedarán enlazadas a sus pasos.`);
 }
 
 /** Selector en dos pasos: industria y proceso, con vista previa de carriles, pasos y dolores típicos. */
@@ -116,6 +138,12 @@ function selectorPlantillas(app, proceso) {
         onclick: () => { industria = clave; app.render(); },
       }, ind.nombre))),
     h('p', { class: 'ayuda' }, INDUSTRIAS[industria].descripcion),
+    iaConfigurada(app.ia)
+      ? campo('Tu empresa, en una o dos líneas (para adaptar con IA)', h('input', {
+        type: 'text', value: contextoEmpresa, maxlength: 300, placeholder: 'Ej.: planta de proceso de cerdos, supervisores por turno y SAP',
+        oninput: (e) => { contextoEmpresa = e.target.value; },
+      }), 'La IA solo cambia nombres de actores, pasos, para qué y dolores: el circuito no cambia.')
+      : h('p', { class: 'ayuda' }, 'Con una IA conectada en Ajustes puedes adaptar la plantilla a la empresa (nombres de cargos, sistemas y dolores) antes de usarla.'),
     h('ul', { class: 'plantillas-lista' }, plantillasDe(industria).map((pl) => {
       const tareas = pl.pasos.filter(([, tipo]) => tipo === 'tarea');
       const decisiones = pl.pasos.filter(([, tipo]) => tipo === 'decision');
@@ -126,7 +154,25 @@ function selectorPlantillas(app, proceso) {
         h('p', { class: 'tarjeta-meta' }, `${pl.carriles.join(' · ')}`),
         h('p', { class: 'tarjeta-meta' }, `${tareas.length} tareas · ${decisiones.map(([, , t]) => t).join(' ')}`),
         h('details', {}, h('summary', {}, `Dolores típicos (${dolores.length})`), h('ul', {}, dolores.map((d) => h('li', {}, d)))),
-        h('button', { type: 'button', class: 'btn btn--secundario btn--chico', onclick: () => usar(pl) }, 'Usar esta plantilla'));
+        h('div', { class: 'acciones' },
+          h('button', { type: 'button', class: 'btn btn--secundario btn--chico', disabled: Boolean(ocupado), onclick: () => usar(pl) }, 'Usar esta plantilla'),
+          iaConfigurada(app.ia) ? h('button', {
+            type: 'button', class: 'btn-texto', disabled: Boolean(ocupado),
+            onclick: async () => {
+              if (!contextoEmpresa.trim()) { app.avisar('Escribe primero cómo es la empresa, en una o dos líneas.', 'error'); return; }
+              ocupado = pl.clave;
+              app.render();
+              try {
+                const adaptada = adaptarPlantilla(pl, await adaptarPlantillaConIa(app.ia, plantillaParaIa(pl), contextoEmpresa.trim()));
+                ocupado = '';
+                await usar(adaptada);
+              } catch (e) {
+                ocupado = '';
+                app.avisar(`La IA no respondió (${e.message}). Puedes usar la plantilla tal cual y ajustarla a mano.`, 'error');
+                app.render();
+              }
+            },
+          }, ocupado === pl.clave ? 'Adaptando…' : 'Adaptar con IA y usar') : null));
     })));
 }
 

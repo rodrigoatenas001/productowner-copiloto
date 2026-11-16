@@ -101,3 +101,53 @@ export function enlazarConPasos(proyecto, historias) {
     },
   };
 }
+
+/**
+ * Mezcla la redacción propuesta por la IA con las candidatas por reglas, por `pasoId`.
+ * Solo reemplaza lo que viene bien formado (textos no vacíos, criterios «Dado…»); la prioridad,
+ * la épica y el enlace al paso siguen siendo los de las reglas.
+ */
+export function mejorarConIa(candidatas, datos) {
+  const lista = Array.isArray(datos?.historias) ? datos.historias : [];
+  const txt = (v, max) => (typeof v === 'string' ? v.trim().replace(/\s+/g, ' ').slice(0, max) : '');
+  const porPaso = new Map(lista.filter((x) => x && typeof x.pasoId === 'string').map((x) => [x.pasoId, x]));
+  return candidatas.map((c) => {
+    const ia = porPaso.get(c.pasoId);
+    if (!ia) return c;
+    const quiero = txt(ia.quiero, 1000).replace(/^poder\s+/i, '').replace(/[.\s]+$/, '');
+    const criterios = (Array.isArray(ia.criterios) ? ia.criterios : []).map((x) => txt(x, 1000)).filter((x) => /^dad[oa]s?\b/i.test(x)).slice(0, 6);
+    const reglas = (Array.isArray(ia.reglas) ? ia.reglas : []).map((x) => txt(x, 200)).filter(Boolean).slice(0, 8);
+    const nuevoQuiero = quiero ? minuscula(quiero) : c.quiero;
+    return {
+      ...c,
+      rol: txt(ia.rol, 120).toLowerCase() || c.rol,
+      quiero: nuevoQuiero,
+      titulo: quiero ? capitalizar(resumirTitulo(nuevoQuiero)) : c.titulo,
+      para: minuscula(txt(ia.para, 1000).replace(/^para\s+(que\s+)?/i, '').replace(/[.\s]+$/, '')) || c.para,
+      criterios: criterios.length ? criterios : c.criterios,
+      reglas: reglas.length ? [...new Set([...c.reglas, ...reglas])] : c.reglas,
+    };
+  });
+}
+
+/** Contexto que se le da a la IA por cada candidata: el paso y lo que lo rodea. */
+export function contextoParaIa(proyecto, candidatas) {
+  const proceso = proyecto.proceso || { carriles: [], pasos: [] };
+  const carril = new Map(proceso.carriles.map((c) => [c.id, c.nombre]));
+  const porId = new Map(proceso.pasos.map((p) => [p.id, p]));
+  return candidatas.map((c) => {
+    const paso = porId.get(c.pasoId);
+    const decisiones = (paso?.siguientes || []).map((s) => porId.get(s.a)).filter((d) => d?.tipo === 'decision')
+      .map((d) => ({ pregunta: d.texto, salidas: d.siguientes.map((s) => ({ respuesta: s.etiqueta, va_a: porId.get(s.a)?.texto || '' })) }));
+    return {
+      pasoId: c.pasoId,
+      actor: carril.get(paso?.carril) || '',
+      paso: paso?.texto || '',
+      para_que: paso?.valor || '',
+      dolores_confirmados: (paso?.dolores || []).filter((d) => d.confirmado).map((d) => d.texto),
+      reglas: paso?.reglas || [],
+      decision_siguiente: decisiones,
+      borrador: { rol: c.rol, quiero: c.quiero, para: c.para, criterios: c.criterios },
+    };
+  });
+}

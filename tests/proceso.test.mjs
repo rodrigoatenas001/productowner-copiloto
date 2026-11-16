@@ -264,3 +264,48 @@ test('del proceso al backlog: rol del carril, para qué, criterios de las decisi
   assert.equal(historiasDesdeProceso(enlazado).length, 0, 'las tareas con historias no se repiten');
   assert.equal(historiasDesdeProceso(enlazado, { todas: true }).length, hs.length);
 });
+
+test('IA: mejora la redacción por paso, pero lo mal formado no reemplaza a las reglas', async () => {
+  const { PLANTILLAS_PROCESO, procesoDesdePlantilla } = await import('../js/nucleo/plantillasProceso.js');
+  const { historiasDesdeProceso, mejorarConIa, contextoParaIa } = await import('../js/nucleo/derivar.js');
+  const proyecto = { ...nuevoProyecto('Obra'), proceso: procesoDesdePlantilla(PLANTILLAS_PROCESO.find((x) => x.clave === 'construccion-estado-pago')) };
+  const reglas = historiasDesdeProceso(proyecto);
+  const [a, b] = reglas;
+  const ctx = contextoParaIa(proyecto, reglas);
+  assert.equal(ctx[0].pasoId, a.pasoId);
+  assert.equal(ctx[0].actor, 'Jefe de obra');
+  assert.ok(ctx.some((x) => x.decision_siguiente.length), 'la IA recibe las salidas de la decisión');
+  const mejoradas = mejorarConIa(reglas, { historias: [
+    { pasoId: a.pasoId, rol: 'Jefe de obra', quiero: 'Poder medir el avance por partida desde la tablet.', para: 'para cobrar lo ejecutado sin discusiones', criterios: ['Dado un período cerrado, cuando mido una partida, entonces queda con foto y fecha.', 'esto no es un criterio'] },
+    { pasoId: b.pasoId, quiero: '', criterios: [] },
+    { pasoId: 'otro', quiero: 'algo que no existe' },
+  ] });
+  assert.equal(mejoradas[0].quiero, 'medir el avance por partida desde la tablet');
+  assert.equal(mejoradas[0].para, 'cobrar lo ejecutado sin discusiones');
+  assert.equal(mejoradas[0].rol, 'jefe de obra');
+  assert.deepEqual(mejoradas[0].criterios, ['Dado un período cerrado, cuando mido una partida, entonces queda con foto y fecha.']);
+  assert.equal(mejoradas[0].prioridad, a.prioridad, 'la prioridad sigue siendo la de las reglas');
+  assert.deepEqual(mejoradas[1], b, 'sin texto válido, queda el borrador por reglas');
+  assert.equal(mejoradas.length, reglas.length, 'no se agregan historias inventadas');
+});
+
+test('IA: adaptar la plantilla cambia nombres, nunca el circuito', async () => {
+  const { PLANTILLAS_PROCESO, adaptarPlantilla, procesoDesdePlantilla, plantillaParaIa } = await import('../js/nucleo/plantillasProceso.js');
+  const pl = PLANTILLAS_PROCESO.find((x) => x.clave === 'agro-mermas');
+  assert.equal(plantillaParaIa(pl).pasos[1].carril, 'Operador de línea');
+  const adaptada = adaptarPlantilla(pl, {
+    carriles: ['Operario de faena', 'Jefe de turno', 'Aseguramiento de calidad', 'SAP'],
+    pasos: [
+      { ref: 'registro', texto: 'Registrar kilos y mermas por estación de faena', valor: 'conocer el rendimiento por canal', dolores: ['Planilla en papel por estación'] },
+      { ref: 'sobre', texto: '¿Merma sobre el 2%?' },
+      { ref: 'inventado', texto: 'Paso que no existe' },
+    ],
+  });
+  assert.deepEqual(adaptada.carriles, ['Operario de faena', 'Jefe de turno', 'Aseguramiento de calidad', 'SAP']);
+  assert.equal(adaptada.pasos.length, pl.pasos.length, 'no se agregan ni quitan pasos');
+  const pr = normalizarProceso(JSON.parse(JSON.stringify(procesoDesdePlantilla(adaptada))));
+  assert.ok(pr.pasos.some((x) => x.texto === 'Registrar kilos y mermas por estación de faena' && x.dolores[0].texto === 'Planilla en papel por estación'));
+  assert.ok(pr.pasos.some((x) => x.texto === '¿Merma sobre el 2%?' && x.siguientes.length === 2), 'la decisión conserva sus salidas');
+  assert.deepEqual(revisarProceso(pr).avisos.filter((a) => a.nivel !== 'info'), []);
+  assert.deepEqual(adaptarPlantilla(pl, { carriles: ['solo uno'] }).carriles, pl.carriles, 'otra cantidad de carriles se ignora');
+});
