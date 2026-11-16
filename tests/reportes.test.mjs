@@ -82,6 +82,8 @@ test('especificación de épica: historias pendientes en orden y aviso de DoR', 
   const md = especificacionEpica(p, 'Pagos');
   assert.ok(md.includes('## 1. Recibir la boleta por correo'));
   assert.ok(!md.includes('Pagar con tarjeta'), 'lo terminado no se vuelve a pedir');
-  assert.ok(md.includes('no cumple la Definition of Ready'));
+  assert.ok(!md.includes('no cumple la Definition of Ready'), 'si nadie usa la DoR, no se avisa en cada historia');
+  p.historias[0].checks = { ...(p.historias[0].checks || {}), ready: ['Tiene criterios de aceptación verificables'] };
+  assert.ok(especificacionEpica(p, 'Pagos').includes('no cumple la Definition of Ready'), 'desde que se usa, avisa lo que falta');
   assert.throws(() => especificacionEpica(p, 'Inexistente'), /no tiene historias/);
 });

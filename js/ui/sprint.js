@@ -1,6 +1,6 @@
 // Sprint: planificar con la capacidad del equipo, trabajar en un tablero y cerrar con burndown y velocidad.
 import { h, campo, pedirTexto, vacio, selector, termino, interruptor } from './dom.js';
-import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
+import { definicionesDe, avance, marcar, seUsa } from '../nucleo/definiciones.js';
 import { listaVerificacion, editorHistoria } from './historia.js';
 import { dependenciasPendientes, bloqueosDelSprint } from '../nucleo/dependencias.js';
 import { columnasDe, usoWip, cicloPromedio, bloquear, desbloquear, diasBloqueada } from '../nucleo/flujo.js';
@@ -112,7 +112,7 @@ function planificar(app, sprint) {
           h('input', { type: 'checkbox', checked: x.sprintId === sprint.id, onchange: (e) => alternar(x.id, e.target.checked) }),
           h('span', {}, x.titulo),
           h('span', { class: 'tarjeta-meta' }, x.puntos ? `${x.puntos} pts` : 'sin estimar',
-            avance(x, definicionesDe(p).ready, 'ready').completa ? '' : h('span', { class: 'chip chip--aviso', title: 'No cumple la Definition of Ready' }, ' no lista'),
+            !seUsa(p, 'ready') || avance(x, definicionesDe(p).ready, 'ready').completa ? '' : h('span', { class: 'chip chip--aviso', title: 'No cumple la Definition of Ready' }, ' no lista'),
             dependenciasPendientes(p, x).length ? h('span', { class: 'chip chip--aviso', title: `Espera a: ${dependenciasPendientes(p, x).map((d) => d.titulo).join(', ')}` }, ' depende de algo pendiente') : ''))))) : vacio('El backlog está vacío.', 'Agrega historias para elegir cuáles entran a este sprint.', ['Ir a Notas', () => app.ir('notas')])),
       avisoDependencias(p, sprint.id),
     h('div', { class: 'acciones' },

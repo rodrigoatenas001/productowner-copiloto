@@ -2,7 +2,7 @@
 // y los agentes de IA (Claude Code, Antigravity, Cursor) los entienden bien.
 import { enunciado, revisarInvest, PRIORIDADES } from './historias.js';
 import { ESTADOS, resumenSprint, burndown, puntosDe, resumenEpicas, velocidad } from './proyecto.js';
-import { definicionesDe, avance } from './definiciones.js';
+import { definicionesDe, avance, seUsa } from './definiciones.js';
 import { COLUMNAS_RETRO, notasDe } from './retro.js';
 import { infoEpica, hipotesis, resultadosDeEpica, cobertura, RESULTADOS_HIPOTESIS } from './okr.js';
 import { roadmap, visionDe, HORIZONTES } from './roadmap.js';
@@ -226,7 +226,7 @@ export function especificacionEpica(proyecto, epica) {
       '',
       `> ${enunciado(h)}`,
       '',
-      `_${PRIORIDADES[h.prioridad]}${h.puntos ? ` · ${h.puntos} pts` : ' · sin estimar'}${avance(h, definicionesDe(proyecto).ready, 'ready').completa ? '' : ' · **no cumple la Definition of Ready**'}_`,
+      `_${PRIORIDADES[h.prioridad]}${h.puntos ? ` · ${h.puntos} pts` : ' · sin estimar'}${!seUsa(proyecto, 'ready') || avance(h, definicionesDe(proyecto).ready, 'ready').completa ? '' : ' · **no cumple la Definition of Ready**'}_`,
       '',
       '**Criterios de aceptación**',
       '',

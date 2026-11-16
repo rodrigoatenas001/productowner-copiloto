@@ -109,3 +109,36 @@ test('el ejemplo de Carla trae su circuito completo, con cada tarea enlazada a h
   assert.ok(historiasFuera.length > 0, 'muestra historias de soporte fuera del circuito');
   assert.equal(p.proceso.carriles.length, 3);
 });
+
+test('insertar un paso olvidado lo deja en medio, sin rehacer flechas', async () => {
+  const { insertarPasoDespues } = await import('../js/nucleo/proceso.js');
+  const { p, ids } = pedido();
+  const conPaso = insertarPasoDespues(p, ids.elegir, { texto: 'Revisa el carro' });
+  const nuevo = conPaso.pasos[2];
+  assert.equal(nuevo.texto, 'Revisa el carro');
+  assert.deepEqual(conPaso.pasos[1].siguientes.map((s) => s.a), [nuevo.id], 'el anterior lleva al nuevo');
+  assert.deepEqual(nuevo.siguientes.map((s) => s.a), [ids.stock], 'el nuevo lleva a donde iba el anterior');
+  assert.equal(nuevo.carril, p.pasos[1].carril);
+  const trasDecision = insertarPasoDespues(p, ids.stock, { texto: 'Avisa' });
+  assert.equal(trasDecision.pasos[3].siguientes.length, 0, 'después de una decisión no adivina qué salida tomar');
+  assert.deepEqual(revisarProceso(conPaso).avisos.filter((a) => a.nivel === 'error'), []);
+});
+
+test('los carriles se renombran y reordenan sin perder sus pasos', async () => {
+  const { renombrarCarril, moverCarril } = await import('../js/nucleo/proceso.js');
+  const { p } = pedido();
+  const [clienta, tienda] = p.carriles.map((c) => c.id);
+  const r = moverCarril(renombrarCarril(p, tienda, 'Tienda en línea'), tienda, -1);
+  assert.deepEqual(r.carriles.map((c) => c.nombre), ['Tienda en línea', 'Clienta']);
+  assert.ok(r.pasos.some((x) => x.carril === clienta) && r.pasos.some((x) => x.carril === tienda));
+  assert.equal(renombrarCarril(p, tienda, '   '), p, 'un nombre vacío no cambia nada');
+});
+
+test('dos flechas que vuelven al mismo paso llegan por puntos distintos', () => {
+  let { p, ids } = pedido();
+  p = conectar(p, ids.pagar, ids.elegir, 'Cambiar');
+  const vueltas = disposicion(p).flechas.filter((f) => f.a === ids.elegir && f.puntos.length === 4 && f.puntos[0][1] < f.puntos[1][1]);
+  assert.equal(vueltas.length, 2);
+  assert.notEqual(vueltas[0].puntos[3][0], vueltas[1].puntos[3][0]);
+  assert.notEqual(vueltas[0].puntos[1][1], vueltas[1].puntos[1][1]);
+});

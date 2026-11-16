@@ -589,7 +589,7 @@ kbd { font: .75rem var(--f-mono); border: 1px solid currentColor; border-radius:
 label.tarjeta-orden { align-items: center; gap: 6px; cursor: pointer; }
 label.tarjeta-orden input { width: 16px; height: 16px; accent-color: var(--cobre); }
 .tarjeta-rapido { display: inline-flex; gap: 4px; }
-.tarjeta-rapido select { font-size: .8rem; padding: 3px 4px; max-width: 9.5em; }
+.tarjeta-rapido select { font-size: .8rem; padding: 3px 4px; width: auto; max-width: none; }
 .barra-seleccion { position: sticky; top: 8px; z-index: 5; display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 10px 14px; margin: 0 0 12px; border: 2px solid var(--cobre); border-radius: var(--radio); background: var(--superficie); }
 @media (max-width: 820px) { .tarjeta-rapido { display: none; } }
 
@@ -778,3 +778,12 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
   main.principal--ancho .guia-flujo { grid-template-columns: repeat(6, minmax(0, 1fr)); }
   main.principal--ancho .guia-etapa:nth-child(3n):not(:last-child)::after { content: "→"; }
 }
+.chip-editable { padding: 2px 4px; }
+.chip-nombre { background: none; border: 0; padding: 4px 6px; font: inherit; font-weight: 600; color: var(--texto); cursor: pointer; border-radius: 6px; text-decoration: underline dotted var(--pizarra); text-underline-offset: 3px; }
+.chip-nombre:hover { background: var(--superficie); }
+.chip-editable .icono { width: 26px; height: 26px; }
+.chip-editable .icono:disabled { opacity: .35; cursor: default; }
+.proceso-insertar { align-items: center; margin-top: 4px; }
+.proceso-insertar .ayuda { margin: 0; }
+.aviso-suave { margin: 0 0 14px; padding: 10px 14px; border-radius: var(--radio); background: var(--ambar-suave); color: var(--ambar-texto); font-size: .92rem; }
+.aviso-suave .btn-texto { color: inherit; font-weight: 700; padding: 0 2px; }

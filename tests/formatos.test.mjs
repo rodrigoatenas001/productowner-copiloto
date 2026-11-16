@@ -79,3 +79,14 @@ test('Word: estilos de título reales, casillas, tablas con encabezado repetido 
   assert.ok(archivos['word/footer1.xml'].includes(' PAGE ') && archivos['word/footer1.xml'].includes(' NUMPAGES '));
   assert.ok(archivos['word/styles.xml'].includes('<w:outlineLvl w:val="0"/>'), 'los títulos entran al índice');
 });
+
+test('Markdown de la app a bloques: título y fecha, secciones, listas, casillas, tablas y negritas limpias', async () => {
+  const { markdownABloques } = await import('../js/nucleo/markdownBloques.js');
+  const b = markdownABloques('# Propuesta: Taller\n\n_16-11-2026 · válida por 15 días_\n\n## Qué incluye\n\n**Agenda**\n\n- Ver la agenda, para preparar.\n- [ ] Dado un día, cuando abro, entonces veo.\n\n| Concepto | Valor |\n|---|---|\n| **Total** | **28,8 UF** |\n\n> Como mecánico, quiero ver la agenda.\n\nTexto con **negrita** y _cursiva_.');
+  assert.deepEqual(b.map((x) => x.t), ['titulo', 'subtitulo', 'h1', 'p', 'lista', 'check', 'tabla', 'cita', 'p']);
+  assert.equal(b[1].texto, '16-11-2026 · válida por 15 días');
+  assert.ok(b[3].fuerte);
+  assert.deepEqual(b[6].columnas, ['Concepto', 'Valor']);
+  assert.deepEqual(b[6].filas, [['Total', '28,8 UF']]);
+  assert.equal(b[8].texto, 'Texto con negrita y cursiva.');
+});

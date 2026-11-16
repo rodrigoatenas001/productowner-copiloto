@@ -39,6 +39,22 @@ export function agregarCarril(proceso, nombre) {
   return { ...proceso, carriles: [...proceso.carriles, { id: nuevoId('ca'), nombre: limpio }] };
 }
 
+export function renombrarCarril(proceso, id, nombre) {
+  const limpio = texto(nombre, 60);
+  if (!limpio) return proceso;
+  return { ...proceso, carriles: proceso.carriles.map((c) => (c.id === id ? { ...c, nombre: limpio } : c)) };
+}
+
+/** Sube o baja un carril (el orden es el de arriba hacia abajo en el diagrama). */
+export function moverCarril(proceso, id, delta) {
+  const carriles = [...proceso.carriles];
+  const i = carriles.findIndex((c) => c.id === id);
+  const j = i + delta;
+  if (i < 0 || j < 0 || j >= carriles.length) return proceso;
+  [carriles[i], carriles[j]] = [carriles[j], carriles[i]];
+  return { ...proceso, carriles };
+}
+
 /** Quita un carril; sus pasos pasan al primer carril que quede. */
 export function quitarCarril(proceso, id) {
   const carriles = proceso.carriles.filter((c) => c.id !== id);
@@ -55,6 +71,24 @@ export function agregarPaso(proceso, { tipo = 'tarea', texto: t = '', carril = n
   const pasos = proceso.pasos.map((p) => (p === ultimo && (p.tipo === 'tarea' || p.tipo === 'inicio') && !p.siguientes.length
     ? { ...p, siguientes: [{ a: paso.id, etiqueta: '' }] } : p));
   return { ...proceso, pasos: [...pasos, paso] };
+}
+
+/**
+ * Inserta un paso justo después de otro. Si el anterior no es una decisión y lleva a un solo paso,
+ * el nuevo queda en medio (anterior → nuevo → siguiente): así agregar un paso olvidado no exige
+ * rehacer las flechas. El nuevo queda en el mismo carril que el anterior.
+ */
+export function insertarPasoDespues(proceso, id, { tipo = 'tarea', texto: t = '' } = {}) {
+  const i = proceso.pasos.findIndex((p) => p.id === id);
+  if (i < 0) return agregarPaso(proceso, { tipo, texto: t });
+  const anterior = proceso.pasos[i];
+  const paso = { id: nuevoId('pa'), tipo: Object.hasOwn(TIPOS_PASO, tipo) ? tipo : 'tarea', texto: texto(t, 160), carril: anterior.carril, siguientes: [], historiaIds: [] };
+  const enMedio = anterior.tipo !== 'decision' && anterior.tipo !== 'fin' && anterior.siguientes.length <= 1;
+  if (enMedio) paso.siguientes = anterior.siguientes.map((s) => ({ ...s }));
+  const pasos = [...proceso.pasos];
+  if (enMedio) pasos[i] = { ...anterior, siguientes: [{ a: paso.id, etiqueta: '' }] };
+  pasos.splice(i + 1, 0, paso);
+  return { ...proceso, pasos };
 }
 
 export function editarPaso(proceso, id, cambios) {
@@ -174,9 +208,13 @@ export function disposicion(proceso) {
   const porId = new Map(nodos.map((n) => [n.id, n]));
 
   const flechas = [];
+  // Flechas que vuelven atrás: cada una por su propio carril inferior y llegando a su propio punto,
+  // para que dos vueltas al mismo paso no se dibujen una sobre otra
+  let vueltas = 0;
+  const llegadas = new Map();
   for (const p of proceso.pasos) {
     const o = porId.get(p.id);
-    p.siguientes.forEach((s, k) => {
+    p.siguientes.forEach((s) => {
       const d = porId.get(s.a);
       if (!d) return;
       let puntos;
@@ -187,8 +225,12 @@ export function disposicion(proceso) {
         puntos = o.fila === d.fila ? [[sx, o.cy], [tx, d.cy]] : [[sx, o.cy], [mx, o.cy], [mx, d.cy], [tx, d.cy]];
       } else {
         // Vuelve atrás: baja, cruza por el borde inferior del carril y sube al destino
-        const fondo = Math.max(o.fila, d.fila) * M.carril + M.carril - 10 - k * 6;
-        puntos = [[o.cx, o.y + o.alto], [o.cx, fondo], [d.cx, fondo], [d.cx, d.y + d.alto]];
+        const fondo = Math.max(o.fila, d.fila) * M.carril + M.carril - 8 - (vueltas % 4) * 8;
+        const n = llegadas.get(d.id) || 0;
+        llegadas.set(d.id, n + 1);
+        const dx = d.cx + (n % 2 ? 1 : -1) * Math.ceil(n / 2) * 14;
+        puntos = [[o.cx, o.y + o.alto], [o.cx, fondo], [dx, fondo], [dx, d.y + d.alto]];
+        vueltas += 1;
       }
       flechas.push({ de: p.id, a: s.a, etiqueta: s.etiqueta, puntos });
     });

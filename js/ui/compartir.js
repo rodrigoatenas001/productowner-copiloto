@@ -1,6 +1,11 @@
-// Botones para compartir un reporte en Markdown: copiar al portapapeles o descargar el archivo.
+// Botones para compartir un documento: copiarlo en Markdown, descargarlo en Markdown o Word, o guardarlo en PDF.
 import { h, descargar } from './dom.js';
 import { nombreArchivo } from '../nucleo/exportar.js';
+import { markdownABloques } from '../nucleo/markdownBloques.js';
+import { documentoWord } from '../nucleo/docx.js';
+import { imprimirDocumento } from './imprimir.js';
+
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 /**
  * @param {object} app
@@ -38,5 +43,23 @@ export function botonesMarkdown(app, etiqueta, sufijo, generar) {
         const md = obtener();
         if (md !== null) descargar(nombreArchivo(app.proyecto, `${sufijo}.md`), md, 'text/markdown');
       },
-    }, 'Descargar .md'));
+    }, 'Descargar .md'),
+    // Para el cliente: Word para editarlo, PDF para enviarlo o firmarlo
+    h('button', {
+      type: 'button', class: 'btn-texto',
+      onclick: () => {
+        const md = obtener();
+        if (md === null) return;
+        const bloques = markdownABloques(md);
+        const titulo = bloques.find((b) => b.t === 'titulo')?.texto || etiqueta;
+        descargar(nombreArchivo(app.proyecto, `${sufijo}.docx`), documentoWord(bloques, { titulo, pie: app.proyecto.nombre }), DOCX);
+      },
+    }, 'Word'),
+    h('button', {
+      type: 'button', class: 'btn-texto',
+      onclick: () => {
+        const md = obtener();
+        if (md !== null) imprimirDocumento(markdownABloques(md), nombreArchivo(app.proyecto, sufijo).replace(/\.$/, ''));
+      },
+    }, 'PDF'));
 }

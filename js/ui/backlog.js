@@ -132,6 +132,7 @@ export function vistaBacklog(app) {
 
   const sinEstimar = backlog.filter((x) => !x.puntos).length;
   const porMejorar = backlog.filter((x) => calidad(x) < 60).length;
+  const sinEpica = backlog.filter((x) => !x.epica);
 
   return h('div', { class: 'vista' },
     h('header', { class: 'vista-cabecera' },
@@ -154,6 +155,13 @@ export function vistaBacklog(app) {
       cifra('Puntos estimados', puntosDe(backlog)),
       cifra('Sin estimar', sinEstimar),
       cifra('Por mejorar', porMejorar)),
+    // Sin épica, el mapa, el roadmap, el proceso y los informes no pueden agrupar por tema
+    modo === 'lista' && sinEpica.length && sinEpica.length >= Math.min(3, backlog.length) ? h('p', { class: 'aviso-suave' },
+      `${sinEpica.length === 1 ? 'Una historia no tiene' : `${sinEpica.length} historias no tienen`} épica: agrúpalas para ver el mapa, el roadmap y los informes por tema. `,
+      h('button', {
+        type: 'button', class: 'btn-texto',
+        onclick: () => { seleccion.clear(); sinEpica.forEach((x) => seleccion.add(x.id)); app.render(); },
+      }, sinEpica.length === 1 ? 'Seleccionarla para asignar una' : 'Seleccionarlas para asignar una')) : null,
     modo !== 'lista' ? null : h('div', { class: 'barra-filtros', role: 'search' },
       h('input', {
         type: 'search', placeholder: 'Buscar historias', 'aria-label': 'Buscar historias', value: filtros.texto,

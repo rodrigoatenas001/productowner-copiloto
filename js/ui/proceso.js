@@ -1,13 +1,29 @@
 // Pestaña «Proceso» del backlog: el circuito del cliente en carriles (BPMN liviano),
 // enlazado a las historias, con revisión de cobertura y exportación a BPMN 2.0.
-import { h, campo, selector, descargar, vacio, termino } from './dom.js';
+import { h, campo, selector, descargar, vacio, termino, pedirTexto } from './dom.js';
 import {
-  TIPOS_PASO, procesoDe, agregarCarril, quitarCarril, agregarPaso, editarPaso, eliminarPaso, moverPaso,
-  conectar, desconectar, revisarProceso, disposicion, aBpmn,
+  TIPOS_PASO, procesoDe, agregarCarril, quitarCarril, renombrarCarril, moverCarril, agregarPaso, insertarPasoDespues,
+  editarPaso, eliminarPaso, moverPaso, conectar, desconectar, revisarProceso, disposicion, aBpmn,
 } from '../nucleo/proceso.js';
 import { nombreArchivo } from '../nucleo/exportar.js';
 
 let abierto = null; // paso con el editor desplegado
+let enfocar = null; // tras redibujar: 'actor' (el campo para agregar otro) o el id de un paso nuevo
+
+/** Cada cambio redibuja la vista: devuelve el foco donde la persona seguía escribiendo. */
+function devolverFoco() {
+  if (!enfocar) return;
+  const destino = enfocar;
+  enfocar = null;
+  requestAnimationFrame(() => {
+    const el = destino === 'actor'
+      ? document.getElementById('proceso-nuevo-actor')
+      : document.querySelector(`#paso-${CSS.escape(destino)} .proceso-editor input[type="text"]`);
+    if (!el) return;
+    el.focus({ preventScroll: true });
+    el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+  });
+}
 
 const NS = 'http://www.w3.org/2000/svg';
 const svg = (tag, attrs = {}, ...hijos) => {
@@ -30,6 +46,7 @@ export function vistaProceso(app) {
         ['Partir con Cliente, Negocio y Sistema', () => cambiar((p) => ['Cliente', 'Negocio', 'Sistema'].reduce(agregarCarril, p))]));
   }
 
+  devolverFoco();
   return h('div', { class: 'proceso' },
     h('p', { class: 'ayuda' }, 'El circuito real del cliente, con un subconjunto de BPMN: inicio, tarea, decisión y fin, en carriles por actor. Enlaza cada tarea con sus historias para ver qué falta levantar. ', termino('bpmn')),
     seccionCarriles(proceso, cambiar),
@@ -44,6 +61,7 @@ export function vistaProceso(app) {
         onclick: () => cambiar((p) => {
           const nuevo = agregarPaso(p, { tipo, carril: p.pasos[p.pasos.length - 1]?.carril });
           abierto = nuevo.pasos[nuevo.pasos.length - 1].id;
+          enfocar = abierto;
           return nuevo;
         }),
       }, `+ ${nombre}`)))),
@@ -57,12 +75,22 @@ export function vistaProceso(app) {
 }
 
 function seccionCarriles(proceso, cambiar) {
-  const entrada = h('input', { type: 'text', placeholder: 'Ej.: Clienta, Dueña, Tienda en línea', maxlength: 60 });
-  const agregar = () => { if (entrada.value.trim()) cambiar((p) => agregarCarril(p, entrada.value)); };
+  const entrada = h('input', { type: 'text', id: 'proceso-nuevo-actor', placeholder: 'Ej.: Clienta, Dueña, Tienda en línea', maxlength: 60 });
+  const agregar = () => { if (entrada.value.trim()) { enfocar = 'actor'; cambiar((p) => agregarCarril(p, entrada.value)); } };
+  const ultimo = proceso.carriles.length - 1;
   return h('section', { class: 'panel', 'aria-labelledby': 'proceso-carriles' },
     h('h2', { id: 'proceso-carriles' }, 'Actores (carriles)'),
-    h('ul', { class: 'proceso-carriles' }, proceso.carriles.map((c) => h('li', { class: 'chip-editable' },
-      c.nombre,
+    h('p', { class: 'ayuda' }, 'De arriba hacia abajo, en el orden del diagrama. Toca un nombre para cambiarlo.'),
+    h('ul', { class: 'proceso-carriles' }, proceso.carriles.map((c, i) => h('li', { class: 'chip-editable' },
+      h('button', { type: 'button', class: 'icono', 'aria-label': `Subir el carril ${c.nombre}`, disabled: i === 0, onclick: () => cambiar((p) => moverCarril(p, c.id, -1)) }, '↑'),
+      h('button', {
+        type: 'button', class: 'chip-nombre', 'aria-label': `Cambiar el nombre de ${c.nombre}`,
+        onclick: async () => {
+          const nombre = await pedirTexto('Nombre del actor', { valor: c.nombre, aceptar: 'Guardar' });
+          if (nombre) cambiar((p) => renombrarCarril(p, c.id, nombre));
+        },
+      }, c.nombre),
+      h('button', { type: 'button', class: 'icono', 'aria-label': `Bajar el carril ${c.nombre}`, disabled: i === ultimo, onclick: () => cambiar((p) => moverCarril(p, c.id, 1)) }, '↓'),
       h('button', {
         type: 'button', class: 'icono', 'aria-label': `Quitar el carril ${c.nombre}`,
         disabled: proceso.carriles.length === 1,
@@ -122,6 +150,17 @@ function filaPaso(app, proceso, paso, i, cambiar) {
                 onchange: (e) => editar({ historiaIds: e.target.checked ? [...paso.historiaIds, x.id] : paso.historiaIds.filter((id) => id !== x.id) }),
               }), x.titulo)))) : h('p', { class: 'ayuda' }, 'Aún no hay historias en el backlog.')) : null,
 
+        paso.tipo === 'fin' ? null : h('div', { class: 'acciones proceso-insertar' },
+          h('span', { class: 'ayuda' }, '¿Faltó un paso?'),
+          ['tarea', 'decision'].map((tipo) => h('button', {
+            type: 'button', class: 'btn btn--secundario btn--chico',
+            onclick: () => cambiar((p) => {
+              const nuevo = insertarPasoDespues(p, paso.id, { tipo });
+              abierto = nuevo.pasos[nuevo.pasos.findIndex((x) => x.id === paso.id) + 1].id;
+              enfocar = abierto;
+              return nuevo;
+            }),
+          }, `+ ${TIPOS_PASO[tipo]} después`))),
         h('div', { class: 'acciones' },
           h('button', { type: 'button', class: 'btn-texto', disabled: i === 0, onclick: () => cambiar((p) => moverPaso(p, paso.id, -1)) }, '↑ Antes'),
           h('button', { type: 'button', class: 'btn-texto', disabled: i === proceso.pasos.length - 1, onclick: () => cambiar((p) => moverPaso(p, paso.id, 1)) }, '↓ Después'),

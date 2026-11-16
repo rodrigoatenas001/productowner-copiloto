@@ -28,6 +28,12 @@ export function definicionesDe(proyecto) {
   };
 }
 
+/**
+ * ¿El equipo usa esta lista? Si nadie ha marcado nada todavía, avisar «no lista» en cada historia
+ * es ruido: el aviso aparece desde que se marca el primer punto.
+ */
+export const seUsa = (proyecto, tipo) => proyecto.historias.some((h) => (h.checks?.[tipo] || []).length);
+
 /** Avance de una historia en una lista. Los puntos marcados se guardan por texto. */
 export function avance(historia, lista, tipo) {
   const marcados = new Set(historia.checks?.[tipo] || []);
