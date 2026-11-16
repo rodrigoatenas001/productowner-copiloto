@@ -787,3 +787,5 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .proceso-insertar .ayuda { margin: 0; }
 .aviso-suave { margin: 0 0 14px; padding: 10px 14px; border-radius: var(--radio); background: var(--ambar-suave); color: var(--ambar-texto); font-size: .92rem; }
 .aviso-suave .btn-texto { color: inherit; font-weight: 700; padding: 0 2px; }
+.ver-mas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 12px 0 0; }
+.ver-mas .ayuda { margin: 0; }

@@ -112,15 +112,9 @@ function filaPaso(app, proceso, paso, i, cambiar) {
   const historias = app.proyecto.historias.filter((x) => x.tipo === 'historia');
   const porEpica = Map.groupBy ? Map.groupBy(historias, (x) => x.epica || 'Sin épica') : agrupar(historias);
 
-  return h('li', { class: `proceso-paso proceso-paso--${paso.tipo}`, id: `paso-${paso.id}` },
-    h('details', { open: abierto === paso.id, ontoggle: (e) => { if (e.target.open) abierto = paso.id; else if (abierto === paso.id) abierto = null; } },
-      h('summary', {},
-        h('span', { class: 'proceso-numero' }, String(i + 1)),
-        h('span', { class: `proceso-tipo proceso-tipo--${paso.tipo}` }, TIPOS_PASO[paso.tipo]),
-        h('span', { class: 'proceso-resumen' }, paso.texto || h('em', {}, 'Sin nombre')),
-        h('span', { class: 'proceso-meta' }, carril),
-        paso.tipo === 'tarea' ? h('span', { class: `chip${paso.historiaIds.length ? ' chip--ok' : ' chip--aviso'}` }, `${paso.historiaIds.length} hist.`) : null),
-      h('div', { class: 'proceso-editor' },
+  // El editor (con la lista de historias para enlazar) se arma solo al abrir el paso:
+  // con cientos de historias, armarlo para cada paso dejaba la pestaña en decenas de miles de nodos
+  const crearEditor = () => h('div', { class: 'proceso-editor' },
         h('div', { class: 'editor-fila' },
           campo('Qué pasa', h('input', { type: 'text', value: paso.texto, maxlength: 160, placeholder: paso.tipo === 'decision' ? '¿Hay stock?' : 'Verbo + objeto: «Paga el pedido»', onchange: (e) => editar({ texto: e.target.value.trim() }) })),
           campo('Tipo', selector(TIPOS_PASO, paso.tipo, { onchange: (e) => editar({ tipo: e.target.value }) })),
@@ -167,7 +161,25 @@ function filaPaso(app, proceso, paso, i, cambiar) {
           h('button', {
             type: 'button', class: 'btn-texto btn-peligro',
             onclick: () => { abierto = null; app.cambiarConDeshacer('Paso eliminado.', (x) => ({ ...x, proceso: eliminarPaso(procesoDe(x), paso.id) })); },
-          }, 'Eliminar paso')))));
+          }, 'Eliminar paso')));
+
+  return h('li', { class: `proceso-paso proceso-paso--${paso.tipo}`, id: `paso-${paso.id}` },
+    h('details', {
+      open: abierto === paso.id,
+      ontoggle: (e) => {
+        if (e.target.open) {
+          abierto = paso.id;
+          if (!e.target.querySelector('.proceso-editor')) e.target.append(crearEditor());
+        } else if (abierto === paso.id) abierto = null;
+      },
+    },
+      h('summary', {},
+        h('span', { class: 'proceso-numero' }, String(i + 1)),
+        h('span', { class: `proceso-tipo proceso-tipo--${paso.tipo}` }, TIPOS_PASO[paso.tipo]),
+        h('span', { class: 'proceso-resumen' }, paso.texto || h('em', {}, 'Sin nombre')),
+        h('span', { class: 'proceso-meta' }, carril),
+        paso.tipo === 'tarea' ? h('span', { class: `chip${paso.historiaIds.length ? ' chip--ok' : ' chip--aviso'}` }, `${paso.historiaIds.length} hist.`) : null),
+      abierto === paso.id ? crearEditor() : null));
 }
 
 function agrupar(lista) {

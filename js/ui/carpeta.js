@@ -9,7 +9,7 @@ import {
 
 const estado = {
   carpeta: null, // FileSystemDirectoryHandle
-  permiso: 'sin carpeta', // 'granted' | 'prompt' | 'denied' | 'sin carpeta'
+  permiso: 'sin carpeta', // 'granted' | 'prompt' | 'denied' | 'perdida' | 'sin carpeta'
   marcas: {}, // id del proyecto → { archivo, modificado, local }
   invalidos: [],
   ultima: null, // fecha de la última sincronización
@@ -21,6 +21,17 @@ export const carpetaLista = () => Boolean(estado.carpeta) && estado.permiso === 
 export const nombreCarpeta = () => estado.carpeta?.name || '';
 
 const guardarMarcas = () => guardarAjuste('carpetaMarcas', estado.marcas);
+
+/**
+ * La carpeta ya no está (se movió, se renombró o se borró, o la nube dejó de sincronizarla):
+ * se deja de usar hasta que la persona elija otra, con un aviso claro en vez del error del navegador.
+ */
+function carpetaPerdida(app) {
+  if (estado.permiso === 'perdida') return;
+  estado.permiso = 'perdida';
+  avisar(`No se encuentra la carpeta «${nombreCarpeta()}»: ¿la moviste, la renombraste o la borraste? Elige otra en Ajustes › Usar en varios equipos. Mientras tanto, los cambios quedan en este navegador.`, 'error');
+  app.render();
+}
 const hora = (iso) => (iso ? new Date(iso).toLocaleString('es-CL', { day: 'numeric', month: 'short', hour: '2-digit', minute: '2-digit' }) : 'sin fecha');
 
 /** Al abrir la app: recupera la carpeta. Si el navegador ya dio permiso, sincroniza; si no, se pide con un clic. */
@@ -37,6 +48,7 @@ export async function iniciarCarpeta(app) {
   if (estado.permiso === 'granted') await sincronizar(app);
   else app.render();
 }
+
 
 export async function vincularCarpeta(app) {
   let carpeta;
@@ -128,8 +140,9 @@ export async function sincronizar(app, { anunciar = false } = {}) {
     if (nuevosInvalidos.length) avisar(`En la carpeta hay ${nuevosInvalidos.length === 1 ? 'un archivo que no es' : `${nuevosInvalidos.length} archivos que no son`} un proyecto válido: ${nuevosInvalidos.join(', ')}. No se tocaron.`, 'error');
     if (anunciar) avisar(`Carpeta «${nombreCarpeta()}» al día${traidos ? `: ${traidos} ${traidos === 1 ? 'proyecto traído' : 'proyectos traídos'}` : ''}${escritos ? `${traidos ? ',' : ':'} ${escritos} ${escritos === 1 ? 'guardado' : 'guardados'}` : ''}.`);
   } catch (e) {
-    if (e.name === 'NotAllowedError') estado.permiso = 'prompt';
-    avisar(`No se pudo sincronizar con la carpeta: ${e.message}`, 'error');
+    if (e.name === 'NotFoundError') carpetaPerdida(app);
+    else if (e.name === 'NotAllowedError') estado.permiso = 'prompt';
+    else avisar(`No se pudo sincronizar con la carpeta: ${e.message}`, 'error');
   } finally {
     estado.ocupado = false;
     app.render();
@@ -147,6 +160,7 @@ export async function alGuardarEnCarpeta(app, proyecto) {
     await escribir(proyecto);
     await guardarMarcas();
   } catch (e) {
+    if (e.name === 'NotFoundError') { carpetaPerdida(app); return; }
     if (e.name === 'NotAllowedError') { estado.permiso = 'prompt'; app.render(); return; }
     avisar(`No se pudo guardar en la carpeta: ${e.message}. El cambio quedó en este navegador.`, 'error');
   }
@@ -167,6 +181,14 @@ export async function alBorrarEnCarpeta(id) {
 /** Aviso arriba de cada vista cuando la carpeta necesita que la persona confirme el acceso. */
 export function avisoCarpeta(app) {
   if (!estado.carpeta || estado.permiso === 'granted') return null;
+  if (estado.permiso === 'perdida') {
+    return h('aside', { class: 'recordatorio', 'aria-label': 'Carpeta sincronizada' },
+      h('p', {}, h('strong', {}, `No se encuentra la carpeta «${nombreCarpeta()}». `),
+        'Los cambios quedan solo en este navegador hasta que elijas una carpeta. Si la moviste, elígela en su nuevo lugar.'),
+      h('div', { class: 'acciones' },
+        h('button', { type: 'button', class: 'btn', onclick: () => vincularCarpeta(app) }, 'Elegir la carpeta'),
+        h('button', { type: 'button', class: 'btn-texto', onclick: () => desvincularCarpeta(app) }, 'Dejar de usarla')));
+  }
   return h('aside', { class: 'recordatorio', 'aria-label': 'Carpeta sincronizada' },
     h('p', {}, h('strong', {}, `Tus proyectos se guardan en «${nombreCarpeta()}». `),
       'El navegador pide confirmar el acceso cada vez que abres el copiloto. Mientras tanto, los cambios quedan solo aquí.'),
@@ -187,13 +209,16 @@ export function seccionCarpeta(app) {
         h('p', {}, h('strong', {}, `Carpeta: «${nombreCarpeta()}». `),
           estado.permiso === 'granted'
             ? `Cada cambio se guarda también ahí${estado.ultima ? ` (última revisión: ${hora(estado.ultima)})` : ''}.`
-            : 'Falta confirmar el acceso en esta sesión.'),
+            : estado.permiso === 'perdida'
+              ? 'No se encuentra: ¿la moviste, la renombraste o la borraste? Elígela de nuevo.'
+              : 'Falta confirmar el acceso en esta sesión.'),
         estado.invalidos.length ? h('p', { class: 'ayuda' }, `Archivos que no son proyectos (no se tocan): ${estado.invalidos.join(', ')}.`) : null,
         h('div', { class: 'acciones' },
           estado.permiso === 'granted'
             ? h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => sincronizar(app, { anunciar: true }) }, 'Revisar ahora')
-            : h('button', { type: 'button', class: 'btn', onclick: () => reconectarCarpeta(app) }, 'Dar acceso a la carpeta'),
-          h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => vincularCarpeta(app) }, 'Cambiar de carpeta'),
+            : estado.permiso === 'perdida' ? null
+              : h('button', { type: 'button', class: 'btn', onclick: () => reconectarCarpeta(app) }, 'Dar acceso a la carpeta'),
+          h('button', { type: 'button', class: estado.permiso === 'perdida' ? 'btn' : 'btn btn--secundario', onclick: () => vincularCarpeta(app) }, estado.permiso === 'perdida' ? 'Elegir la carpeta' : 'Cambiar de carpeta'),
           h('button', { type: 'button', class: 'btn-texto', onclick: () => desvincularCarpeta(app) }, 'Dejar de usarla')),
         h('p', { class: 'ayuda' }, 'Si editas el mismo proyecto en dos equipos antes de que la nube los iguale, el copiloto te pregunta cuál conservar; la otra versión queda en la carpeta «papelera». Los proyectos que borras también van ahí. El proyecto de ejemplo no se guarda en la carpeta.'),
       ];

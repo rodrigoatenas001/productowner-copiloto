@@ -22,8 +22,26 @@ const filtros = { texto: '', epica: '' };
 let revision = null; // { historiaId, pasos, estado: 'corriendo'|'lista'|'error', resultado, error }
 let modo = 'lista'; // 'lista' | 'proceso' | 'priorizar' | 'roadmap' | 'epicas' | 'mapa' | 'estimar'
 let abierta = null;
+// Con cientos de historias, dibujar todas las tarjetas hacía lento cada cambio: se muestran de a 100
+// (la búsqueda y los filtros recorren todo el backlog)
+const POR_PAGINA = 100;
+let mostrar = POR_PAGINA;
 let arrastrando = null;
 const seleccion = new Set(); // historias marcadas para cambios en grupo
+
+/** Las primeras tarjetas y un botón para ver más. La historia abierta siempre queda a la vista. */
+function listaPaginada(app, visibles, tarjeta) {
+  const posAbierta = abierta ? visibles.findIndex((x) => x.id === abierta) : -1;
+  const limite = Math.max(mostrar, posAbierta + 1);
+  const quedan = visibles.length - limite;
+  return [
+    h('ol', { class: 'lista-tarjetas' }, visibles.slice(0, limite).map(tarjeta)),
+    quedan > 0 ? h('div', { class: 'ver-mas' },
+      h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => { mostrar = limite + POR_PAGINA; app.render(); } },
+        `Mostrar ${Math.min(POR_PAGINA, quedan)} más`),
+      h('span', { class: 'ayuda' }, `Se muestran ${limite} de ${visibles.length}. Usa la búsqueda o el filtro de épica para ir directo.`)) : null,
+  ];
+}
 
 /** Abre una pestaña del backlog (lo usa la guía «Cómo funciona»). */
 export function abrirModo(m) { modo = m; abierta = null; }
@@ -185,7 +203,7 @@ export function vistaBacklog(app) {
     modo !== 'lista' ? null : filtrando ? h('p', { class: 'ayuda' }, 'Con filtros activos no se puede reordenar.') : null,
     modo === 'lista' && seleccion.size ? barraSeleccion(app, sprintAbierto) : null,
     modo !== 'lista' ? null : backlog.length
-      ? (visibles.length ? h('ol', { class: 'lista-tarjetas' }, visibles.map(tarjeta)) : h('p', { class: 'vacio' }, 'Ninguna historia coincide con el filtro.'))
+      ? (visibles.length ? listaPaginada(app, visibles, tarjeta) : h('p', { class: 'vacio' }, 'Ninguna historia coincide con el filtro.'))
       : vacio('El backlog está vacío.', 'Es la lista de todo lo que hay que hacer. Puedes llenarlo desde tus notas, con una plantilla de proyecto o agregando historias una a una con "+ Historia".',
         ['Convertir notas en historias', () => app.ir('notas')],
         ['Usar una plantilla', () => app.ir('cliente')],

@@ -5,6 +5,9 @@ import {
 } from '../nucleo/priorizacion.js';
 
 let metodo = 'wsjf';
+// Una fila con tres selectores por historia: con cientos de historias se muestran de a 100
+const POR_PAGINA = 100;
+let mostrar = POR_PAGINA;
 
 export function vistaPriorizar(app) {
   const backlog = app.proyecto.historias.filter((x) => x.estado === 'backlog');
@@ -71,7 +74,10 @@ export function vistaPriorizar(app) {
     h('div', { class: 'mapa-scroll' },
       h('table', { class: 'tabla tabla-priorizar' },
         h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, 'Historia'), cabeceras.map((c) => h('th', { scope: 'col' }, c)), h('th', { scope: 'col' }, 'Puntos'), h('th', { scope: 'col' }, def.nombre))),
-        h('tbody', {}, backlog.map(fila)))),
+        h('tbody', {}, backlog.slice(0, mostrar).map(fila)))),
+    backlog.length > mostrar ? h('div', { class: 'ver-mas' },
+      h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => { mostrar += POR_PAGINA; app.render(); } }, `Mostrar ${Math.min(POR_PAGINA, backlog.length - mostrar)} más`),
+      h('span', { class: 'ayuda' }, `Se muestran ${mostrar} de ${backlog.length}, en el orden del backlog. «Ordenar el backlog» considera todas.`)) : null,
     metodo === 'wsjf' ? matriz(app, backlog) : null);
 }
 
