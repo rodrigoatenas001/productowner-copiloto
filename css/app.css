@@ -654,3 +654,35 @@ h2 .termino { font-size: .78rem; }
 .interruptor-detalle { display: block; font-weight: 400; color: var(--pizarra); font-size: .88rem; }
 @media (prefers-reduced-motion: reduce) { .interruptor input, .interruptor input::before { transition: none; } }
 @media (forced-colors: active) { .interruptor input { border-color: CanvasText; } .interruptor input:checked { background: Highlight; } }
+
+/* ── Cómo funciona: mapa del flujo ── */
+.guia-flujo { list-style: none; margin: 0 0 20px; padding: 0; display: grid; gap: 28px 16px; grid-template-columns: repeat(3, minmax(0, 1fr)); }
+.guia-etapa { position: relative; display: flex; flex-direction: column; gap: 10px; padding: 18px 18px 16px; background: var(--superficie); border: 1px solid var(--niebla); border-top: 4px solid var(--niebla); border-radius: var(--radio); }
+.guia-etapa--hecho { border-top-color: var(--bosque); }
+.guia-etapa--curso { border-top-color: var(--cobre); }
+/* Flecha hacia la etapa siguiente: a la derecha en filas, abajo cuando se apilan */
+.guia-etapa:not(:last-child)::after { content: "→"; position: absolute; right: -15px; top: 22px; color: var(--cobre); font-weight: 700; }
+.guia-etapa:nth-child(3n)::after { content: none; }
+@media (max-width: 1100px) {
+  .guia-flujo { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .guia-etapa:nth-child(3n):not(:last-child)::after { content: "→"; }
+  .guia-etapa:nth-child(2n)::after { content: none; }
+}
+@media (max-width: 620px) {
+  .guia-flujo { grid-template-columns: 1fr; }
+  .guia-etapa:not(:last-child)::after, .guia-etapa:nth-child(2n):not(:last-child)::after, .guia-etapa:nth-child(3n):not(:last-child)::after { content: "↓"; right: auto; left: 50%; top: auto; bottom: -24px; }
+}
+.guia-cabeza { display: flex; align-items: center; gap: 10px; }
+.guia-cabeza h2 { margin: 0; font-size: 1.15rem; }
+.guia-sub { display: block; font: 400 .85rem var(--f-texto); color: var(--pizarra); }
+.guia-numero { flex: none; display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; background: var(--tinta-2); color: var(--superficie); font: 700 .95rem var(--f-display); }
+.guia-estado { margin: 0; justify-self: start; align-self: flex-start; padding: 2px 10px; border-radius: 999px; font: 500 .78rem var(--f-mono); background: var(--niebla); color: var(--tinta-2); }
+.guia-estado--hecho { background: var(--bosque-suave); color: var(--bosque); }
+.guia-estado--curso { background: var(--cobre-suave); color: var(--cobre-texto); }
+.guia-texto { margin: 0; color: var(--texto); font-size: .92rem; flex: 1; }
+.guia-destinos { display: flex; flex-wrap: wrap; gap: 6px; margin: 0; }
+.btn--chico { padding: 6px 12px; font-size: .85rem; min-height: 32px; }
+.guia-ciclo { display: flex; gap: 14px; align-items: flex-start; margin: 0 0 24px; padding: 14px 18px; border: 1px dashed var(--cobre); border-radius: var(--radio); background: var(--cobre-suave); }
+.guia-ciclo p { margin: 0; }
+.guia-ciclo-flecha { font-size: 1.6rem; line-height: 1; color: var(--cobre-texto); }
+@media (prefers-color-scheme: dark) { .guia-estado--hecho { color: #8fd3bf; } }

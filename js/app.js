@@ -11,6 +11,7 @@ import { vistaTaller } from './ui/taller.js';
 import { vistaRetro } from './ui/retro.js';
 import { vistaCliente } from './ui/cliente.js';
 import { vistaBienvenida } from './ui/bienvenida.js';
+import { vistaGuia } from './ui/guia.js';
 import { vistaComentar } from './ui/comentar.js';
 import { cajaRecorrido, avisoEjemplo, cajaInfo, PASOS_RECORRIDO } from './ui/ayuda.js';
 import { normalizarProyecto, resumenSprint } from './nucleo/proyecto.js';
@@ -18,6 +19,7 @@ import { activarAtajos, abrirBuscador } from './ui/buscador.js';
 
 const VISTAS = {
   inicio: { titulo: 'Inicio', render: vistaBienvenida },
+  guia: { titulo: 'Cómo funciona', render: vistaGuia },
   notas: { titulo: 'Notas', render: vistaNotas },
   backlog: { titulo: 'Backlog', render: vistaBacklog },
   cliente: { titulo: 'Cliente', render: vistaCliente },

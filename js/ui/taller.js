@@ -9,6 +9,9 @@ import { enunciado } from '../nucleo/historias.js';
 let pestana = 'trivia';
 const ejercicio = { casoId: CASOS[0].id, textos: {}, resultado: null, verEjemplo: false };
 
+/** Abre una pestaña de esta sección (lo usa la guía «Cómo funciona»). */
+export function abrirPestana(clave) { pestana = clave; }
+
 export function vistaTaller(app) {
   return h('div', { class: 'vista' },
     h('header', { class: 'vista-cabecera' },

@@ -20,6 +20,7 @@ export function vistaBienvenida(app) {
       h('ol', { class: 'caminos' },
         camino('Mirar un ejemplo', 'Un proyecto real armado de punta a punta: la tienda en línea de una pastelería, con propuesta, hitos, sprints y un bloqueo.', async () => { await app.cargarEjemplo(); app.iniciarRecorrido(); }, 'Ver el ejemplo con un recorrido', true),
         camino('Pegar mis notas', 'Lo que te pidió tu cliente, tal cual. Lo convertimos en historias de usuario y te decimos qué les falta.', () => app.ir('notas'), 'Ir a mis notas'),
+        camino('Ver cómo funciona', 'El mapa del flujo en seis etapas: levantar, acordar, ordenar, construir, entregar y aprender, con un atajo a cada sección.', () => app.ir('guia'), 'Ver el mapa'),
         camino('Partir de una plantilla', `Para proyectos típicos: ${Object.values(PLANTILLAS).map((p) => p.nombre).join(', ')}.`, () => app.ir('cliente'), 'Elegir una plantilla'))),
 
     h('div', { class: 'bienvenida-columnas' },

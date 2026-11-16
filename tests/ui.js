@@ -225,6 +225,13 @@ const PRUEBAS = [
     todos('.ficha-bloqueo').find((b) => b.textContent === 'Bloquear').click(); await pausa(80);
     verdad(uno('.ficha.is-bloqueada') && uno('.aviso-bloqueos'), 'la ficha queda bloqueada con aviso');
   }],
+  ['Cómo funciona: seis etapas con estado y atajos a cada sección', async () => {
+    await ir('guia');
+    igual(todos('.guia-etapa').length, 6, 'muestra las seis etapas');
+    verdad(todos('.guia-estado').every((e) => /^(Hecho|En curso|Pendiente) · /.test(e.textContent.replace('Estado: ', ''))), 'cada etapa dice en qué va');
+    await clic('Priorizar');
+    verdad(doc().location.hash === '#backlog' && uno('.priorizar'), 'el atajo abre Backlog en la pestaña Priorizar');
+  }],
   ['Glosario: el botón «?» abre y cierra la definición', async () => {
     await ir('ajustes');
     const boton = uno('.termino');

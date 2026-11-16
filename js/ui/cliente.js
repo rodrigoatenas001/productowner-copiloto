@@ -12,6 +12,9 @@ let pestana = 'alcance';
 
 const PESTANAS = { alcance: 'Alcance', cotizacion: 'Cotización', hitos: 'Hitos de pago', cambios: 'Cambios' };
 
+/** Abre una pestaña de esta sección (lo usa la guía «Cómo funciona»). */
+export function abrirPestana(clave) { pestana = clave; }
+
 export function vistaCliente(app) {
   return h('div', { class: 'vista' },
     h('header', { class: 'vista-cabecera' },
