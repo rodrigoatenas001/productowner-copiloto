@@ -8,6 +8,7 @@ import { botonesMarkdown } from './compartir.js';
 import { reporteSprint, notasDeVersion, informeCliente } from '../nucleo/reportes.js';
 import { sugerirObjetivo } from '../nucleo/objetivo.js';
 import { iaConfigurada, objetivoConIa, notasConIa } from '../ia.js';
+import { resumenDaily, dailyMarkdown, DIAS_ESTANCADA } from '../nucleo/daily.js';
 
 let notasIa = null; // { sprintId, estado: 'corriendo'|'lista'|'error', texto, error }
 import {
@@ -15,6 +16,7 @@ import {
 } from '../nucleo/proyecto.js';
 
 let arrastrando = null;
+let verDaily = false; // panel de la Daily abierto sobre el tablero
 const filtroTablero = { epica: '', bloqueadas: false };
 
 export function vistaSprint(app) {
@@ -135,6 +137,41 @@ function planificar(app, sprint) {
       }, 'Descartar')));
 }
 
+/** Los 15 minutos de la Daily: qué se terminó, qué está en curso, qué está bloqueado y si se va a tiempo. */
+function panelDaily(app, sprint) {
+  const r = resumenDaily(app.proyecto, sprint);
+  const dias = (n) => (n === 0 ? 'desde hoy' : `${n} ${n === 1 ? 'día' : 'días'}`);
+  const grupo = (titulo, clase, items, vacioTexto) => h('div', { class: `daily-grupo daily-grupo--${clase}` },
+    h('h3', {}, titulo, h('span', { class: 'nav-conteo' }, String(items.length))),
+    items.length ? h('ul', {}, items) : h('p', { class: 'ayuda' }, vacioTexto));
+  const ritmo = { atrasado: ['Atrasado', 'chip--aviso'], adelantado: ['Adelantado', 'chip--ok'], 'a tiempo': ['A tiempo', 'chip--ok'] }[r.ritmo];
+  const desde = new Date(r.corte).toLocaleString('es-CL', { weekday: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
+  return h('section', { class: 'panel daily', 'aria-labelledby': 'daily-titulo' },
+    h('div', { class: 'daily-cabecera' },
+      h('h2', { id: 'daily-titulo' }, 'Daily', termino('daily')),
+      ritmo ? h('span', { class: `chip ${ritmo[1]}` }, ritmo[0]) : null,
+      r.pendiente !== null ? h('span', { class: 'tarjeta-meta' }, `faltan ${r.pendiente} pts; lo ideal hoy: ${r.ideal}`) : null,
+      h('button', { type: 'button', class: 'icono', 'aria-label': 'Cerrar la Daily', onclick: () => { verDaily = false; app.render(); } }, '×')),
+    r.objetivo ? h('p', {}, h('strong', {}, 'Objetivo: '), r.objetivo) : null,
+    h('div', { class: 'daily-grupos' },
+      grupo('Terminado', 'hecho', r.terminadas.map((x) => h('li', {}, x.titulo)), `Nada desde ${desde}`),
+      grupo('En curso', 'curso', r.enCurso.map(({ historia, dias: d }) => h('li', { class: d > DIAS_ESTANCADA ? 'is-estancada' : null },
+        historia.titulo, h('span', { class: 'tarjeta-meta' }, ` · ${dias(d)}${d > DIAS_ESTANCADA ? ' · ¿sigue avanzando?' : ''}`))), 'Nada en curso.'),
+      grupo('Bloqueado', 'bloqueo', r.bloqueadas.map(({ historia, dias: d }) => h('li', {},
+        historia.titulo, h('span', { class: 'tarjeta-meta' }, ` · ${historia.bloqueo.motivo} · ${dias(d)}`))), 'Sin bloqueos.'),
+      grupo('Por empezar', 'todo', r.porEmpezar.map((x) => h('li', {}, x.titulo)), 'Todo empezó.')),
+    h('p', { class: 'ayuda' }, `«Terminado» cuenta desde ${desde} · Cada persona: qué terminó, en qué sigue y qué la bloquea; lo demás, después de la Daily.`),
+    h('div', { class: 'acciones' },
+      h('button', {
+        type: 'button', class: 'btn',
+        onclick: () => {
+          app.cambiar((x) => ({ ...x, sprints: x.sprints.map((s) => (s.id === sprint.id ? { ...s, ultimaDaily: new Date().toISOString() } : s)) }));
+          app.avisar('Daily registrada: la próxima mostrará lo terminado desde ahora.');
+        },
+      }, 'Daily hecha'),
+      botonesMarkdown(app, 'Resumen para el chat', `daily-${sprint.nombre}`, () => dailyMarkdown(app.proyecto, sprint))));
+}
+
 function tablero(app, sprint) {
   const p = app.proyecto;
   const resumen = resumenSprint(sprint, p.historias);
@@ -230,6 +267,7 @@ function tablero(app, sprint) {
       h('div', { class: 'cifra' }, h('dt', {}, 'Capacidad'), h('dd', {}, sprint.capacidad ? `${sprint.capacidad} pts` : '—')),
       h('div', { class: 'cifra' }, h('dt', {}, 'Tiempo de ciclo'), h('dd', {}, ciclo === null ? '—' : `${ciclo.toLocaleString('es-CL')} días`))),
     bloqueadas.length ? h('p', { class: 'aviso-bloqueos', role: 'status' }, `${bloqueadas.length} ${bloqueadas.length === 1 ? 'ítem bloqueado' : 'ítems bloqueados'}: pídelo en la Daily o escálalo hoy.`) : null,
+    verDaily ? panelDaily(app, sprint) : h('p', {}, h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => { verDaily = true; app.render(); } }, 'Abrir la Daily')),
     filtrosTablero,
     h('div', { class: `tablero tablero--${COLUMNAS.length}` }, COLUMNAS.map(columna)),
     seccionReview(app, sprint),

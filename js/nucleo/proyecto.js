@@ -97,6 +97,7 @@ export function normalizarProyecto(datos) {
     capacidad: Number.isFinite(s.capacidad) && s.capacidad >= 0 ? s.capacidad : null,
     estado: ['planificado', 'activo', 'cerrado'].includes(s.estado) ? s.estado : 'planificado',
     feedback: texto(s.feedback, 5000),
+    ultimaDaily: texto(s.ultimaDaily, 40) || null,
   }));
   const idsSprint = new Set(sprints.map((s) => s.id));
 

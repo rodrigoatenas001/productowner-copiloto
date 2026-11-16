@@ -351,6 +351,16 @@ const PRUEBAS = [
     verdad(todos('.matriz-pi-cuadrante--informar li').some((li) => li.textContent.includes('Supervisor de prueba')), 'queda en «Mantener informados»');
     verdad(todos('.stakeholders .proceso-aviso').some((a) => a.textContent.includes('Nadie aprueba')), 'avisa que falta quien aprueba');
   }],
+  ['Daily: lo terminado, en curso y bloqueado, y «Daily hecha» marca el corte', async () => {
+    await ir('sprint');
+    await clic('Abrir la Daily');
+    verdad(uno('.daily'), 'abre el panel de la Daily');
+    igual(todos('.daily-grupo').length, 4, 'terminado, en curso, bloqueado y por empezar');
+    verdad(uno('.daily-grupo--bloqueo li'), 'el ejemplo tiene un bloqueo');
+    await clic('Daily hecha');
+    verdad(uno('.daily-grupo--hecho .ayuda'), 'después de marcarla no queda nada «terminado desde la última Daily»');
+    todos('.daily .icono').find((b) => b.getAttribute('aria-label') === 'Cerrar la Daily').click(); await pausa(80);
+  }],
   ['Mapa clásico: el recorrido del proceso como columnas, con sus actores arriba', async () => {
     await ir('backlog');
     await pestana('Mapa');
