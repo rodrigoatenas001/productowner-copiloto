@@ -613,3 +613,44 @@ label.tarjeta-orden input { width: 16px; height: 16px; accent-color: var(--cobre
   body { padding-bottom: 64px; }
   .nav-buscar { display: none; }
 }
+
+/* ── Glosario: botón «?» junto a un término y su definición ── */
+.campo-rotulo { display: flex; align-items: center; gap: 6px; }
+.campo-rotulo label { margin: 0; }
+.invest-rotulo { margin: 4px 0 0; font-weight: 600; font-size: .9rem; }
+.termino {
+  display: inline-grid; place-items: center; flex: none; vertical-align: middle;
+  /* Área táctil de 24 px (WCAG 2.5.8) aunque el círculo se vea pequeño */
+  width: 24px; height: 24px; margin-left: 4px; padding: 0;
+  border: 1px solid var(--niebla); border-radius: 50%; background: var(--superficie);
+  color: var(--cobre-texto); font: 700 .78rem/1 var(--f-texto); cursor: help;
+}
+.termino:hover, .termino[aria-expanded="true"] { border-color: var(--cobre); background: var(--cobre-suave); }
+.termino-definicion {
+  /* La posición la calcula dom.js; sin ella queda centrada, que también se lee bien */
+  position: fixed; inset: auto; top: var(--y, 50%); left: var(--x, 50%); margin: 0;
+  max-width: min(340px, calc(100vw - 16px)); padding: 12px 14px;
+  border: 1px solid var(--niebla); border-radius: var(--radio); background: var(--superficie);
+  color: var(--texto); box-shadow: var(--sombra); font: 400 .88rem/1.5 var(--f-texto); text-align: left;
+}
+.termino-definicion strong { display: block; margin-bottom: 2px; color: var(--cobre-texto); }
+h2 .termino { font-size: .78rem; }
+
+/* ── Interruptores: switch nativo donde existe; en el resto, el checkbox con forma de interruptor ── */
+.interruptor { display: inline-flex; align-items: flex-start; gap: 10px; cursor: pointer; max-width: 60ch; }
+.interruptor input {
+  flex: none; margin: 2px 0 0; cursor: pointer; accent-color: var(--cobre);
+  appearance: none; position: relative; width: 38px; height: 22px; border-radius: 999px;
+  background: var(--niebla); border: 1px solid var(--pizarra); transition: background .15s;
+}
+.interruptor input::before {
+  content: ""; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%;
+  background: var(--superficie); box-shadow: 0 1px 2px rgba(0, 0, 0, .3); transition: transform .15s;
+}
+.interruptor input:checked { background: var(--cobre); border-color: var(--cobre); }
+.interruptor input:checked::before { transform: translateX(16px); }
+.interruptor input:focus-visible { outline: 3px solid var(--cobre); outline-offset: 3px; }
+.interruptor-texto { font-weight: 600; }
+.interruptor-detalle { display: block; font-weight: 400; color: var(--pizarra); font-size: .88rem; }
+@media (prefers-reduced-motion: reduce) { .interruptor input, .interruptor input::before { transition: none; } }
+@media (forced-colors: active) { .interruptor input { border-color: CanvasText; } .interruptor input:checked { background: Highlight; } }

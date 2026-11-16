@@ -1,5 +1,5 @@
 // Priorizar con números: WSJF o RICE, orden del backlog por puntaje y matriz valor/esfuerzo.
-import { h, selector, vacio } from './dom.js';
+import { h, selector, vacio, termino } from './dom.js';
 import {
   METODOS, ESCALA_WSJF, IMPACTO_RICE, CONFIANZA_RICE, reordenarBacklog, matrizValorEsfuerzo, CUADRANTES,
 } from '../nucleo/priorizacion.js';
@@ -61,6 +61,7 @@ export function vistaPriorizar(app) {
           type: 'button', role: 'tab', class: 'pestana', 'aria-selected': String(metodo === clave),
           onclick: () => { metodo = clave; app.render(); },
         }, m.nombre))),
+      termino(metodo),
       h('button', {
         type: 'button', class: 'btn btn--secundario',
         onclick: () => app.cambiarConDeshacer(`Backlog ordenado por ${def.nombre}.`, (x) => ({ ...x, historias: reordenarBacklog(x.historias, metodo) })),
@@ -77,7 +78,7 @@ export function vistaPriorizar(app) {
 function matriz(app, backlog) {
   const { cuadrantes, sinDatos, cortes } = matrizValorEsfuerzo(backlog);
   return h('section', { class: 'panel matriz-panel', 'aria-labelledby': 'matriz-titulo' },
-    h('h2', { id: 'matriz-titulo' }, 'Matriz valor / esfuerzo'),
+    h('h2', { id: 'matriz-titulo' }, 'Matriz valor / esfuerzo', termino('matriz')),
     cortes
       ? h('p', { class: 'ayuda' }, `Valor = costo del retraso; esfuerzo = puntos. Los cortes son la mitad de tu backlog: valor ${cortes.valor} y ${cortes.esfuerzo} puntos.`)
       : h('p', { class: 'ayuda' }, 'Completa valor, urgencia, riesgo y puntos de algunas historias para ver la matriz.'),

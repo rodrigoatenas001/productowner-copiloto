@@ -1,5 +1,5 @@
 // Inicio: qué es Copiloto PO, para quién, qué no es, sus límites, cómo empezar y cómo aportar.
-import { h } from './dom.js';
+import { h, interruptor } from './dom.js';
 import { PLANTILLAS } from '../nucleo/plantillas.js';
 
 export const PRODUCTOWNER = 'https://productowner.cl';
@@ -58,9 +58,8 @@ export function vistaBienvenida(app) {
 
     h('section', { class: 'panel', 'aria-labelledby': 'bv-modo' },
       h('h2', { id: 'bv-modo' }, 'A tu medida'),
-      h('label', { class: 'opcion' },
-        h('input', { type: 'checkbox', checked: app.modoSimple, onchange: (e) => app.cambiarModoSimple(e.target.checked) }),
-        h('span', {}, h('strong', {}, 'Modo simple: '), 'muestra solo lo esencial (Notas, Backlog, Cliente y Sprint). Desactívalo para ver priorización, mapa de historias, estimación en equipo, retrospectiva y taller.')),
+      interruptor('Modo simple', app.modoSimple, (activo) => app.cambiarModoSimple(activo),
+        'Muestra solo lo esencial (Notas, Backlog, Cliente y Sprint). Apágalo para ver priorización, mapa de historias, estimación en equipo, retrospectiva y taller.'),
       app.cajasCerradas.size ? h('p', {}, h('button', { type: 'button', class: 'btn-texto', onclick: () => app.reabrirCajas() }, 'Volver a mostrar las cajas de ayuda')) : null,
       h('p', {}, h('button', { type: 'button', class: 'btn-texto', onclick: () => { app.iniciarRecorrido(); } }, 'Hacer el recorrido de 4 pasos con mi proyecto'))));
 }

@@ -215,7 +215,7 @@ const PRUEBAS = [
   }],
   ['Kanban liviano: columna de revisión y bloqueo', async () => {
     await ir('ajustes');
-    const casilla = todos('label.opcion').find((l) => l.textContent.includes('En revisión')).querySelector('input');
+    const casilla = todos('label.interruptor').find((l) => l.textContent.includes('En revisión')).querySelector('input');
     casilla.click(); await pausa(80);
     await ir('sprint');
     await clic('Planificar un sprint');
@@ -224,6 +224,18 @@ const PRUEBAS = [
     verdad(uno('.columna--review'), 'aparece la columna En revisión');
     todos('.ficha-bloqueo').find((b) => b.textContent === 'Bloquear').click(); await pausa(80);
     verdad(uno('.ficha.is-bloqueada') && uno('.aviso-bloqueos'), 'la ficha queda bloqueada con aviso');
+  }],
+  ['Glosario: el botón «?» abre y cierra la definición', async () => {
+    await ir('ajustes');
+    const boton = uno('.termino');
+    verdad(boton, 'hay un botón de glosario junto al límite de trabajo en curso');
+    igual(boton.getAttribute('aria-expanded'), 'false', 'parte cerrado');
+    boton.click(); await pausa(80);
+    const def = doc().getElementById(boton.getAttribute('popovertarget'));
+    verdad(def.matches(':popover-open') && def.getAttribute('role') === 'tooltip', 'muestra la definición');
+    igual(boton.getAttribute('aria-expanded'), 'true', 'avisa que está abierta');
+    def.hidePopover(); await pausa(80);
+    igual(boton.getAttribute('aria-expanded'), 'false', 'vuelve a cerrada');
   }],
   ['Desafíos del taller', async () => {
     await ir('taller');

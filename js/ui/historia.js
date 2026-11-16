@@ -1,5 +1,5 @@
 // Editor y tarjeta de una historia, compartidos por Notas (candidatas) y Backlog.
-import { h, campo, selector } from './dom.js';
+import { h, campo, selector, termino } from './dom.js';
 import { revisarInvest, calidad, enunciado, resumirTitulo, ESCALA_PUNTOS, PRIORIDADES, TIPOS } from '../nucleo/historias.js';
 import { avance, NOMBRES } from '../nucleo/definiciones.js';
 
@@ -54,20 +54,21 @@ export function editorHistoria(historia, alCambiar, { epicas = [] } = {}) {
     campo('Criterios de aceptación', h('textarea', {
       rows: 3,
       oninput: (e) => actualizar({ criterios: e.target.value.split('\n').map((c) => c.trim()).filter(Boolean) }),
-    }, (historia.criterios || []).join('\n')), 'Uno por línea. Formato sugerido: Dado… cuando… entonces…'),
+    }, (historia.criterios || []).join('\n')), 'Uno por línea. Formato sugerido: Dado… cuando… entonces…', 'criterios'),
     campo('Reglas de negocio', h('textarea', {
       rows: 2,
       oninput: (e) => actualizar({ reglas: e.target.value.split('\n').map((c) => c.trim()).filter(Boolean) }),
-    }, (historia.reglas || []).join('\n')), 'Una por línea: reglas, excepciones o controles que debe respetar. Ej.: «No se aceptan pedidos con menos de 48 horas de anticipación».'),
+    }, (historia.reglas || []).join('\n')), 'Una por línea: reglas, excepciones o controles que debe respetar. Ej.: «No se aceptan pedidos con menos de 48 horas de anticipación».', 'reglas'),
     h('div', { class: 'editor-fila' },
-      campo('Épica', h('input', { type: 'text', value: historia.epica || '', list: idLista, oninput: (e) => actualizar({ epica: e.target.value.trim() }) })),
+      campo('Épica', h('input', { type: 'text', value: historia.epica || '', list: idLista, oninput: (e) => actualizar({ epica: e.target.value.trim() }) }), null, 'epica'),
       h('datalist', { id: idLista }, epicas.map((e) => h('option', { value: e }))),
       campo('Puntos', selector({ '': 'Sin estimar', ...Object.fromEntries(ESCALA_PUNTOS.map((p) => [p, String(p)])) }, historia.puntos ?? '', {
         onchange: (e) => actualizar({ puntos: e.target.value ? Number(e.target.value) : null }),
-      })),
-      campo('Prioridad', selector(PRIORIDADES, historia.prioridad, { onchange: (e) => actualizar({ prioridad: e.target.value }) })),
-      campo('Tipo', selector(TIPOS, historia.tipo || 'historia', { onchange: (e) => actualizar({ tipo: e.target.value }) })),
+      }), null, 'puntos'),
+      campo('Prioridad', selector(PRIORIDADES, historia.prioridad, { onchange: (e) => actualizar({ prioridad: e.target.value }) }), null, 'moscow'),
+      campo('Tipo', selector(TIPOS, historia.tipo || 'historia', { onchange: (e) => actualizar({ tipo: e.target.value }) }), null, 'tipo'),
     ),
+    h('p', { class: 'campo-rotulo invest-rotulo' }, 'Revisión INVEST', termino('invest')),
     avisos,
     historia.notaOriginal && historia.notaOriginal !== enunciado(historia)
       ? h('p', { class: 'nota-original' }, h('span', {}, 'Nota original: '), historia.notaOriginal)
@@ -81,6 +82,7 @@ export function listaVerificacion(historia, lista, tipo, alMarcar) {
   const resumen = h('span', { class: `chip${estado.completa ? ' chip--ok' : ''}` }, `${estado.hechos}/${estado.total}`);
   return h('details', { class: 'verificacion' },
     h('summary', {}, NOMBRES[tipo], ' ', resumen),
+    h('p', { class: 'campo-rotulo' }, `Qué es la ${NOMBRES[tipo]}`, termino(tipo)),
     h('ul', {}, lista.map((item) => h('li', {},
       h('label', { class: 'opcion' },
         h('input', {

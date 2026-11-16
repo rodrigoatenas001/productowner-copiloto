@@ -1,5 +1,5 @@
 // Sprint: planificar con la capacidad del equipo, trabajar en un tablero y cerrar con burndown y velocidad.
-import { h, campo, pedirTexto, vacio, selector } from './dom.js';
+import { h, campo, pedirTexto, vacio, selector, termino, interruptor } from './dom.js';
 import { definicionesDe, avance, marcar } from '../nucleo/definiciones.js';
 import { listaVerificacion, editorHistoria } from './historia.js';
 import { dependenciasPendientes, bloqueosDelSprint } from '../nucleo/dependencias.js';
@@ -62,7 +62,7 @@ function planificar(app, sprint) {
         campo('Capacidad (puntos)', h('input', {
           type: 'number', min: 0, max: 500, value: sprint.capacidad ?? '',
           onchange: (e) => editarSprint({ capacidad: e.target.value === '' ? null : Math.max(0, Number(e.target.value)) }, true),
-        }), velocidad(p) ? `Velocidad promedio: ${velocidad(p)} pts.` : 'Sin sprints anteriores: estima cuánto alcanzan a terminar.')),
+        }), velocidad(p) ? `Velocidad promedio: ${velocidad(p)} pts.` : 'Sin sprints anteriores: estima cuánto alcanzan a terminar.', 'velocidad')),
       campo('Objetivo del sprint', h('input', {
         id: 'objetivo-sprint', type: 'text', value: sprint.objetivo, placeholder: 'Qué valor entregamos al terminar', maxlength: 300,
         oninput: (e) => editarSprint({ objetivo: e.target.value }),
@@ -163,9 +163,7 @@ function tablero(app, sprint) {
     epicasSprint.length ? selector({ '': 'Todas las épicas', ...Object.fromEntries(epicasSprint.map((e) => [e, e])) }, filtroTablero.epica, {
       'aria-label': 'Filtrar por épica', onchange: (e) => { filtroTablero.epica = e.target.value; app.render(); },
     }) : null,
-    h('label', { class: 'opcion' },
-      h('input', { type: 'checkbox', checked: filtroTablero.bloqueadas, onchange: (e) => { filtroTablero.bloqueadas = e.target.checked; app.render(); } }),
-      h('span', {}, 'Solo bloqueadas')),
+    interruptor('Solo bloqueadas', filtroTablero.bloqueadas, (activo) => { filtroTablero.bloqueadas = activo; app.render(); }),
     filtroTablero.epica || filtroTablero.bloqueadas ? h('button', { type: 'button', class: 'btn-texto', onclick: () => { filtroTablero.epica = ''; filtroTablero.bloqueadas = false; app.render(); } }, 'Ver todo') : null);
 
   const columna = (estado) => {
@@ -236,7 +234,7 @@ function tablero(app, sprint) {
     h('div', { class: `tablero tablero--${COLUMNAS.length}` }, COLUMNAS.map(columna)),
     seccionReview(app, sprint),
     h('section', { class: 'panel', 'aria-labelledby': 'burndown-titulo' },
-      h('h2', { id: 'burndown-titulo' }, 'Burndown'),
+      h('h2', { id: 'burndown-titulo' }, 'Burndown', termino('burndown')),
       graficoBurndown(burndown(sprint, p.historias))),
     h('div', { class: 'acciones' },
       h('button', {

@@ -1,4 +1,5 @@
 // Utilidades de interfaz. Todo el DOM se construye con nodos (nunca innerHTML con datos del usuario).
+import { GLOSARIO } from '../nucleo/glosario.js';
 
 /**
  * Crea un elemento: h('button', { class: 'btn', onclick }, 'Texto', otroNodo)
@@ -63,13 +64,69 @@ export function avisar(texto, tipo = 'ok', { accion = null, duracion = accion ? 
   setTimeout(cerrar, duracion);
 }
 
-/** Campo con etiqueta asociada. */
+/**
+ * Botón «?» que muestra la definición de un término del glosario (toggletip).
+ * Usa la Popover API nativa: se abre con clic, toque o Enter y se cierra con Escape o
+ * al tocar fuera. Sin polyfills, porque la app funciona sin conexión.
+ */
+let secuenciaTermino = 0;
+export function termino(clave) {
+  const def = GLOSARIO[clave];
+  if (!def) return null;
+  secuenciaTermino += 1;
+  const id = `termino-${clave}-${secuenciaTermino}`;
+  return [
+    h('button', {
+      type: 'button', class: 'termino', popovertarget: id, popovertargetaction: 'show',
+      'aria-label': `Qué es: ${def.termino}`, 'aria-expanded': 'false',
+    }, '?'),
+    // Justo después del botón, para que el lector de pantalla lo lea en orden al abrirse
+    h('div', { id, popover: 'auto', role: 'tooltip', class: 'termino-definicion' },
+      h('strong', {}, def.termino), ' ', def.texto),
+  ];
+}
+
+/** Interruptor encendido/apagado para ajustes que se aplican al instante. */
+export function interruptor(texto, encendido, alCambiar, detalle) {
+  return h('label', { class: 'interruptor' },
+    h('input', { type: 'checkbox', switch: true, role: 'switch', checked: encendido, onchange: (e) => alCambiar(e.target.checked) }),
+    h('span', { class: 'interruptor-texto' }, texto, detalle ? h('span', { class: 'interruptor-detalle' }, detalle) : null));
+}
+
+// Un solo par de escuchas para todas las definiciones. `toggle` no burbujea: se escucha en captura.
+if (typeof document !== 'undefined') {
+  document.addEventListener('toggle', (e) => {
+    const pop = e.target;
+    if (!(pop instanceof HTMLElement) || !pop.classList.contains('termino-definicion')) return;
+    const boton = document.querySelector(`[popovertarget="${CSS.escape(pop.id)}"]`);
+    if (!boton) return;
+    boton.setAttribute('aria-expanded', String(e.newState === 'open'));
+    if (e.newState === 'open') ubicarJunto(pop, boton);
+  }, true);
+}
+
+/** Ubica la definición bajo su botón (o sobre él si no cabe), sin salirse de la pantalla. */
+function ubicarJunto(pop, boton) {
+  const r = boton.getBoundingClientRect();
+  const margen = 8;
+  const ancho = pop.offsetWidth;
+  const alto = pop.offsetHeight;
+  const izquierda = Math.min(Math.max(margen, r.left + r.width / 2 - ancho / 2), window.innerWidth - ancho - margen);
+  const abajo = r.bottom + margen;
+  const arriba = abajo + alto > window.innerHeight - margen ? Math.max(margen, r.top - alto - margen) : abajo;
+  pop.style.setProperty('--x', `${Math.round(izquierda)}px`);
+  pop.style.setProperty('--y', `${Math.round(arriba)}px`);
+}
+
+/** Campo con etiqueta asociada. `glosario` agrega el botón «?» con la definición del término. */
 let secuencia = 0;
-export function campo(etiqueta, control, ayuda) {
+export function campo(etiqueta, control, ayuda, glosario) {
   secuencia += 1;
   const id = control.id || `c${secuencia}`;
   control.id = id;
-  const nodos = [h('label', { for: id }, etiqueta), control];
+  const rotulo = h('label', { for: id }, etiqueta);
+  // El botón va fuera del <label>: un botón dentro de la etiqueta le robaría el clic al control
+  const nodos = [glosario ? h('div', { class: 'campo-rotulo' }, rotulo, termino(glosario)) : rotulo, control];
   if (ayuda) {
     const idAyuda = `${id}-ayuda`;
     control.setAttribute('aria-describedby', idAyuda);

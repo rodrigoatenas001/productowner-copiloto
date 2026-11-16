@@ -1,5 +1,5 @@
 // Ajustes: proyecto, IA opcional, respaldo y exportaciones.
-import { h, campo, selector, descargar, confirmar } from './dom.js';
+import { h, campo, selector, descargar, confirmar, interruptor } from './dom.js';
 import { normalizarProyecto } from '../nucleo/proyecto.js';
 import { aCsv, aJiraCsv, aMarkdown, nombreArchivo, GUIA_JQL } from '../nucleo/exportar.js';
 import { PROVEEDORES, probarConexion, iaConfigurada } from '../ia.js';
@@ -242,10 +242,10 @@ function seccionFlujo(app) {
   const limite = (estado, etiqueta) => campo(etiqueta, h('input', {
     type: 'number', min: 1, max: 50, value: f.wip[estado] ?? '', placeholder: 'Sin límite',
     onchange: (e) => guardar({ wip: { [estado]: e.target.value ? Math.max(1, Math.min(50, Math.round(Number(e.target.value)))) : null } }),
-  }));
+  }), null, 'wip');
   return h('section', { class: 'panel', 'aria-labelledby': 'aj-flujo' },
     h('h2', { id: 'aj-flujo' }, 'Flujo del tablero'),
     h('p', { class: 'ayuda' }, 'Lo mejor de Kanban dentro del sprint: limitar el trabajo en curso hace que las cosas se terminen antes. Un buen punto de partida es un límite igual al número de personas.'),
-    h('label', { class: 'opcion' }, h('input', { type: 'checkbox', checked: f.revision, onchange: (e) => guardar({ revision: e.target.checked }) }), 'Agregar la columna "En revisión"'),
+    interruptor('Columna "En revisión"', f.revision, (activa) => guardar({ revision: activa }), 'Antes de terminar, otra persona revisa la tarjeta.'),
     h('div', { class: 'editor-fila' }, limite('doing', 'Límite en "En curso"'), f.revision ? limite('review', 'Límite en "En revisión"') : null));
 }
