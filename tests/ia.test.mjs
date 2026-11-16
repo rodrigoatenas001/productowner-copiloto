@@ -26,7 +26,7 @@ test('valida y limpia las historias de la IA', () => {
 test('sin criterios propone uno y usa el rol por defecto', () => {
   const [h] = historiasDesdeIa({ historias: [{ quiero: 'exportar a PDF' }] }, 'product owner');
   assert.equal(h.rol, 'product owner');
-  assert.equal(h.criterios.length, 1);
+  assert.deepEqual(h.criterios, [], 'no inventa criterios');
 });
 
 test('iaConfigurada exige clave salvo en Ollama', () => {

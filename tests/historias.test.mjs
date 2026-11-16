@@ -2,7 +2,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   extraerItems, aHistoria, notasAHistorias, revisarInvest, calidad, enunciado, singular, resumirTitulo,
-  dividirHistoria, reemplazarPorPartes,
+  dividirHistoria, reemplazarPorPartes, esCriterioGenerico,
 } from '../js/nucleo/historias.js';
 
 test('separa viñetas, numeración, punto y coma y toma títulos como épica', () => {
@@ -58,7 +58,7 @@ test('usa el rol por defecto del proyecto cuando la nota no lo dice', () => {
   assert.equal(h.rol, 'product owner');
   assert.equal(h.quiero, 'exportar el backlog a CSV');
   assert.equal(h.titulo, 'Exportar el backlog a CSV');
-  assert.equal(h.criterios.length, 1);
+  assert.deepEqual(h.criterios, [], 'no inventa criterios');
 });
 
 test('mantiene siglas al inicio', () => {
@@ -86,6 +86,8 @@ test('INVEST: avisa falta de valor, palabras vagas y varias metas', () => {
 
 test('INVEST: una buena historia no tiene avisos y puntúa 100', () => {
   const h = aHistoria({ texto: 'Como contadora, quiero descargar las boletas del mes en un ZIP, para declarar a tiempo' });
+  assert.ok(revisarInvest(h).some((a) => a.codigo === 'criterios'), 'sin criterios no está lista');
+  h.criterios = ['Dado un mes con boletas, cuando descargo el ZIP, entonces trae una boleta por archivo.'];
   assert.deepEqual(revisarInvest(h), []);
   assert.equal(calidad(h), 100);
 });
@@ -137,4 +139,30 @@ test('palabras vagas: sugiere cómo medirlas, también en los criterios', () => 
   h2.criterios = ['Dado que descargo, entonces la descarga es fácil e intuitiva'];
   const enCriterio = revisarInvest(h2).find((a) => a.codigo === 'vaga-criterio');
   assert.match(enCriterio.texto, /Un criterio dice "fácil"/);
+});
+
+test('notas reales: el sujeto es el rol y la frase queda bien armada', () => {
+  const [mecanico, pedido, sistema, saber] = notasAHistorias('el mecánico necesita ver la agenda del día en el celular\nquiere que agenden solos por internet\nsistema debe ser rápido\nquiere saber cuántos autos atiende por semana');
+  assert.equal(enunciado(mecanico), 'Como mecánico, quiero ver la agenda del día en el celular.');
+  assert.equal(pedido.quiero, 'que agenden solos por internet');
+  assert.equal(sistema.quiero, 'que el sistema sea rápido');
+  assert.ok(revisarInvest(sistema).some((a) => a.codigo === 'vaga'), '«rápido» pide una métrica');
+  assert.equal(saber.quiero, 'saber cuántos autos atiende por semana');
+});
+
+test('notas reales: contexto, preguntas abiertas y problemas no quedan como historias listas', () => {
+  const [contexto, problema, pregunta] = notasAHistorias('reunión con don Jorge Soto, taller en Maipú\nhoy los clientes llaman por teléfono y se pierden llamadas\ncobrar un abono para reservar? no está seguro');
+  assert.equal(contexto.nota, 'contexto');
+  assert.equal(problema.nota, 'problema');
+  assert.ok(revisarInvest(problema).some((a) => a.codigo === 'problema'));
+  assert.equal(pregunta.nota, 'pregunta');
+  assert.equal(pregunta.tipo, 'spike');
+  for (const h of [contexto, problema, pregunta]) assert.ok(calidad(h) < 90, `«${h.quiero}» no debe verse lista`);
+});
+
+test('el criterio de plantilla de versiones anteriores se avisa como si faltara', () => {
+  const h = aHistoria({ texto: 'Como contadora, quiero descargar las boletas, para declarar' });
+  h.criterios = ['Dado que tengo acceso, cuando intento descargar las boletas, entonces el sistema me confirma que se realizó.'];
+  assert.ok(esCriterioGenerico(h.criterios[0]));
+  assert.ok(revisarInvest(h).some((a) => a.codigo === 'criterios' && /plantilla/.test(a.texto)));
 });

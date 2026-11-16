@@ -50,6 +50,31 @@ const TECNICAS = /\b(refactor\w*|migra\w*|base de datos|bd|api|endpoint|servidor
 /** Frases de relleno al inicio de una nota que no forman parte de lo que se quiere. */
 const RELLENO = /^(?:hay que|tenemos que|necesitamos(?: que)?|se necesita(?: que)?|se debe(?:ría)?|debemos|deber[ií]amos|queremos(?: que)?|quiero(?: que)?|falta(?:n)?|ojal[aá]|idea:|pendiente:|todo:)\s+/i;
 
+// Verbos con que se anota lo que pidió alguien sin decir quién: «quiere que agenden…», «necesita saber…».
+// Se quitan, pero se conserva el «que» para que la frase quede bien armada («quiero que agenden…»).
+const PEDIDO = /^(?:quiere|quieren|necesita|necesitan|le gustar[ií]a|les gustar[ií]a|pide|piden|pidi[oó]|busca|espera)\s+/i;
+
+// Lo que debe hacer el sistema o la página: «el sistema debe ser rápido» → «que el sistema sea rápido».
+const SISTEMA = /^(?:el\s+|la\s+)?(sistema|app|aplicaci[oó]n|p[aá]gina|sitio(?: web)?|plataforma)\s+(?:debe|deber[ií]a|tiene que|tendr[ií]a que)\s+(.+)$/i;
+const SUBJUNTIVO = { ser: 'sea', estar: 'esté', tener: 'tenga', funcionar: 'funcione', permitir: 'permita', mostrar: 'muestre', enviar: 'envíe', guardar: 'guarde', avisar: 'avise', calcular: 'calcule', cargar: 'cargue' };
+
+// Líneas que no son una necesidad: el encabezado de la reunión, una pregunta abierta o la descripción de un problema
+const CONTEXTO = /^(?:reuni[oó]n|minuta|notas? de|acta|asisten(?:tes)?|fecha|participan|llamada con|entrevista con)\b/i;
+const PREGUNTA = /\?|\b(?:no est[aá] segur[oa]|no sabe|por definir|a definir|evaluar si|ver si)\b/i;
+const PROBLEMA = /^(?:hoy|actualmente|ahora|a veces|siempre|nunca|el problema|se pierden?|no hay|no se puede|l[oa]s? \p{L}+ (?:llaman|reclaman|esperan|pierden))\b/iu;
+
+/** Qué es una línea de notas cuando no es una necesidad: 'contexto', 'pregunta' o 'problema'. */
+export function tipoDeNota(texto) {
+  const t = String(texto || '').trim();
+  if (CONTEXTO.test(t)) return 'contexto';
+  if (PREGUNTA.test(t)) return 'pregunta';
+  if (PROBLEMA.test(t)) return 'problema';
+  return null;
+}
+
+/** El criterio de plantilla que versiones anteriores agregaban solas: no sirve para aceptar nada. */
+export const esCriterioGenerico = (c) => /^Dado que tengo acceso, cuando intento .*, entonces el sistema me confirma que se realizó\.?$/.test(String(c).trim());
+
 const PATRON_HISTORIA = /^como\s+(?:un[ao]?\s+)?(.+?),?\s+quiero\s+(?:poder\s+)?(.+?)(?:,?\s+para\s+(?:que\s+)?(.+?))?\.?$/i;
 
 let contador = 0;
@@ -155,17 +180,25 @@ export function aHistoria(item, opciones = {}) {
   let quiero;
   let para;
 
+  const nota = tipoDeNota(original);
   const clasica = original.match(PATRON_HISTORIA);
+  const sistema = original.match(SISTEMA);
   if (clasica) {
     [, rol, quiero, para = ''] = clasica;
+  } else if (sistema) {
+    const [, quien, resto] = sistema;
+    const [verbo, ...demas] = resto.split(/\s+/);
+    const conjugado = SUBJUNTIVO[verbo.toLowerCase()];
+    [quiero, para] = separarBeneficio(`que el ${quien.toLowerCase()} ${conjugado ? [conjugado, ...demas].join(' ') : `pueda ${resto}`}`);
+    rol = rolPorDefecto;
   } else {
-    const sinRelleno = original.replace(RELLENO, '');
+    const sinRelleno = original.replace(RELLENO, '').replace(PEDIDO, '');
     [quiero, para] = separarBeneficio(sinRelleno);
     rol = detectarRol(original) || rolPorDefecto;
 
-    // "que el cliente pueda pagar…" → rol "cliente", quiero "pagar…"
-    const sujeto = quiero.match(/^(?:que\s+)?(?:el|la|los|las)\s+([\p{L}]+(?:\s+de\s+[\p{L}]+)?)\s+(?:pueda|puedan|podr[aá]n?)\s+(.+)$/iu);
-    if (sujeto) {
+    // «que el cliente pueda pagar…» o «el mecánico necesita ver…»: el rol es el sujeto y el quiero, lo que sigue
+    const sujeto = quiero.match(/^(?:que\s+)?(?:el|la|los|las)\s+([\p{L}]+(?:\s+de\s+[\p{L}]+)?)\s+(?:pueda|puedan|podr[aá]n?|puede|pueden|necesita|necesitan|quiere|quieren|tiene que|tienen que|debe|deben)\s+(.+)$/iu);
+    if (sujeto && !/^(?:sistema|app|aplicaci[oó]n|p[aá]gina|sitio|plataforma)$/i.test(sujeto[1])) {
       rol = singular(sujeto[1].toLowerCase());
       quiero = sujeto[2];
     }
@@ -189,6 +222,9 @@ export function aHistoria(item, opciones = {}) {
     sprintId: null,
     notaOriginal: String(item.texto).trim(),
     creada: new Date().toISOString(),
+    // Solo para las candidatas: una pregunta abierta parte como spike; el contexto no se agrega
+    ...(nota === 'pregunta' ? { tipo: 'spike' } : {}),
+    ...(nota ? { nota } : {}),
   };
 }
 
@@ -199,10 +235,12 @@ export function resumirTitulo(quiero, maxPalabras = 8) {
   return palabras.length > maxPalabras ? corto + '…' : corto;
 }
 
-/** Criterio de aceptación de partida, en formato Dado / Cuando / Entonces, para que la persona lo ajuste. */
-export function sugerirCriterios(quiero) {
-  const accion = String(quiero || 'realizar la acción').trim();
-  return [`Dado que tengo acceso, cuando intento ${accion}, entonces el sistema me confirma que se realizó.`];
+/**
+ * Criterios de partida. No se inventan: un criterio de plantilla («el sistema me confirma que se realizó»)
+ * hacía ver la historia completa sin serlo. El editor muestra el formato como ejemplo.
+ */
+export function sugerirCriterios() {
+  return [];
 }
 
 /** Texto completo en formato clásico. */
@@ -259,8 +297,17 @@ export function revisarInvest(h) {
   if (esHistoria && TECNICAS.test(quiero) && !h.para) {
     avisos.push({ codigo: 'tecnica', nivel: 'sugerencia', texto: 'Suena a tarea técnica. Explica a quién ayuda o márcala como habilitador técnico.' });
   }
-  if (!h.criterios || !h.criterios.length || h.criterios.every((c) => !String(c).trim())) {
+  const criterios = (h.criterios || []).filter((c) => String(c).trim());
+  if (!criterios.length) {
     avisos.push({ codigo: 'criterios', nivel: 'aviso', texto: 'Sin criterios de aceptación no se sabe cuándo está terminada.' });
+  } else if (criterios.every(esCriterioGenerico)) {
+    avisos.push({ codigo: 'criterios', nivel: 'aviso', texto: 'El criterio es de plantilla: escribe el caso real («Dado… cuando… entonces…») para poder aceptarla.' });
+  }
+  if (esHistoria) {
+    const nota = tipoDeNota(h.quiero);
+    if (nota === 'pregunta') avisos.push({ codigo: 'pregunta', nivel: 'aviso', texto: 'Es una pregunta abierta: resuélvela con el cliente o conviértela en un spike con plazo.' });
+    if (nota === 'problema') avisos.push({ codigo: 'problema', nivel: 'aviso', texto: 'Describe un problema, no lo que alguien necesita hacer. Reescríbela: ¿qué quiere poder hacer y para qué?' });
+    if (nota === 'contexto') avisos.push({ codigo: 'contexto', nivel: 'aviso', texto: 'Parece contexto de la reunión, no una necesidad.' });
   }
   if (typeof h.puntos === 'number' && h.puntos > 13) {
     avisos.push({ codigo: 'grande', nivel: 'aviso', texto: `${h.puntos} puntos es mucho para un sprint. Conviene dividirla (E de Estimable).` });

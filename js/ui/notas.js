@@ -4,6 +4,13 @@ import { notasAHistorias } from '../nucleo/historias.js';
 import { editorHistoria, insigniaCalidad } from './historia.js';
 import { generarConIa, iaConfigurada, nombreProveedor } from '../ia.js';
 
+/** Líneas de las notas que no son una necesidad: se marcan para que la persona decida. */
+const AVISO_NOTA = {
+  contexto: { texto: 'Contexto', detalle: 'Parece el encabezado de la reunión: no se agrega salvo que lo marques.' },
+  pregunta: { texto: 'Pregunta abierta', detalle: 'Quedó como spike: resuélvela con el cliente antes de construir.' },
+  problema: { texto: 'Problema', detalle: 'Describe un problema: reescríbelo como lo que alguien necesita hacer y para qué.' },
+};
+
 const EJEMPLO = `Pagos:
 - que el cliente pueda pagar con tarjeta para no tener que transferir
 - enviar la boleta por correo automáticamente
@@ -27,9 +34,11 @@ export function vistaNotas(app) {
       app.avisar('No encontramos ideas en las notas. Escribe una por línea.', 'error');
       return;
     }
-    app.candidatos = historias.map((x) => ({ ...x, incluir: true }));
+    // El encabezado de la reunión y otras líneas de contexto parten desmarcadas
+    app.candidatos = historias.map((x) => ({ ...x, incluir: x.nota !== 'contexto' }));
     app.render();
-    app.avisar(`${historias.length} historias propuestas ${origen}. Revísalas antes de agregarlas.`);
+    const contexto = historias.filter((x) => x.nota === 'contexto').length;
+    app.avisar(`${historias.length - contexto} historias propuestas ${origen}${contexto ? ` (y ${contexto} ${contexto === 1 ? 'línea' : 'líneas'} de contexto sin marcar)` : ''}. Revísalas antes de agregarlas.`);
     document.getElementById('candidatas')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
   };
 
@@ -87,7 +96,7 @@ function candidatas(app) {
   pintarBoton();
 
   function agregar() {
-    const nuevas = app.candidatos.filter((c) => c.incluir).map(({ incluir, ...resto }) => resto);
+    const nuevas = app.candidatos.filter((c) => c.incluir).map(({ incluir, nota, ...resto }) => resto);
     app.candidatos = [];
     app.cambiar((x) => ({ ...x, historias: [...x.historias, ...nuevas] }), { redibujar: false });
     app.avisar(`${nuevas.length} historias agregadas al backlog.`);
@@ -113,6 +122,7 @@ function candidatas(app) {
             }),
             titulo,
             c.epica ? h('span', { class: 'chip' }, c.epica) : null,
+            c.nota ? h('span', { class: 'chip chip--aviso', title: AVISO_NOTA[c.nota].detalle }, AVISO_NOTA[c.nota].texto) : null,
             insignia),
           editorHistoria(c, (cambios) => {
             Object.assign(c, cambios);

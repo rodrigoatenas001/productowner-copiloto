@@ -44,6 +44,7 @@ export function avisoEjemplo(app) {
     h('p', {}, h('strong', {}, 'Estás viendo un ejemplo. '),
       'Carla tiene una pastelería en Ñuñoa y quiere vender en línea. Un PO independiente levantó sus necesidades, le cotizó en UF con tres hitos de pago y ya va en el tercer sprint: hay un ítem bloqueado, una solicitud de cambio y una retrospectiva. Explóralo y cámbialo sin miedo: no afecta tus proyectos.'),
     h('div', { class: 'acciones' },
+      h('button', { type: 'button', class: 'btn btn--cobre btn--chico', onclick: async () => { if (await app.pedirNuevoProyecto()) app.ir('notas'); } }, 'Crear mi proyecto'),
       h('button', { type: 'button', class: 'btn-texto', onclick: () => app.ir('inicio') }, 'Volver al inicio'),
       h('button', {
         type: 'button', class: 'btn-texto',

@@ -8,6 +8,7 @@ const proyecto = () => {
   const p = nuevoProyecto('Tienda');
   p.historias = notasAHistorias('Pagos en línea:\n- Como clienta, quiero pagar con tarjeta, para no transferir');
   p.historias[0].puntos = 5;
+  p.historias[0].criterios = ['Dado un pago aprobado, cuando vuelvo a la tienda, entonces veo el número de pedido.'];
   return p;
 };
 
@@ -16,7 +17,7 @@ test('la issue lleva historia, criterios como casillas, DoD y etiqueta de épica
   const i = issueDe(p, p.historias[0]);
   assert.equal(i.titulo, 'Pagar con tarjeta');
   assert.ok(i.cuerpo.startsWith('> Como clienta, quiero pagar con tarjeta, para no transferir.'));
-  assert.ok(i.cuerpo.includes('- [ ] Dado que tengo acceso'));
+  assert.ok(i.cuerpo.includes('- [ ] Dado un pago aprobado'));
   assert.ok(i.cuerpo.includes('### Definition of Done'));
   assert.ok(i.cuerpo.endsWith('_Épica: Pagos en línea · Prioridad: Importante · 5 puntos_'));
   assert.deepEqual(i.etiquetas, ['historia', 'pagos-en-linea']);

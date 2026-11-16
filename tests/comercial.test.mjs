@@ -13,6 +13,7 @@ function proyecto() {
   const p = nuevoProyecto('Pastelería de Carla');
   p.historias = notasAHistorias('Catálogo:\n- Como clienta, quiero ver las tortas con precio, para decidir\n- Como clienta, quiero filtrar por ocasión, para encontrar rápido\nPedidos:\n- Como clienta, quiero encargar para una fecha, para tenerla a tiempo\n- Como Carla, quiero ver los pedidos, para no olvidar ninguno');
   [3, 2, 5, 2].forEach((x, i) => { p.historias[i].puntos = x; });
+  p.historias.forEach((h) => { h.criterios = ['Dado un caso real, cuando pasa algo, entonces se ve el resultado.']; });
   p.comercial = { ...comercialDe(p), moneda: 'UF', valorHora: 0.5, horasPorPunto: 4, margen: 20, valorUF: 40000 };
   return p;
 }
@@ -112,7 +113,7 @@ test('documentos: propuesta, acta y respuesta a un cambio', () => {
 
   const acta = actaAceptacion(p, p.hitos[0].id);
   assert.ok(acta.startsWith('# Acta de aceptación · Hito 1: Catálogo'));
-  assert.ok(acta.includes('- [ ] Dado que'));
+  assert.ok(acta.includes('- [ ] Dado un caso real'));
   assert.ok(acta.includes('liberando el pago de **14,4 UF** (50% del total)'));
 
   p = registrarCambio(p, 'Agregar un blog de recetas', 10);

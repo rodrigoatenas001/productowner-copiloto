@@ -326,6 +326,20 @@ const PRUEBAS = [
     await esperar(() => ventana().location.hash === '#comentar', 'terminó en Comentar');
     verdad(!uno('.recorrido'), 'el recorrido se cerró');
   }],
+  ['Inicio: con el ejemplo abierto, empezar lo propio no escribe en el ejemplo', async () => {
+    await ir('inicio');
+    if (!uno('.aviso-ejemplo')) { await clic('Ver el ejemplo con un recorrido'); await esperar(() => uno('.aviso-ejemplo'), 'abrió el ejemplo'); await ir('inicio'); }
+    verdad(uno('.aviso-ejemplo button.btn--cobre')?.textContent === 'Crear mi proyecto', 'el aviso del ejemplo ofrece crear un proyecto');
+    const botones = todos('.camino button').map((b) => b.textContent);
+    verdad(botones.filter((t) => t === 'Crear mi proyecto').length === 2, 'pegar notas y usar una plantilla parten creando un proyecto');
+    await clic('Crear mi proyecto');
+    await esperar(() => ventana().location.hash === '#notas' && !uno('.aviso-ejemplo'), 'queda en las notas de un proyecto propio');
+    verdad(uno('#proyecto-activo option:checked').textContent !== 'Pastelería de Carla (ejemplo)', 'no es el ejemplo');
+    // Las pruebas siguientes trabajan sobre el ejemplo
+    const selector = uno('#proyecto-activo');
+    escribir(selector, 'ejemplo-pasteleria', 'change');
+    await esperar(() => uno('.aviso-ejemplo'), 'volvió al ejemplo');
+  }],
   ['Comentar: arma el texto y el enlace a GitHub', async () => {
     await ir('comentar');
     todos('input[name="nota"]')[3].click();

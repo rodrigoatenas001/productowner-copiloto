@@ -47,7 +47,7 @@ export function vistaProceso(app) {
           return nuevo;
         }),
       }, `+ ${nombre}`)))),
-    seccionRevision(app, avisos, historiasFuera),
+    seccionRevision(app, avisos, historiasFuera, proceso.pasos.length),
     h('div', { class: 'acciones' },
       h('button', {
         type: 'button', class: 'btn btn--secundario', disabled: !proceso.pasos.length,
@@ -137,14 +137,16 @@ function agrupar(lista) {
   return m;
 }
 
-function seccionRevision(app, avisos, historiasFuera) {
+function seccionRevision(app, avisos, historiasFuera, cantidadPasos) {
   const NIVEL = { error: 'Falta', aviso: 'Revisar', info: 'Cobertura' };
   return h('section', { class: 'panel', 'aria-labelledby': 'proceso-revision' },
     h('h2', { id: 'proceso-revision' }, 'Revisión del circuito'),
     avisos.length ? h('ul', { class: 'proceso-avisos' }, avisos.map((a) => h('li', { class: `proceso-aviso proceso-aviso--${a.nivel}` },
       h('span', { class: 'chip' }, NIVEL[a.nivel]), ' ',
       a.pasoId ? h('button', { type: 'button', class: 'btn-texto', onclick: () => { abierto = a.pasoId; app.render(); document.getElementById(`paso-${a.pasoId}`)?.scrollIntoView({ block: 'center' }); } }, a.texto) : a.texto)))
-      : h('p', { class: 'invest-ok' }, '✓ El circuito está completo y cada tarea tiene sus historias.'),
+      : cantidadPasos
+        ? h('p', { class: 'invest-ok' }, '✓ El circuito está completo y cada tarea tiene sus historias.')
+        : h('p', { class: 'ayuda' }, 'Agrega los pasos del circuito para revisarlo.'),
     historiasFuera.length ? h('details', {},
       h('summary', {}, `Historias fuera del proceso (${historiasFuera.length})`),
       h('ul', {}, historiasFuera.map((x) => h('li', {}, x.titulo, x.epica ? h('span', { class: 'proceso-meta' }, ` · ${x.epica}`) : null)))) : null);

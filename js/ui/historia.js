@@ -52,7 +52,7 @@ export function editorHistoria(historia, alCambiar, { epicas = [] } = {}) {
       campo('Para', texto('para', { placeholder: 'el beneficio que obtiene' })),
     ),
     campo('Criterios de aceptación', h('textarea', {
-      rows: 3,
+      rows: 3, placeholder: 'Dado un auto agendado para hoy, cuando el mecánico abre la agenda, entonces ve la hora, la patente y el servicio.',
       oninput: (e) => actualizar({ criterios: e.target.value.split('\n').map((c) => c.trim()).filter(Boolean) }),
     }, (historia.criterios || []).join('\n')), 'Uno por línea. Formato sugerido: Dado… cuando… entonces…', 'criterios'),
     campo('Reglas de negocio', h('textarea', {

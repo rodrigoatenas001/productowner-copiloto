@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { aHistoria } from '../js/nucleo/historias.js';
 import { revisarEnDosVoces, aplicarPropuesta, llamadasMaximas } from '../js/nucleo/dosvoces.js';
 
-const buena = () => aHistoria({ texto: 'Como contadora, quiero descargar las boletas del mes en un ZIP, para declarar a tiempo' });
+const buena = () => ({ ...aHistoria({ texto: 'Como contadora, quiero descargar las boletas del mes en un ZIP, para declarar a tiempo' }), criterios: ['Dado un mes con boletas, cuando descargo el ZIP, entonces trae una boleta por archivo.'] });
 const floja = () => aHistoria({ texto: 'hacer el login rápido' });
 
 test('si el revisor aprueba y las reglas no marcan nada, termina con una sola llamada', async () => {

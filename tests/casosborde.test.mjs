@@ -27,7 +27,7 @@ test('no sugiere lo que los criterios ya cubren', () => {
 test('agregar casos borde no duplica y se puede repetir sin efecto', () => {
   const h = aHistoria({ texto: 'Como clienta, quiero pagar con tarjeta, para no transferir' });
   const una = agregarCasosBorde(h);
-  assert.equal(una.criterios.length, 1 + 4);
+  assert.equal(una.criterios.length, 4, 'no se inventa un criterio de partida');
   assert.deepEqual(agregarCasosBorde(una).criterios, una.criterios);
   assert.deepEqual(casosBorde(una), []);
 });

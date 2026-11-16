@@ -124,10 +124,12 @@ test('Jira CSV: épicas como incidencias, historias enlazadas por Parent ID y sp
 });
 
 test('Markdown agrupa por épica con criterios como casillas', () => {
-  const md = aMarkdown(proyectoDeEjemplo());
+  const p = proyectoDeEjemplo();
+  p.historias[0].criterios = ['Dado un pago aprobado, cuando vuelvo a la tienda, entonces veo el número de pedido.'];
+  const md = aMarkdown(p);
   assert.ok(md.startsWith('# Tienda Ñuñoa'));
   assert.ok(md.includes('## Pagos'));
-  assert.ok(md.includes('- [ ] Dado que'));
+  assert.ok(md.includes('- [ ] Dado un pago aprobado'));
 });
 
 test('nombreArchivo quita acentos y espacios', () => {

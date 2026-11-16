@@ -5,6 +5,9 @@ import { PLANTILLAS } from '../nucleo/plantillas.js';
 export const PRODUCTOWNER = 'https://productowner.cl';
 
 export function vistaBienvenida(app) {
+  // Con el ejemplo abierto, empezar «lo mío» crea primero un proyecto propio
+  const enEjemplo = app.proyecto.id === 'ejemplo-pasteleria';
+  const empezar = (vista) => async () => { if (await app.asegurarProyectoPropio()) app.ir(vista); };
   const camino = (titulo, texto, accion, etiqueta, principal = false) => h('li', { class: 'camino' },
     h('h3', {}, titulo), h('p', {}, texto),
     h('button', { type: 'button', class: principal ? 'btn btn--cobre' : 'btn btn--secundario', onclick: accion }, etiqueta));
@@ -19,9 +22,9 @@ export function vistaBienvenida(app) {
       h('h2', { id: 'bv-empezar' }, '¿Cómo quieres empezar?'),
       h('ol', { class: 'caminos' },
         camino('Mirar un ejemplo', 'Un proyecto real armado de punta a punta: la tienda en línea de una pastelería, con propuesta, hitos, sprints y un bloqueo.', async () => { await app.cargarEjemplo(); app.iniciarRecorrido(); }, 'Ver el ejemplo con un recorrido', true),
-        camino('Pegar mis notas', 'Lo que te pidió tu cliente, tal cual. Lo convertimos en historias de usuario y te decimos qué les falta.', () => app.ir('notas'), 'Ir a mis notas'),
+        camino('Pegar mis notas', 'Lo que te pidió tu cliente, tal cual. Lo convertimos en historias de usuario y te decimos qué les falta.', empezar('notas'), enEjemplo ? 'Crear mi proyecto' : 'Ir a mis notas'),
         camino('Ver cómo funciona', 'El mapa del flujo en seis etapas: levantar, acordar, ordenar, construir, entregar y aprender, con un atajo a cada sección.', () => app.ir('guia'), 'Ver el mapa'),
-        camino('Partir de una plantilla', `Para proyectos típicos: ${Object.values(PLANTILLAS).map((p) => p.nombre).join(', ')}.`, () => app.ir('cliente'), 'Elegir una plantilla'))),
+        camino('Partir de una plantilla', `Para proyectos típicos: ${Object.values(PLANTILLAS).map((p) => p.nombre).join(', ')}.`, empezar('cliente'), enEjemplo ? 'Crear mi proyecto' : 'Elegir una plantilla'))),
 
     h('div', { class: 'bienvenida-columnas' },
       h('section', { class: 'panel', 'aria-labelledby': 'bv-es' },

@@ -147,6 +147,33 @@ const app = {
     await this.abrir(p.id);
   },
 
+  /** Pide un nombre y crea el proyecto. Devuelve false si la persona cancela. */
+  async pedirNuevoProyecto() {
+    const nombre = await pedirTexto('Nombre del nuevo proyecto', { aceptar: 'Crear proyecto', placeholder: 'Ej.: Taller de Jorge' });
+    if (!nombre) return false;
+    await this.crearProyecto(nombre);
+    return true;
+  },
+
+  /**
+   * Antes de escribir en un proyecto: si el abierto es el ejemplo, ofrece crear uno propio,
+   * para que nadie mezcle su trabajo con Carla (el ejemplo se puede reemplazar o eliminar).
+   */
+  async asegurarProyectoPropio() {
+    if (this.proyecto.id !== ID_EJEMPLO) return true;
+    const propios = this.proyectos.filter((p) => p.id !== ID_EJEMPLO);
+    const conTrabajo = propios.find((p) => p.historias.length || p.notas.trim());
+    if (conTrabajo) { await this.abrir(conTrabajo.id); return true; }
+    // El «Mi proyecto» vacío que se crea al primer uso se reutiliza con el nombre que elija
+    const vacio = propios[0];
+    if (!vacio) return this.pedirNuevoProyecto();
+    const nombre = await pedirTexto('Nombre de tu proyecto', { aceptar: 'Empezar', placeholder: 'Ej.: Taller de Jorge' });
+    if (!nombre) return false;
+    await this.abrir(vacio.id);
+    this.cambiar((x) => ({ ...x, nombre }));
+    return true;
+  },
+
   async importarProyecto(p) {
     if (this.proyectos.some((x) => x.id === p.id)) p.id = `${p.id}-${Date.now().toString(36)}`;
     await guardarProyecto(p);
@@ -301,12 +328,7 @@ function renderBarraInferior() {
 }
 
 async function pedirNuevoProyecto(select) {
-  const nombre = await pedirTexto('Nombre del nuevo proyecto', { aceptar: 'Crear proyecto', placeholder: 'Ej.: Tienda de Carla' });
-  if (nombre) {
-    app.crearProyecto(nombre);
-  } else {
-    select.value = app.proyecto.id;
-  }
+  if (!(await app.pedirNuevoProyecto())) select.value = app.proyecto.id;
 }
 
 async function iniciar() {
