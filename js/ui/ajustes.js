@@ -19,12 +19,23 @@ import { definicionesDe, listaDesdeTexto, NOMBRES, DEFINICIONES_INICIALES } from
 const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
 const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
+// Secciones de Ajustes desplegadas (se recuerdan mientras la pestaña está abierta)
+const abiertas = new Set(['aj-proyecto']);
+
+/** Convierte una sección en un bloque plegable: su título queda como resumen. */
+function plegable(seccion) {
+  if (!seccion) return null;
+  const titulo = seccion.querySelector('h2');
+  const id = titulo?.id || '';
+  const bloque = h('details', { class: `${seccion.className} aj-plegable`, 'data-seccion': id, open: abiertas.has(id) || null });
+  bloque.addEventListener('toggle', () => { if (bloque.open) abiertas.add(id); else abiertas.delete(id); });
+  bloque.append(h('summary', {}, titulo), ...seccion.childNodes);
+  return bloque;
+}
+
 export function vistaAjustes(app) {
   const p = app.proyecto;
-  return h('div', { class: 'vista' },
-    h('header', { class: 'vista-cabecera' },
-      h('p', { class: 'eyebrow' }, p.nombre),
-      h('h1', {}, 'Ajustes')),
+  const secciones = [
     seccionProyecto(app),
     seccionDefiniciones(app),
     seccionFlujo(app),
@@ -33,7 +44,20 @@ export function vistaAjustes(app) {
     seccionRespaldo(app),
     seccionIa(app),
     iaConfigurada(app.ia) ? seccionIa(app, 'iaRevisor') : null,
-    seccionAcerca());
+    seccionAcerca(),
+  ].map(plegable).filter(Boolean);
+  const ir = (bloque) => { bloque.open = true; bloque.scrollIntoView({ behavior: 'smooth', block: 'start' }); };
+  return h('div', { class: 'vista' },
+    h('header', { class: 'vista-cabecera' },
+      h('p', { class: 'eyebrow' }, p.nombre),
+      h('h1', {}, 'Ajustes'),
+      h('p', { class: 'bajada' }, 'Toca una sección para abrirla.')),
+    h('nav', { class: 'aj-indice', 'aria-label': 'Secciones de ajustes' },
+      secciones.map((b) => h('button', { type: 'button', class: 'btn-texto', onclick: () => ir(b) }, b.querySelector('summary').textContent))),
+    h('p', { class: 'acciones' },
+      h('button', { type: 'button', class: 'btn-texto', onclick: () => secciones.forEach((b) => { b.open = true; }) }, 'Abrir todas'),
+      h('button', { type: 'button', class: 'btn-texto', onclick: () => secciones.forEach((b) => { b.open = false; }) }, 'Cerrar todas')),
+    secciones);
 }
 
 function seccionProyecto(app) {

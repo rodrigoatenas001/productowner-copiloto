@@ -947,3 +947,18 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .inicio-proyecto .etapa-nombre { font-weight: 600; min-width: 7.5em; }
 .inicio-proyecto .etapa-detalle { flex: 1; color: var(--tinta-2); }
 .inicio-presentacion > summary { cursor: pointer; font-weight: 600; margin: 18px 0 8px; }
+
+/* Ajustes plegable */
+.aj-indice { display: flex; flex-wrap: wrap; gap: 4px 16px; margin: 0 0 6px; }
+.aj-plegable > summary { cursor: pointer; list-style-position: outside; }
+.aj-plegable > summary h2 { display: inline; margin: 0; }
+.aj-plegable:not([open]) { padding-block: 14px; }
+.aj-plegable[open] > summary { margin-bottom: 12px; }
+.termino-linea { margin: 0 0 10px; }
+
+/* Modo presentación al cliente */
+.nav-presentacion { display: flex; align-items: center; gap: 6px; margin-top: 8px; font-size: .8rem; color: #c3cfde; cursor: pointer; }
+.modo-presentacion [data-vista="notas"], .modo-presentacion [data-vista="ajustes"], .modo-presentacion [data-vista="comentar"], .modo-presentacion [data-vista="taller"],
+.modo-presentacion .caja-info, .modo-presentacion .recordatorio, .modo-presentacion .calidad, .modo-presentacion .proceso-dolor,
+.modo-presentacion .ley-dolor, .modo-presentacion .proceso-leyenda-item:has(.ley-dolor), .modo-presentacion .termino, .modo-presentacion .termino-linea { display: none !important; }
+.modo-presentacion #navegacion .nav-presentacion { color: #f0b98f; font-weight: 600; }

@@ -2,6 +2,34 @@
 // Definiciones cortas, en lenguaje simple y con un ejemplo cuando ayuda.
 
 export const GLOSARIO = {
+  alcance: {
+    termino: 'Alcance',
+    texto: 'Lo que el proyecto incluye y, tan importante, lo que no incluye. Escribirlo evita discusiones al final: si no está en el alcance, es un cambio y se cotiza aparte.',
+  },
+  cotizacion: {
+    termino: 'Cotización',
+    texto: 'Cuánto cuesta el proyecto y cómo se calcula: horas o puntos por tarifa, más un margen por riesgo. Se puede expresar en UF para que no pierda valor si el proyecto se alarga.',
+  },
+  hitos: {
+    termino: 'Hitos de pago',
+    texto: 'Entregas acordadas que, al ser aceptadas por el cliente, gatillan un pago. Ej.: 30% al firmar, 40% al entregar el catálogo, 30% al salir a producción. Cada hito se cierra con un acta.',
+  },
+  cambios: {
+    termino: 'Control de cambios',
+    texto: 'Registro de lo que el cliente pide después de acordar el alcance, con su impacto en plazo y precio. Un cambio aprobado entra al backlog; uno rechazado queda anotado para no volver a discutirlo.',
+  },
+  sprint: {
+    termino: 'Sprint',
+    texto: 'Un período corto y fijo (1 a 4 semanas) en que el equipo se compromete con un conjunto de historias y al final muestra algo funcionando. Al cerrarlo se hace la revisión con el cliente y la retrospectiva.',
+  },
+  retro: {
+    termino: 'Retrospectiva',
+    texto: 'Reunión al cerrar el sprint para mejorar la forma de trabajar, no el producto: qué salió bien, qué mejorar y qué acciones concretas se toman (con responsable). Al empezar la siguiente se revisa si se cumplieron.',
+  },
+  okr: {
+    termino: 'Objetivos y resultados clave',
+    texto: 'El objetivo dice qué se quiere lograr (cualitativo); los resultados clave, cómo se sabe que se logró (medibles, con línea base y meta). Ej.: «Vender en línea» → «30 pedidos web al mes».',
+  },
   entrega: {
     termino: 'Tiempo de entrega y de ciclo',
     texto: 'Entrega: desde que el trabajo entra al tablero hasta que se termina (lo que espera quien lo pidió). Ciclo: desde que se empieza hasta que se termina. Se mira el percentil 85: «el 85% se termina en este tiempo o menos», que sirve para comprometer plazos.',

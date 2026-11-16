@@ -22,6 +22,8 @@ export function h(etiqueta, atributos = {}, ...hijos) {
     }
   }
   agregar(el, hijos);
+  // Botones de solo ícono (↑ ↓ × ⋮…): el mouse muestra lo mismo que oye el lector de pantalla
+  if (etiqueta === 'button' && !el.title && el.getAttribute('aria-label') && el.textContent.trim().length <= 2) el.title = el.getAttribute('aria-label');
   return el;
 }
 

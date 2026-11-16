@@ -1,5 +1,5 @@
 // Retrospectiva para proyectar: notas anónimas en tres columnas, votos y acciones con responsable.
-import { h, vacio } from './dom.js';
+import { h, vacio, termino } from './dom.js';
 import { botonesMarkdown } from './compartir.js';
 import { reporteRetro } from '../nucleo/reportes.js';
 import {
@@ -22,7 +22,7 @@ export function vistaRetro(app) {
   return h('div', { class: 'vista' },
     h('header', { class: 'vista-cabecera' },
       h('p', { class: 'eyebrow' }, app.proyecto.nombre),
-      h('h1', {}, actual ? actual.titulo : 'Retrospectiva'),
+      h('h1', {}, actual ? actual.titulo : 'Retrospectiva', termino('retro')),
       h('p', { class: 'bajada' }, 'Las notas son anónimas. Al final, voten lo más importante y acuerden pocas acciones concretas, con responsable.')),
     h('div', { class: 'barra-filtros' },
       retros.length > 1 ? h('select', {

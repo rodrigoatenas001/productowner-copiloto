@@ -541,7 +541,7 @@ const PRUEBAS = [
     select.dispatchEvent(new Event('change'));
     await pausa(200);
     await ir('ajustes');
-    const seccion = () => uno('#aj-equipo').closest('section');
+    const seccion = () => uno('#aj-equipo').closest('.panel');
     const [nombre, servidor] = seccion().querySelectorAll('input');
     nombre.value = 'Rodrigo'; nombre.dispatchEvent(new Event('change'));
     servidor.value = 'salas.ejemplo.workers.dev'; servidor.dispatchEvent(new Event('change'));

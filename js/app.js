@@ -264,6 +264,15 @@ const app = {
     this.cambiar(() => p);
   },
 
+  /** Modo presentación: oculta lo interno para compartir la pantalla con el cliente (no se guarda). */
+  cambiarPresentacion(activo) {
+    this.presentacion = activo;
+    document.body.classList.toggle('modo-presentacion', activo);
+    if (activo && ['notas', 'ajustes', 'comentar', 'taller'].includes(this.vista)) this.vista = this.proyecto.historias.length ? 'backlog' : 'cliente';
+    this.render();
+    this.avisar(activo ? 'Modo presentación: se ocultan notas, ayudas, calidad de las historias y problemas del proceso.' : 'Modo presentación desactivado.');
+  },
+
   render() {
     // En flujo continuo la sección del sprint es el tablero Kanban
     VISTAS.sprint.titulo = esKanban(this.proyecto) ? 'Tablero' : 'Sprint';
@@ -274,7 +283,7 @@ const app = {
     // Mapas, tableros y diagramas usan todo el ancho; el resto queda en un ancho cómodo de leer
     principal.classList.toggle('principal--ancho', ['sprint', 'guia', 'proceso'].includes(this.vista) || (this.vista === 'backlog' && VISTAS_ANCHAS_BACKLOG.has(modoBacklog())));
     const v = this.vista;
-    const caja = AYUDAS[v] && v !== 'comentar' && this.recorrido === null ? cajaInfo(this, v, `Para qué sirve ${VISTAS[v].titulo}`, AYUDAS[v], EXTRA_AYUDA[v]?.()) : null;
+    const caja = AYUDAS[v] && v !== 'comentar' && this.recorrido === null && !this.presentacion ? cajaInfo(this, v, `Para qué sirve ${VISTAS[v].titulo}`, AYUDAS[v], EXTRA_AYUDA[v]?.()) : null;
     // Con la carpeta sincronizada no hace falta recordar el respaldo manual
     vaciar(principal, avisoEjemplo(this), avisoCarpeta(this), cajaRecorrido(this), caja, this.proyecto.id === ID_EJEMPLO || carpetaLista() ? null : avisoRespaldo(this), VISTAS[this.vista].render(this));
     document.title = `${VISTAS[this.vista].titulo} · ${this.proyecto.nombre} · Copiloto PO`;
@@ -342,21 +351,23 @@ function renderNavegacion() {
   };
 
   vaciar(document.getElementById('navegacion'),
-    h('div', { class: 'nav-proyecto' }, selectorProyecto),
+    h('div', { class: 'nav-proyecto' }, selectorProyecto,
+      h('label', { class: 'nav-presentacion', title: 'Oculta lo interno (notas, ayudas, calidad de las historias y problemas del proceso) para mostrar la pantalla en una reunión con el cliente' },
+        h('input', { type: 'checkbox', checked: app.presentacion, onchange: (e) => app.cambiarPresentacion(e.target.checked) }), ' Modo presentación')),
     h('button', { type: 'button', class: 'nav-buscar', onclick: () => abrirBuscador(app, VISTAS), title: 'Buscar (Ctrl + K)' }, 'Buscar…', h('kbd', {}, 'Ctrl K')),
     h('nav', { 'aria-label': 'Secciones' },
       h('ul', {}, GRUPOS.flatMap(([grupo, claves]) => {
         const visibles = claves.filter((clave) => clave === app.vista || !(app.modoSimple && AVANZADAS.has(clave)));
         if (!visibles.length) return [];
-        return [grupo ? h('li', { class: 'nav-grupo', 'aria-hidden': 'true' }, grupo) : h('li', { class: 'nav-separador', 'aria-hidden': 'true' }),
+        return [grupo ? h('li', { class: 'nav-grupo', 'aria-hidden': 'true', 'data-grupo': grupo }, grupo) : h('li', { class: 'nav-separador', 'aria-hidden': 'true' }),
           ...visibles.map((clave) => [clave, VISTAS[clave]])];
-      }).map((x) => (x instanceof Node ? x : (([clave, v]) => h('li', { class: clave === 'comentar' ? 'nav-comentar' : null },
+      }).map((x) => (x instanceof Node ? x : (([clave, v]) => h('li', { class: clave === 'comentar' ? 'nav-comentar' : null, 'data-vista': clave },
         h('a', {
           href: `#${clave}`,
           title: AYUDAS[clave] || null,
           'aria-current': app.vista === clave ? 'page' : null,
           onclick: (e) => { e.preventDefault(); app.ir(clave); },
-        }, v.titulo, conteos[clave] ? h('span', { class: 'nav-conteo', title: clave === 'sprint' ? `${activo.nombre}: ${r.hechos} de ${r.puntos} puntos terminados` : null }, String(conteos[clave])) : null,
+        }, v.titulo, conteos[clave] ? h('span', { class: 'nav-conteo', title: clave === 'sprint' ? `${activo.nombre}: ${r.hechos} de ${r.puntos} puntos terminados` : `${conteos[clave]} historias en el backlog` }, String(conteos[clave])) : null,
         clave === 'sprint' && r ? h('span', { class: 'nav-avance', 'aria-hidden': 'true' }, h('span', { class: `nav-avance-${Math.min(10, Math.round(avanceSprint / 10))}` })) : null)))(x))))),
     h('p', { class: 'nav-estado', id: 'estado-guardado', 'aria-live': 'polite' }, 'Guardado en este navegador'),
     h('p', { class: 'nav-estado nav-equipo', id: 'estado-equipo', 'aria-live': 'polite' }, estadoEquipo()));

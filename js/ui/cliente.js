@@ -1,5 +1,5 @@
 // Cliente: lo comercial del PO independiente. Alcance, cotización, hitos de pago y cambios.
-import { h, campo, selector, pedirTexto } from './dom.js';
+import { h, campo, selector, pedirTexto, termino } from './dom.js';
 import { botonesMarkdown } from './compartir.js';
 import { PLANTILLAS } from '../nucleo/plantillas.js';
 import {
@@ -10,6 +10,7 @@ import { propuestaAlcance, actaAceptacion, respuestaCambio, detalleHoras } from 
 import { vistaStakeholders } from './stakeholders.js';
 
 let pestana = 'alcance';
+const GLOSARIO_PESTANA = { alcance: 'alcance', cotizacion: 'cotizacion', hitos: 'hitos', cambios: 'cambios' };
 
 const PESTANAS = { stakeholders: 'Stakeholders', alcance: 'Alcance', cotizacion: 'Cotización', hitos: 'Hitos de pago', cambios: 'Cambios' };
 
@@ -27,6 +28,7 @@ export function vistaCliente(app) {
         type: 'button', role: 'tab', class: 'pestana', 'aria-selected': String(pestana === clave),
         onclick: () => { pestana = clave; app.render(); },
       }, texto))),
+    GLOSARIO_PESTANA[pestana] ? h('p', { class: 'ayuda termino-linea' }, `${PESTANAS[pestana]}: qué es `, termino(GLOSARIO_PESTANA[pestana])) : null,
     { stakeholders: vistaStakeholders, alcance, cotizacion: vistaCotizacion, hitos, cambios }[pestana](app),
     h('p', { class: 'ayuda aviso-legal' }, 'Los documentos son borradores para revisar y adaptar: no reemplazan un contrato ni asesoría legal.'));
 }

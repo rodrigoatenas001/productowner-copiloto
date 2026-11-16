@@ -31,7 +31,7 @@ export function vistaSprint(app) {
   return h('div', { class: 'vista' },
     h('header', { class: 'vista-cabecera' },
       h('p', { class: 'eyebrow' }, p.nombre),
-      h('h1', {}, activo ? activo.nombre : planificado ? `Planificar ${planificado.nombre}` : 'Sprints'),
+      h('h1', {}, activo ? activo.nombre : planificado ? `Planificar ${planificado.nombre}` : 'Sprints', termino('sprint')),
       activo?.objetivo ? h('p', { class: 'bajada' }, `Objetivo: ${activo.objetivo}`) : null),
     activo ? tablero(app, activo) : planificado ? planificar(app, planificado) : sinSprint(app),
     cerrados.length ? historial(app, cerrados) : null);
@@ -60,7 +60,7 @@ function planificar(app, sprint) {
 
   return h('div', { class: 'planificacion' },
     h('section', { class: 'panel', 'aria-labelledby': 'datos-sprint' },
-      h('h2', { id: 'datos-sprint' }, 'Datos del sprint'),
+      h('h2', { id: 'datos-sprint' }, 'Datos del sprint', termino('velocidad')),
       h('div', { class: 'editor-fila' },
         campo('Inicio', h('input', { type: 'date', value: sprint.inicio, onchange: (e) => editarSprint({ inicio: e.target.value }, true) })),
         campo('Fin', h('input', { type: 'date', value: sprint.fin, min: sprint.inicio, onchange: (e) => editarSprint({ fin: e.target.value }, true) })),
