@@ -3,7 +3,7 @@
 import { h, campo, selector, descargar, vacio, termino, pedirTexto, avisar, confirmar } from './dom.js';
 import {
   TIPOS_PASO, procesoDe, flujoDeValor, leerDuracion, formatoDuracion, agregarCarril, quitarCarril, renombrarCarril, moverCarril, agregarPaso, insertarPasoDespues,
-  editarPaso, eliminarPaso, moverPaso, conectar, desconectar, revisarProceso, disposicion, aBpmn,
+  editarPaso, eliminarPaso, moverPaso, conectar, desconectar, revisarProceso, disposicion, aBpmn, lineas,
 } from '../nucleo/proceso.js';
 import { nombreArchivo } from '../nucleo/exportar.js';
 import { INDUSTRIAS, plantillasDe, procesoDesdePlantilla, adaptarPlantilla, plantillaParaIa } from '../nucleo/plantillasProceso.js';
@@ -403,7 +403,13 @@ function diagrama(proceso) {
     d.carriles.map((c) => svg('g', {},
       svg('rect', { x: 0, y: c.y, width: d.ancho, height: c.alto, class: 'proceso-carril' }),
       svg('rect', { x: 0, y: c.y, width: 104, height: c.alto, class: 'proceso-carril-cabecera' }),
-      svg('text', { x: 52, y: c.y + c.alto / 2, class: 'proceso-carril-nombre', 'text-anchor': 'middle', 'dominant-baseline': 'middle' }, c.nombre))),
+      (() => {
+        // Nombre en varias líneas para que quepa en la cabecera (104 px)
+        const ls = lineas(c.nombre, 14);
+        return svg('text', { x: 52, y: c.y + c.alto / 2 - (ls.length - 1) * 7.5, class: 'proceso-carril-nombre', 'text-anchor': 'middle', 'dominant-baseline': 'middle' },
+          svg('title', {}, c.nombre),
+          ls.map((l, k) => svg('tspan', { x: 52, dy: k ? '1.15em' : 0 }, l)));
+      })())),
     d.flechas.map((f) => svg('g', {},
       svg('polyline', { points: f.puntos.map((pt) => pt.join(',')).join(' '), class: 'proceso-flecha', 'marker-end': 'url(#punta)' }),
       f.etiqueta ? etiquetaFlecha(f) : null)),
