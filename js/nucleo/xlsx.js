@@ -18,11 +18,11 @@ export function letra(i) {
 export const nombreHoja = (t) => String(t || 'Hoja').replace(/[\\/?*[\]:]/g, ' ').trim().slice(0, 31) || 'Hoja';
 
 // Índices en <cellXfs> de styles.xml (el orden importa)
-export const ESTILO = { normal: 1, encabezado: 2, centro: 3, must: 4, should: 5, could: 6, wont: 7, titulo: 8, nota: 9, total: 10, decimal: 11, hecho: 12, curso: 13 };
+export const ESTILO = { normal: 1, encabezado: 2, centro: 3, must: 4, should: 5, could: 6, wont: 7, titulo: 8, nota: 9, total: 10, decimal: 11, hecho: 12, curso: 13, entero: 14 };
 
 const ESTILOS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 <styleSheet xmlns="http://schemas.openxmlformats.org/spreadsheetml/2006/main">
-  <numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.##"/></numFmts>
+  <numFmts count="1"><numFmt numFmtId="164" formatCode="#,##0.00"/></numFmts>
   <fonts count="5">
     <font><sz val="11"/><color rgb="FF10213A"/><name val="Calibri"/><family val="2"/></font>
     <font><b/><sz val="11"/><color rgb="FFFFFFFF"/><name val="Calibri"/><family val="2"/></font>
@@ -47,7 +47,7 @@ const ESTILOS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <border><left style="thin"><color rgb="FFD0D7E2"/></left><right style="thin"><color rgb="FFD0D7E2"/></right><top style="thin"><color rgb="FFD0D7E2"/></top><bottom style="thin"><color rgb="FFD0D7E2"/></bottom><diagonal/></border>
   </borders>
   <cellStyleXfs count="1"><xf numFmtId="0" fontId="0" fillId="0" borderId="0"/></cellStyleXfs>
-  <cellXfs count="14">
+  <cellXfs count="15">
     <xf numFmtId="0" fontId="0" fillId="0" borderId="0" xfId="0"/>
     <xf numFmtId="0" fontId="0" fillId="0" borderId="1" xfId="0" applyBorder="1" applyAlignment="1"><alignment vertical="top" wrapText="1"/></xf>
     <xf numFmtId="0" fontId="1" fillId="2" borderId="1" xfId="0" applyFont="1" applyFill="1" applyBorder="1" applyAlignment="1"><alignment vertical="center" wrapText="1"/></xf>
@@ -62,6 +62,7 @@ const ESTILOS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
     <xf numFmtId="164" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="top"/></xf>
     <xf numFmtId="0" fontId="0" fillId="8" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top"/></xf>
     <xf numFmtId="0" fontId="0" fillId="9" borderId="1" xfId="0" applyFill="1" applyBorder="1" applyAlignment="1"><alignment horizontal="center" vertical="top"/></xf>
+    <xf numFmtId="3" fontId="0" fillId="0" borderId="1" xfId="0" applyNumberFormat="1" applyBorder="1" applyAlignment="1"><alignment horizontal="right" vertical="top"/></xf>
   </cellXfs>
   <cellStyles count="1"><cellStyle name="Normal" xfId="0" builtinId="0"/></cellStyles>
 </styleSheet>`;
@@ -70,7 +71,9 @@ const ESTILOS_XML = `<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
 function celda(ref, valor, estiloFila) {
   const v = valor && typeof valor === 'object' && 'v' in valor ? valor.v : valor;
   const nombre = valor && typeof valor === 'object' && valor.estilo;
-  const s = ESTILO[nombre || (typeof v === 'number' ? 'decimal' : estiloFila)] ?? ESTILO.normal;
+  // Los enteros sin decimales («12», no «12,00» ni «12,»); los demás con dos decimales
+  const numero = typeof v === 'number' ? (Number.isInteger(v) ? 'entero' : 'decimal') : null;
+  const s = ESTILO[nombre || numero || estiloFila] ?? ESTILO.normal;
   if (v === null || v === undefined || v === '') return `<c r="${ref}" s="${s}"/>`;
   if (typeof v === 'number' && Number.isFinite(v)) return `<c r="${ref}" s="${s}"><v>${v}</v></c>`;
   return `<c r="${ref}" s="${s}" t="inlineStr"><is><t xml:space="preserve">${xmlSeguro(v)}</t></is></c>`;

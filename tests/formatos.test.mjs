@@ -28,6 +28,17 @@ test('Excel: columnas, nombres de hoja válidos y sin repetir, y texto escapado'
   assert.ok(archivos['xl/worksheets/sheet2.xml'].includes('<v>3.5</v>'), 'los números quedan como números');
 });
 
+test('Excel: enteros sin coma decimal y decimales con dos cifras', () => {
+  const archivos = leerZip(libroExcel([{ nombre: 'N', columnas: [{ titulo: 'A' }, { titulo: 'B' }], filas: [[30, 44.09]] }]));
+  const estilos = archivos['xl/styles.xml'];
+  assert.ok(!estilos.includes('#,##0.##'), 'ese formato deja «30,» en los enteros');
+  const xfs = [...estilos.split('<cellXfs')[1].matchAll(/<xf numFmtId="(\d+)"/g)].map((m) => m[1]);
+  const [, sEntero] = archivos['xl/worksheets/sheet1.xml'].match(/<c r="A2" s="(\d+)"/);
+  const [, sDecimal] = archivos['xl/worksheets/sheet1.xml'].match(/<c r="B2" s="(\d+)"/);
+  assert.equal(xfs[sEntero], '3', 'entero con separador de miles y sin decimales');
+  assert.equal(xfs[sDecimal], '164', 'decimal con #,##0.00');
+});
+
 test('Excel del backlog: encabezado fijo, filtros, prioridad con color y una fila por historia', async () => {
   const p = await carla();
   const hoja = leerZip(excelBacklog(p))['xl/worksheets/sheet1.xml'];
