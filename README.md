@@ -22,7 +22,9 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - **Hipótesis de valor** por épica ("Creemos que al… lograremos… lo sabremos cuando…") y su **resultado medido**: se cumplió, en parte o no.
 
 **Del caos al backlog**
+- **Mapa del proceso (BPMN liviano)**: el circuito real del cliente en carriles por actor, con inicio, tareas, decisiones y fin. Cada tarea se enlaza con sus historias y la revisión avisa qué falta: decisiones con una sola salida, pasos sueltos, tareas sin historias e historias que no están en ningún paso. Se exporta a **BPMN 2.0** (`.bpmn`) para abrirlo en bpmn.io, Camunda Modeler o Bizagi.
 - **Notas → historias** "Como… quiero… para…", con reglas o con IA; **importar** desde CSV de Jira o Excel.
+- **Reglas de negocio** en cada historia (políticas, excepciones y controles), aparte de los criterios de aceptación; viajan en todas las exportaciones.
 - **Tipos de ítem** (historia, bug, spike, deuda técnica) y **dependencias** sin ciclos.
 - **Feedback de la Sprint Review** que pasa directo al backlog.
 
@@ -49,6 +51,10 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - **Retrospectiva** con votos y acciones que se revisan en la siguiente.
 
 **Comunicar**
+- **Documentos con formato**, generados en tu navegador, sin conexión:
+  - **Backlog en Excel**: encabezado fijo, filtros, prioridad y estado con color, criterios y reglas, WSJF, sprint y paso del proceso; lista para imprimir.
+  - **Proyecto en Excel**: resumen, backlog, épicas con hipótesis, proceso, sprints, hitos de pago y cambios, cada uno en su hoja.
+  - **Proyecto en Word y PDF**: portada, alcance, proceso, historias por épica con criterios como casillas y reglas, cotización, hitos, sprints y mejoras de las retrospectivas, con número de página. El Word usa estilos de título reales, así que puedes generar el índice.
 - **Informe para el cliente**: resumen sin jerga, entregas, lo que viene con fechas estimadas, resultados y "lo que necesitamos de ti".
 - Reporte de sprint, roadmap, avance por épica, retro y **notas de versión** (también redactadas por IA), en Markdown.
 - **Especificación para agentes de IA** (Claude Code, Antigravity, Cursor) con fuera de alcance explícito.
@@ -58,12 +64,14 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - **Taller**: trivia tipo Kahoot para proyectar, ejercicios de historias con retroalimentación y desafíos de pronóstico, tipos de ítem y validación de hipótesis.
 
 **Siempre**
+- **Cómo funciona**: el mapa del flujo en seis etapas (levantar, acordar, ordenar, construir, entregar y aprender), con el estado de tu proyecto en cada una y un atajo a la sección donde se hace.
+- **Glosario**: un botón **?** junto a cada término (INVEST, MoSCoW, WSJF, Definition of Ready, BPMN…) con su definición y un ejemplo.
 - Funciona **sin IA**; si quieres, conecta la tuya (Ollama en tu equipo o tu propia clave).
 - **Deshacer**, recordatorio de **respaldo** y todo guardado en tu navegador.
 
 ## Así se ve
 
-Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/ejemplo/pasteleria-carla.json), que puedes abrir desde Inicio → Ver el ejemplo (o importarlo desde Ajustes → Importar respaldo).
+Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/ejemplo/pasteleria-carla.json), que puedes abrir desde Inicio → Ver el ejemplo (o importarlo desde Ajustes → Importar respaldo). Es la tienda en línea de una pastelería, levantada de punta a punta: el circuito del pedido en tres carriles, historias con criterios «Dado… cuando… entonces…» y reglas de negocio, prioridad MoSCoW y WSJF, cotización en UF, hitos, sprints y una retrospectiva. Sirve para mostrar el método sin exponer datos de clientes reales.
 
 | | |
 |---|---|
