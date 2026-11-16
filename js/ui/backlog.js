@@ -10,9 +10,8 @@ import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
 import { vistaPriorizar } from './priorizar.js';
 import { vistaRoadmap } from './roadmap.js';
-import { vistaProceso } from './proceso.js';
 import { esKanban } from '../nucleo/kanban.js';
-import { panelObjetivos, detalleEpica } from './okr.js';
+import { detalleEpica } from './okr.js';
 import { pronosticar, textoPronostico } from '../nucleo/pronostico.js';
 import { agregarDependencia, quitarDependencia, dependenciasPendientes, creaCiclo } from '../nucleo/dependencias.js';
 import { issueDe, issueMarkdown, urlGithub, urlLinear } from '../nucleo/issues.js';
@@ -45,7 +44,7 @@ function listaPaginada(app, visibles, tarjeta) {
 }
 
 /** Abre una pestaña del backlog (lo usa la guía «Cómo funciona»). */
-export function abrirModo(m) { modo = m; abierta = null; }
+export function abrirModo(m) { modo = m === 'proceso' ? 'lista' : m; abierta = null; }
 
 /** Pestaña abierta del backlog (la app la usa para dar más ancho a las vistas que lo necesitan). */
 export const modoBacklog = () => modo;
@@ -161,16 +160,20 @@ export function vistaBacklog(app) {
       h('h1', {}, 'Backlog'),
       h('p', { class: 'bajada' }, 'Arriba lo más importante. Arrastra para reordenar o usa las flechas.')),
     h('div', { class: 'pestanas', role: 'tablist', 'aria-label': 'Vista del backlog' },
-      Object.entries({ lista: 'Lista priorizada', proceso: 'Proceso', priorizar: 'Priorizar', roadmap: 'Roadmap', epicas: 'Épicas', mapa: 'Mapa', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
-        type: 'button', role: 'tab', 'aria-selected': String(modo === m), class: 'pestana',
+      Object.entries({ lista: 'Lista priorizada', priorizar: 'Priorizar y estimar', roadmap: 'Roadmap', epicas: 'Épicas', mapa: 'Mapa' }).map(([m, texto]) => h('button', {
+        type: 'button', role: 'tab', 'aria-selected': String(modo === m || (m === 'priorizar' && modo === 'estimar')), class: 'pestana',
         onclick: () => { modo = m; app.render(); },
       }, texto))),
+    modo === 'priorizar' || modo === 'estimar' ? h('div', { class: 'pestanas pestanas--chicas', role: 'tablist', 'aria-label': 'Priorizar o estimar' },
+      Object.entries({ priorizar: 'Ordenar por valor', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
+        type: 'button', role: 'tab', 'aria-selected': String(modo === m), class: 'pestana',
+        onclick: () => { modo = m; app.render(); },
+      }, texto))) : null,
     modo === 'epicas' ? vistaEpicas(app) : null,
     modo === 'estimar' ? vistaEstimar(app) : null,
     modo === 'mapa' ? vistaMapa(app) : null,
     modo === 'priorizar' ? vistaPriorizar(app) : null,
     modo === 'roadmap' ? vistaRoadmap(app) : null,
-    modo === 'proceso' ? vistaProceso(app) : null,
     modo !== 'lista' ? null : h('dl', { class: 'cifras' },
       cifra('Historias', backlog.length),
       cifra('Puntos estimados', puntosDe(backlog)),
@@ -346,7 +349,7 @@ function vistaEpicas(app) {
   const pron = pronosticar(app.proyecto);
   const porEpica = Object.fromEntries((pron?.epicas || []).map((x) => [x.epica, x]));
   return h('div', {},
-    panelObjetivos(app),
+    h('p', { class: 'ayuda' }, 'Los objetivos, resultados clave y KPIs están en ', h('button', { type: 'button', class: 'btn-texto', onclick: () => app.ir('resultados') }, 'Resultados'), '.'),
     panelPronostico(pron),
     h('div', { class: 'compartir' }, botonesMarkdown(app, 'Reporte de avance por épica', 'avance-epicas', () => reporteEpicas(app.proyecto))),
     h('ul', { class: 'lista-epicas' }, epicas.map((e) => h('li', { class: 'epica' },
@@ -421,7 +424,7 @@ function vistaMapa(app) {
   if (!porEpicas && !recorrido.hayProceso) {
     return h('div', { class: 'mapa-contenedor' }, selector,
       vacio('El mapa por recorrido sale del proceso.', 'Dibuja el circuito del cliente en la pestaña Proceso y enlaza cada tarea con sus historias: el mapa las ordena como el recorrido de la persona, de izquierda a derecha.',
-        ['Ir a Proceso', () => { abrirModo('proceso'); app.render(); }], ['Ver por épicas', () => { columnasMapa = 'epicas'; app.render(); }]));
+        ['Ir a Proceso', () => app.ir('proceso')], ['Ver por épicas', () => { columnasMapa = 'epicas'; app.render(); }]));
   }
 
   return h('div', { class: 'mapa-contenedor' },

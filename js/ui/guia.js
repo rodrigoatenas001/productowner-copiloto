@@ -13,7 +13,7 @@ export const ETAPAS = [
   {
     nombre: 'Levantar', sub: 'con el cliente',
     texto: 'Dibujas el circuito del cliente por actores (BPMN liviano) y pegas lo que te pidió. Lo conviertes en historias con su valor (Como… quiero… para…), criterios de aceptación y reglas de negocio, enlazadas a cada paso.',
-    destinos: [['Proceso', 'backlog', 'proceso'], ['Notas', 'notas'], ['Backlog', 'backlog', 'lista']],
+    destinos: [['Proceso', 'proceso'], ['Notas', 'notas'], ['Backlog', 'backlog', 'lista']],
     estado: (p) => (p.historias.length ? ['hecho', n(p.historias.length, 'historia', 'historias')] : p.notas.trim() ? ['curso', 'Notas sin convertir'] : ['pendiente', 'Sin historias']),
   },
   {
@@ -66,14 +66,14 @@ export const ETAPAS = [
   {
     nombre: 'Aprender', sub: 'y mejorar',
     texto: 'Mides si el sistema se usa y mejoró el proceso (KPIs de adopción), revisas si las hipótesis se cumplieron, haces la retrospectiva y practicas con el taller.',
-    destinos: [['Resultados', 'backlog', 'epicas'], ['Retro', 'retro'], ['Taller', 'taller', 'trivia']],
+    destinos: [['Resultados', 'resultados'], ['Retro', 'retro'], ['Taller', 'taller', 'trivia']],
     estado: (p) => ((p.retros || []).length ? ['hecho', n(p.retros.length, 'retrospectiva', 'retrospectivas')] : ['pendiente', 'Sin retrospectivas']),
   },
 ];
 
 const NOMBRE_ESTADO = { hecho: 'Hecho', curso: 'En curso', pendiente: 'Pendiente' };
 
-function ir(app, vista, sub) {
+export function ir(app, vista, sub) {
   if (vista === 'backlog' && sub) abrirModo(sub);
   if (vista === 'cliente' && sub) pestanaCliente(sub);
   if (vista === 'taller' && sub) pestanaTaller(sub);

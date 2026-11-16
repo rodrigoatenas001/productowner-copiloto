@@ -264,8 +264,7 @@ const PRUEBAS = [
     verdad(!doc().getElementById('documento-impresion') && !doc().documentElement.classList.contains('imprimiendo'), 'después de imprimir deja la página como estaba');
   }],
   ['Proceso: carriles, pasos conectados, diagrama y revisión', async () => {
-    await ir('backlog');
-    await pestana('Proceso');
+    await ir('proceso');
     await clic('Partir con Cliente, Negocio y Sistema');
     igual(todos('.proceso-carriles li').length, 3, 'crea tres carriles');
     await clic('+ Inicio');
@@ -498,8 +497,7 @@ const PRUEBAS = [
   }],
   // Al final: reemplaza el proceso del ejemplo, que el mapa por recorrido necesita
   ['Plantilla por industria y del proceso al backlog, con revisión y enlace a los pasos', async () => {
-    await ir('backlog');
-    await pestana('Proceso');
+    await ir('proceso');
     await clic('Plantilla por industria');
     await pestana('Construcción y obras');
     const tarjeta = todos('.plantilla-proceso').find((t) => t.textContent.includes('Control de avance diario'));
@@ -509,13 +507,11 @@ const PRUEBAS = [
     await esperar(() => ventana().location.hash === '#notas' && todos('.candidata').length > 0, 'propone historias para revisar');
     verdad(todos('.enunciado').some((e) => e.textContent.startsWith('Como capataz, quiero registrar avance')), 'el rol sale del carril');
     await clic(todos('button').find((b) => /^Agregar \d+ al backlog$/.test(b.textContent)).textContent);
-    await ir('backlog');
-    await pestana('Proceso');
+    await ir('proceso');
     verdad(todos('.proceso-paso .chip--ok').length > 0, 'las tareas quedan enlazadas a sus historias');
   }],
   ['Del proceso al backlog con IA (simulada): mejora la redacción y mantiene el enlace', async () => {
-    await ir('backlog');
-    await pestana('Proceso');
+    await ir('proceso');
     // Un paso nuevo sin historias, para que haya algo que generar
     await clic('+ Tarea');
     escribir(todos('.proceso-editor input[type="text"]')[0], 'Registrar asistencia de la cuadrilla', 'change'); await pausa(100);

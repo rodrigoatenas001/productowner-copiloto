@@ -912,3 +912,38 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .proceso-dolores li { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
 .proceso-dolor { fill: var(--ambar-texto); font: 700 11px var(--f-mono); }
 .proceso-dolor.is-confirmado { fill: var(--alerta); }
+
+/* Proceso: resumen, interruptores, leyenda y pasos clicables */
+.proceso-pendientes { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 14px; margin: 0 0 10px; }
+.proceso-pendientes .chip { min-width: 1.6em; text-align: center; }
+.proceso-vista-barra { display: flex; flex-wrap: wrap; gap: 6px 16px; margin-bottom: 8px; font-size: .9rem; }
+.proceso-interruptor { display: inline-flex; align-items: center; gap: 4px; cursor: pointer; }
+.proceso-svg.is-ajustado { width: 100%; height: auto; display: block; }
+.proceso-nodo[role="button"] { cursor: pointer; }
+.proceso-nodo[role="button"]:hover rect, .proceso-nodo[role="button"]:hover polygon, .proceso-nodo[role="button"]:hover circle { filter: brightness(.94); }
+.proceso-nodo[role="button"]:focus { outline: none; }
+.proceso-nodo[role="button"]:focus-visible rect, .proceso-nodo[role="button"]:focus-visible polygon, .proceso-nodo[role="button"]:focus-visible circle { stroke: var(--cobre); stroke-width: 3; }
+.proceso-leyenda { display: flex; flex-wrap: wrap; gap: 4px 16px; margin-top: 6px; align-items: center; }
+.proceso-leyenda-item { display: inline-flex; align-items: center; gap: 4px; }
+.ley { display: inline-block; width: 20px; height: 12px; border-radius: 3px; background: var(--superficie); border: 1.6px solid var(--tinta-2); }
+.ley--sin { border: 1.6px dashed var(--cobre); }
+.ley--cuello { border: 2.5px solid var(--alerta); }
+.ley-dolor { color: var(--ambar-texto); font: 700 12px var(--f-mono); }
+.ley-dolor.is-confirmado { color: var(--alerta); }
+.ley-tiempo { font: 11px var(--f-mono); color: var(--tinta-2); }
+.proceso-actores > summary { cursor: pointer; list-style-position: outside; }
+.proceso-actores > summary h2 { display: inline; }
+
+/* Menú agrupado por etapa */
+.nav-grupo { margin: 10px 0 2px; padding: 0 12px; font: 600 .66rem var(--f-mono); letter-spacing: .08em; text-transform: uppercase; color: #8fa1b9; }
+.nav-separador { height: 8px; }
+.nav-separador:first-child { display: none; }
+@media (max-width: 820px) { .nav-grupo, .nav-separador { display: none; } }
+
+/* Inicio con un proyecto en marcha */
+.inicio-proyecto .guia-flujo-corto { list-style: none; margin: 12px 0 0; padding: 0; display: grid; gap: 6px; }
+.inicio-proyecto .guia-flujo-corto li { display: flex; flex-wrap: wrap; align-items: center; gap: 6px 12px; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--niebla); }
+.inicio-proyecto .guia-flujo-corto li.is-siguiente { border-color: var(--cobre); box-shadow: inset 3px 0 0 var(--cobre); }
+.inicio-proyecto .etapa-nombre { font-weight: 600; min-width: 7.5em; }
+.inicio-proyecto .etapa-detalle { flex: 1; color: var(--tinta-2); }
+.inicio-presentacion > summary { cursor: pointer; font-weight: 600; margin: 18px 0 8px; }

@@ -1,6 +1,7 @@
 // Inicio: qué es Copiloto PO, para quién, qué no es, sus límites, cómo empezar y cómo aportar.
 import { h, interruptor } from './dom.js';
 import { PLANTILLAS } from '../nucleo/plantillas.js';
+import { ETAPAS, ir } from './guia.js';
 
 export const PRODUCTOWNER = 'https://productowner.cl';
 
@@ -12,7 +13,8 @@ export function vistaBienvenida(app) {
     h('h3', {}, titulo), h('p', {}, texto),
     h('button', { type: 'button', class: principal ? 'btn btn--cobre' : 'btn btn--secundario', onclick: accion }, etiqueta));
 
-  return h('div', { class: 'vista bienvenida' },
+  const enMarcha = !enEjemplo && (app.proyecto.historias.length || app.proyecto.proceso?.pasos?.length);
+  const presentacion = [
     h('header', { class: 'bienvenida-hero' },
       h('p', { class: 'eyebrow' }, 'Versión inicial · libre y gratuita (MIT)'),
       h('h1', {}, 'Del audio desordenado del cliente a la entrega aceptada.'),
@@ -46,7 +48,7 @@ export function vistaBienvenida(app) {
       h('h2', { id: 'bv-limites' }, 'Límites que conviene saber'),
       h('ul', {},
         h('li', {}, h('strong', {}, 'Tus datos viven en este navegador. '), 'Si limpias el navegador o cambias de equipo se pierden: descarga un respaldo de vez en cuando (Ajustes).'),
-        h('li', {}, h('strong', {}, 'Es para una persona o una pantalla compartida. '), 'No sincroniza entre varias personas; para pasar un proyecto, usa el respaldo.'),
+        h('li', {}, h('strong', {}, 'El trabajo en equipo usa tu propio servidor. '), 'Para editar entre varias personas a la vez, instalas un servidor gratuito en tu cuenta de Cloudflare (Ajustes); sin él, usa una carpeta sincronizada o el respaldo.'),
         h('li', {}, h('strong', {}, 'La IA es opcional y tuya. '), 'Sin IA funciona completo; si conectas una, tus notas van solo a ese servicio.'),
         h('li', {}, h('strong', {}, 'Es una versión inicial. '), 'Puede tener errores y cambiar según lo que nos cuenten quienes lo usen.'))),
 
@@ -65,5 +67,30 @@ export function vistaBienvenida(app) {
       interruptor('Modo simple', app.modoSimple, (activo) => app.cambiarModoSimple(activo),
         'Muestra solo lo esencial (Notas, Backlog, Cliente y Sprint). Apágalo para ver priorización, mapa de historias, estimación en equipo, retrospectiva y taller.'),
       app.cajasCerradas.size ? h('p', {}, h('button', { type: 'button', class: 'btn-texto', onclick: () => app.reabrirCajas() }, 'Volver a mostrar las cajas de ayuda')) : null,
-      h('p', {}, h('button', { type: 'button', class: 'btn-texto', onclick: () => { app.iniciarRecorrido(); } }, 'Hacer el recorrido de 4 pasos con mi proyecto'))));
+      h('p', {}, h('button', { type: 'button', class: 'btn-texto', onclick: () => { app.iniciarRecorrido(); } }, 'Hacer el recorrido de 4 pasos con mi proyecto'))),
+  ];
+  if (!enMarcha) return h('div', { class: 'vista bienvenida' }, ...presentacion);
+  return h('div', { class: 'vista bienvenida' },
+    panelProyecto(app),
+    h('details', { class: 'inicio-presentacion' }, h('summary', {}, 'Qué es Copiloto PO y cómo empezar'), ...presentacion));
+}
+
+/** Estado del proyecto abierto por etapa, con el siguiente paso destacado. */
+function panelProyecto(app) {
+  const p = app.proyecto;
+  const etapas = ETAPAS.map((e) => ({ e, estado: e.estado(p) }));
+  const siguiente = etapas.find((x) => x.estado[0] !== 'hecho');
+  const NOMBRE = { hecho: '✓ Hecho', curso: 'En curso', pendiente: 'Pendiente' };
+  return h('section', { class: 'panel inicio-proyecto', 'aria-labelledby': 'inicio-proyecto' },
+    h('p', { class: 'eyebrow' }, 'Tu proyecto'),
+    h('h1', { id: 'inicio-proyecto' }, p.nombre),
+    siguiente
+      ? h('p', { class: 'bajada' }, 'Siguiente paso: ', h('strong', {}, `${siguiente.e.nombre} ${siguiente.e.sub}`), ` (${siguiente.estado[1].toLowerCase()}).`)
+      : h('p', { class: 'bajada' }, 'Todas las etapas tienen avance. Revisa los resultados y la retrospectiva.'),
+    h('ol', { class: 'guia-flujo-corto' }, etapas.map(({ e, estado: [estado, detalle] }) => h('li', { class: siguiente?.e === e ? 'is-siguiente' : null },
+      h('span', { class: 'etapa-nombre' }, e.nombre),
+      h('span', { class: `guia-estado guia-estado--${estado}` }, NOMBRE[estado]),
+      h('span', { class: 'etapa-detalle' }, detalle),
+      ...e.destinos.map(([texto, vista, sub]) => h('button', { type: 'button', class: siguiente?.e === e ? 'btn btn--chico' : 'btn btn--secundario btn--chico', onclick: () => ir(app, vista, sub) }, texto))))),
+    h('p', { class: 'ayuda' }, 'El detalle de cada etapa está en ', h('button', { type: 'button', class: 'btn-texto', onclick: () => app.ir('guia') }, 'Cómo funciona'), '.'));
 }

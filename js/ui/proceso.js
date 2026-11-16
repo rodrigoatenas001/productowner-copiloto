@@ -15,6 +15,10 @@ let verPlantillas = false; // selector de plantillas por industria abierto
 let industria = 'agro';
 let contextoEmpresa = ''; // para adaptar la plantilla con IA
 let ocupado = ''; // texto del botón mientras la IA trabaja
+// Qué muestra el diagrama (se recuerda en este navegador)
+const VISTA_INICIAL = { tiempos: true, dolores: true, cuello: true, ajustar: false };
+let vista = (() => { try { return { ...VISTA_INICIAL, ...JSON.parse(localStorage.getItem('proceso-vista') || '{}') }; } catch { return { ...VISTA_INICIAL }; } })();
+let verActores = false; // bloque «Editar actores» desplegado
 let enfocar = null; // tras redibujar: 'actor' (el campo para agregar otro) o el id de un paso nuevo
 
 /** Cada cambio redibuja la vista: devuelve el foco donde la persona seguía escribiendo. */
@@ -67,9 +71,10 @@ export function vistaProceso(app) {
         onclick: () => generarHistorias(app, { conIa: true }),
       }, ocupado === 'historias' ? 'Generando con IA…' : 'Generar con IA') : null),
     verPlantillas ? selectorPlantillas(app, proceso) : null,
-    seccionCarriles(proceso, cambiar),
-    proceso.pasos.length ? diagrama(proceso) : null,
+    proceso.pasos.length ? resumenRevision(avisos, historiasFuera) : null,
+    proceso.pasos.length ? diagrama(app, proceso) : null,
     proceso.pasos.length ? panelFlujo(proceso) : null,
+    seccionCarriles(proceso, cambiar, !proceso.pasos.length),
     h('section', { class: 'panel', 'aria-labelledby': 'proceso-pasos' },
       h('h2', { id: 'proceso-pasos' }, 'Pasos'),
       proceso.pasos.length
@@ -176,13 +181,17 @@ function selectorPlantillas(app, proceso) {
     })));
 }
 
-function seccionCarriles(proceso, cambiar) {
+function seccionCarriles(proceso, cambiar, siempreAbierto) {
   const entrada = h('input', { type: 'text', id: 'proceso-nuevo-actor', placeholder: 'Ej.: Clienta, Dueña, Tienda en línea', maxlength: 60 });
-  const agregar = () => { if (entrada.value.trim()) { enfocar = 'actor'; cambiar((p) => agregarCarril(p, entrada.value)); } };
+  const agregar = () => { if (entrada.value.trim()) { enfocar = 'actor'; verActores = true; cambiar((p) => agregarCarril(p, entrada.value)); } };
   const ultimo = proceso.carriles.length - 1;
-  return h('section', { class: 'panel', 'aria-labelledby': 'proceso-carriles' },
-    h('h2', { id: 'proceso-carriles' }, 'Actores (carriles)'),
-    h('p', { class: 'ayuda' }, 'De arriba hacia abajo, en el orden del diagrama. Toca un nombre para cambiarlo.'),
+  return h('details', {
+    class: 'panel proceso-actores', open: siempreAbierto || verActores || enfocar === 'actor' ? '' : null,
+    ontoggle: (e) => { verActores = e.target.open; },
+  },
+    h('summary', {}, h('h2', { id: 'proceso-carriles' }, `Editar actores (${proceso.carriles.length})`),
+      h('span', { class: 'proceso-meta' }, ` · ${proceso.carriles.map((c) => c.nombre).join(', ')}`)),
+    h('p', { class: 'ayuda' }, 'Son los carriles del diagrama, de arriba hacia abajo. Toca un nombre para cambiarlo.'),
     h('ul', { class: 'proceso-carriles' }, proceso.carriles.map((c, i) => h('li', { class: 'chip-editable' },
       h('button', { type: 'button', class: 'icono', 'aria-label': `Subir el carril ${c.nombre}`, disabled: i === 0, onclick: () => cambiar((p) => moverCarril(p, c.id, -1)) }, '↑'),
       h('button', {
@@ -372,7 +381,7 @@ function agrupar(lista) {
 
 function seccionRevision(app, avisos, historiasFuera, cantidadPasos) {
   const NIVEL = { error: 'Falta', aviso: 'Revisar', info: 'Cobertura' };
-  return h('section', { class: 'panel', 'aria-labelledby': 'proceso-revision' },
+  return h('section', { class: 'panel', id: 'revision-circuito', 'aria-labelledby': 'proceso-revision' },
     h('h2', { id: 'proceso-revision' }, 'Revisión del circuito'),
     avisos.length ? h('ul', { class: 'proceso-avisos' }, avisos.map((a) => h('li', { class: `proceso-aviso proceso-aviso--${a.nivel}` },
       h('span', { class: 'chip' }, NIVEL[a.nivel]), ' ',
@@ -385,6 +394,72 @@ function seccionRevision(app, avisos, historiasFuera, cantidadPasos) {
       h('ul', {}, historiasFuera.map((x) => h('li', {}, x.titulo, x.epica ? h('span', { class: 'proceso-meta' }, ` · ${x.epica}`) : null)))) : null);
 }
 
+/** Arriba del diagrama: lo que falta, en una línea, con salto a la revisión completa. */
+function resumenRevision(avisos, historiasFuera) {
+  const cuenta = (nivel) => avisos.filter((a) => a.nivel === nivel).length;
+  const partes = [
+    [cuenta('error'), 'por completar', 'error'],
+    [cuenta('aviso'), 'por revisar', 'aviso'],
+    [avisos.filter((a) => a.nivel === 'info' && a.pasoId).length, 'tareas sin historias', 'info'],
+    [historiasFuera.length, historiasFuera.length === 1 ? 'historia fuera del proceso' : 'historias fuera del proceso', 'info'],
+  ].filter(([n]) => n);
+  if (!partes.length) return h('p', { class: 'invest-ok proceso-pendientes' }, '✓ El circuito está completo y cada tarea tiene sus historias.');
+  return h('p', { class: 'proceso-pendientes' },
+    partes.map(([n, texto, nivel]) => h('span', { class: `proceso-aviso--${nivel}` }, h('span', { class: 'chip' }, String(n)), ` ${texto}`)),
+    h('button', { type: 'button', class: 'btn-texto', onclick: () => document.getElementById('revision-circuito')?.scrollIntoView({ behavior: 'smooth', block: 'start' }) }, 'Ver la revisión'));
+}
+
+/** Abre un paso en la lista de abajo y lo lleva a la vista. */
+function abrirPaso(app, id) {
+  abierto = id;
+  app.render();
+  requestAnimationFrame(() => document.getElementById(`paso-${id}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' }));
+}
+
+/** Texto del tooltip de un paso: historias, problemas, reglas y tiempos. */
+function detallePaso(paso, historias) {
+  const l = [paso.texto || 'Paso sin nombre'];
+  if (paso.tipo === 'tarea') {
+    l.push(historias.length ? `Historias (${historias.length}): ${historias.map((x) => x.titulo).join('; ')}` : 'Sin historias todavía');
+    const dol = paso.dolores || [];
+    if (dol.length) l.push(`Problemas: ${dol.map((x) => `${x.texto}${x.confirmado ? ' (confirmado)' : ' (por confirmar)'}`).join('; ')}`);
+    if ((paso.reglas || []).length) l.push(`Reglas: ${paso.reglas.join('; ')}`);
+    if (Number.isFinite(paso.trabajo) || Number.isFinite(paso.espera)) l.push(`Trabajo ${formatoDuracion(paso.trabajo || 0)} · espera ${formatoDuracion(paso.espera || 0)}`);
+  }
+  l.push('Clic para editar');
+  return l.join('\n');
+}
+
+/** Interruptores del diagrama. */
+function barraDiagrama(app) {
+  const interruptor = (clave, texto, ayuda) => h('label', { class: 'proceso-interruptor', title: ayuda },
+    h('input', {
+      type: 'checkbox', checked: vista[clave],
+      onchange: (e) => {
+        vista = { ...vista, [clave]: e.target.checked };
+        try { localStorage.setItem('proceso-vista', JSON.stringify(vista)); } catch { /* sin almacenamiento */ }
+        app.render();
+      },
+    }), ` ${texto}`);
+  return h('div', { class: 'proceso-vista-barra', role: 'group', 'aria-label': 'Qué mostrar en el diagrama' },
+    interruptor('tiempos', 'Tiempos', 'Trabajo y espera bajo cada tarea'),
+    interruptor('dolores', 'Problemas', 'Marca ⚠ con los problemas anotados en cada tarea'),
+    interruptor('cuello', 'Cuello de botella', 'Resalta la tarea donde más se pierde tiempo'),
+    interruptor('ajustar', 'Ajustar al ancho', 'Achica el diagrama para verlo completo sin desplazarse'));
+}
+
+function leyenda() {
+  const item = (muestra, texto) => h('span', { class: 'proceso-leyenda-item' }, muestra, ` ${texto}`);
+  return h('p', { class: 'proceso-leyenda ayuda' },
+    item(h('span', { class: 'ley ley--sin' }), 'sin historias'),
+    item(h('span', { class: 'ley ley--con' }), 'con historias («2 h» = 2 historias)'),
+    vista.cuello ? item(h('span', { class: 'ley ley--cuello' }), 'cuello de botella') : null,
+    vista.dolores ? item(h('span', { class: 'ley-dolor is-confirmado' }, '⚠'), 'problema confirmado') : null,
+    vista.dolores ? item(h('span', { class: 'ley-dolor' }, '⚠'), 'problema por confirmar') : null,
+    vista.tiempos ? item(h('span', { class: 'ley-tiempo' }, '15 min · espera 1 h'), 'trabajo y espera antes de empezar') : null,
+    h('span', {}, 'Toca un paso para editarlo. El orden de izquierda a derecha es el de la lista de pasos.'));
+}
+
 /** Etiqueta de una salida, junto a su primer tramo: a la derecha si baja, encima si avanza. */
 function etiquetaFlecha(f) {
   const [[x1, y1], [x2]] = f.puntos;
@@ -393,12 +468,13 @@ function etiquetaFlecha(f) {
 }
 
 /** Diagrama dibujado a partir de la lista: no se arrastra, se ordena con la lista de pasos. */
-function diagrama(proceso) {
+function diagrama(app, proceso) {
   const d = disposicion(proceso);
+  const historiasPorId = new Map(app.proyecto.historias.map((x) => [x.id, x]));
   const vsm = flujoDeValor(proceso);
   const tiempos = new Map(proceso.pasos.map((p) => [p.id, p]));
   const resumen = proceso.pasos.map((p, i) => `${i + 1}. ${p.texto || p.tipo}`).join('; ');
-  const lienzo = svg('svg', { viewBox: `0 0 ${d.ancho} ${d.alto}`, width: d.ancho, height: d.alto, class: 'proceso-svg', role: 'img', 'aria-label': `Diagrama del proceso: ${resumen}` },
+  const lienzo = svg('svg', { viewBox: `0 0 ${d.ancho} ${d.alto}`, width: vista.ajustar ? null : d.ancho, height: vista.ajustar ? null : d.alto, class: `proceso-svg${vista.ajustar ? ' is-ajustado' : ''}`, role: 'img', 'aria-label': `Diagrama del proceso: ${resumen}` },
     svg('defs', {}, svg('marker', { id: 'punta', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, svg('path', { d: 'M0,0 L10,5 L0,10 z', class: 'proceso-punta' }))),
     d.carriles.map((c) => svg('g', {},
       svg('rect', { x: 0, y: c.y, width: d.ancho, height: c.alto, class: 'proceso-carril' }),
@@ -419,17 +495,19 @@ function diagrama(proceso) {
       if (n.tipo === 'tarea') {
         const paso = tiempos.get(n.id);
         const conTiempo = Number.isFinite(paso.trabajo) || Number.isFinite(paso.espera);
-        return svg('g', { class: `proceso-nodo${n.historias ? '' : ' proceso-nodo--sin'}${n.id === vsm.cuello ? ' proceso-nodo--cuello' : ''}` },
+        const cuello = vista.cuello && n.id === vsm.cuello;
+        return svg('g', { class: `proceso-nodo${n.historias ? '' : ' proceso-nodo--sin'}${cuello ? ' proceso-nodo--cuello' : ''}` },
           svg('rect', { x: n.x, y: n.y, width: n.ancho, height: n.alto, rx: 10 }),
           texto(n.cx, n.cy - (n.lineas.length - 1) * 7.5 + 4),
           n.historias ? svg('text', { x: n.x + n.ancho - 6, y: n.y + n.alto - 6, 'text-anchor': 'end', class: 'proceso-cuenta' }, `${n.historias} h`) : null,
           // Bajo la tarea: trabajo y espera, como la línea de tiempo de un VSM
-          conTiempo ? svg('text', { x: n.cx, y: n.y + n.alto + 15, 'text-anchor': 'middle', class: 'proceso-tiempo' },
+          vista.tiempos && conTiempo ? svg('text', { x: n.cx, y: n.y + n.alto + 15, 'text-anchor': 'middle', class: 'proceso-tiempo' },
             `${formatoDuracion(paso.trabajo || 0)} · espera ${formatoDuracion(paso.espera || 0)}`) : null,
-          n.id === vsm.cuello ? svg('text', { x: n.cx, y: n.y - 6, 'text-anchor': 'middle', class: 'proceso-cuello' }, 'Cuello de botella') : null,
-          (paso.dolores || []).length ? svg('text', {
-            x: n.x + 6, y: n.y + 13, class: `proceso-dolor${paso.dolores.some((d) => d.confirmado) ? ' is-confirmado' : ''}`,
-          }, `⚠ ${paso.dolores.filter((d) => d.confirmado).length || paso.dolores.length}${paso.dolores.some((d) => d.confirmado) ? '' : '?'}`) : null);
+          cuello ? svg('text', { x: n.cx, y: n.y - 6, 'text-anchor': 'middle', class: 'proceso-cuello' }, 'Cuello de botella') : null,
+          vista.dolores && (paso.dolores || []).length ? (() => {
+            const conf = paso.dolores.filter((x) => x.confirmado).length;
+            return svg('text', { x: n.x + 6, y: n.y + 13, class: `proceso-dolor${conf ? ' is-confirmado' : ''}` }, `⚠ ${conf || paso.dolores.length}`);
+          })() : null);
       }
       if (n.tipo === 'decision') {
         const r = n.ancho / 2;
@@ -444,7 +522,21 @@ function diagrama(proceso) {
         svg('circle', { cx: n.cx, cy: n.cy, r: n.ancho / 2 }),
         texto(n.cx, n.y + n.alto + 16));
     }));
+  // Cada paso: tooltip con su detalle y clic (o Enter) para editarlo en la lista
+  const pasos = new Map(proceso.pasos.map((x) => [x.id, x]));
+  lienzo.querySelectorAll('g.proceso-nodo').forEach((g, i) => {
+    const n = d.nodos[i];
+    const paso = pasos.get(n.id);
+    const titulo = detallePaso(paso, paso.historiaIds.map((id) => historiasPorId.get(id)).filter(Boolean));
+    g.prepend(svg('title', {}, titulo));
+    g.setAttribute('tabindex', '0');
+    g.setAttribute('role', 'button');
+    g.setAttribute('aria-label', `${titulo.split('\n')[0]}: editar`);
+    g.addEventListener('click', () => abrirPaso(app, n.id));
+    g.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); abrirPaso(app, n.id); } });
+  });
   return h('figure', { class: 'proceso-figura' },
+    barraDiagrama(app),
     h('div', { class: 'mapa-scroll' }, lienzo),
-    h('figcaption', { class: 'ayuda' }, 'Las tareas con borde punteado no tienen historias. El orden de izquierda a derecha es el de la lista de pasos.'));
+    h('figcaption', {}, leyenda()));
 }

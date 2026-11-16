@@ -13,6 +13,8 @@ import { vistaCliente } from './ui/cliente.js';
 import { vistaBienvenida } from './ui/bienvenida.js';
 import { vistaGuia } from './ui/guia.js';
 import { vistaComentar } from './ui/comentar.js';
+import { vistaProceso } from './ui/proceso.js';
+import { panelObjetivos } from './ui/okr.js';
 import { cajaRecorrido, avisoEjemplo, cajaInfo, PASOS_RECORRIDO } from './ui/ayuda.js';
 import { normalizarProyecto, resumenSprint } from './nucleo/proyecto.js';
 import { activarAtajos, abrirBuscador } from './ui/buscador.js';
@@ -20,21 +22,42 @@ import { esKanban } from './nucleo/kanban.js';
 import { iniciarEquipo, conectarProyectoActivo, enviar as enviarAlEquipo, estadoEquipo } from './ui/equipo.js';
 import { iniciarCarpeta, alGuardarEnCarpeta, alBorrarEnCarpeta, avisoCarpeta, carpetaLista, nombreCarpeta, sincronizar } from './ui/carpeta.js';
 
+/** Cabecera común de una vista simple: proyecto, título y bajada. */
+const cabecera = (app, titulo, bajada) => h('header', { class: 'vista-cabecera' },
+  h('p', { class: 'eyebrow' }, app.proyecto.nombre), h('h1', {}, titulo), h('p', { class: 'bajada' }, bajada));
+
 const VISTAS = {
   inicio: { titulo: 'Inicio', render: vistaBienvenida },
   guia: { titulo: 'Cómo funciona', render: vistaGuia },
+  cliente: { titulo: 'Cliente', render: vistaCliente },
+  proceso: {
+    titulo: 'Proceso',
+    render: (app) => h('div', { class: 'vista' }, cabecera(app, 'Proceso', 'Cómo trabaja hoy el cliente, paso a paso y por actor. Valídalo con él antes de escribir historias.'), vistaProceso(app)),
+  },
   notas: { titulo: 'Notas', render: vistaNotas },
   backlog: { titulo: 'Backlog', render: vistaBacklog },
-  cliente: { titulo: 'Cliente', render: vistaCliente },
   sprint: { titulo: 'Sprint', render: vistaSprint },
   retro: { titulo: 'Retro', render: vistaRetro },
+  resultados: {
+    titulo: 'Resultados',
+    render: (app) => h('div', { class: 'vista' }, cabecera(app, 'Resultados', 'Para qué se hace el proyecto y si se está logrando: objetivos, resultados clave y KPIs con sus mediciones.'), Object.assign(panelObjetivos(app), { open: true })),
+  },
   taller: { titulo: 'Taller', render: vistaTaller },
   ajustes: { titulo: 'Ajustes', render: vistaAjustes },
   comentar: { titulo: 'Comentar', render: vistaComentar },
 };
+// El menú, agrupado por etapa del trabajo
+const GRUPOS = [
+  [null, ['inicio', 'guia']],
+  ['Descubrir', ['cliente', 'proceso']],
+  ['Definir', ['notas', 'backlog']],
+  ['Ejecutar', ['sprint', 'retro']],
+  ['Medir', ['resultados']],
+  [null, ['taller', 'ajustes', 'comentar']],
+];
 // Con el modo simple se ocultan del menú (siguen accesibles por enlace)
 const AVANZADAS = new Set(['retro', 'taller']);
-const VISTAS_ANCHAS_BACKLOG = new Set(['mapa', 'proceso', 'priorizar', 'roadmap']);
+const VISTAS_ANCHAS_BACKLOG = new Set(['mapa', 'priorizar', 'roadmap']);
 export const ID_EJEMPLO = 'ejemplo-pasteleria';
 // Súbela cuando cambie docs/ejemplo/pasteleria-carla.json, para reemplazar copias antiguas
 const VERSION_EJEMPLO = 3;
@@ -45,6 +68,8 @@ const AYUDA_TABLERO = 'Flujo continuo: trae trabajo del backlog cuando hay capac
 const AYUDAS = {
   notas: 'Pega lo que te pidió el cliente y conviértelo en historias de usuario.',
   backlog: 'La lista ordenada de lo que hay que hacer: arriba lo más importante. Arrastra para reordenar y abre una historia con clic en su título o doble clic. Aquí priorizas, estimas y ves el roadmap.',
+  proceso: 'El circuito del cliente por actores (BPMN liviano), con tiempos, problemas y las historias de cada paso.',
+  resultados: 'Objetivos, resultados clave y KPIs: si el sistema se usa y si mejoró el proceso.',
   cliente: 'Lo que acuerdas con tu cliente: qué incluye y qué no, cuánto cuesta, cuándo se paga y qué cambios pidió.',
   sprint: AYUDA_SPRINT,
   retro: 'Al cerrar un sprint: qué salió bien, qué mejorar y qué acciones tomar.',
@@ -247,7 +272,7 @@ const app = {
     renderBarraInferior();
     const principal = document.getElementById('principal');
     // Mapas, tableros y diagramas usan todo el ancho; el resto queda en un ancho cómodo de leer
-    principal.classList.toggle('principal--ancho', ['sprint', 'guia'].includes(this.vista) || (this.vista === 'backlog' && VISTAS_ANCHAS_BACKLOG.has(modoBacklog())));
+    principal.classList.toggle('principal--ancho', ['sprint', 'guia', 'proceso'].includes(this.vista) || (this.vista === 'backlog' && VISTAS_ANCHAS_BACKLOG.has(modoBacklog())));
     const v = this.vista;
     const caja = AYUDAS[v] && v !== 'comentar' && this.recorrido === null ? cajaInfo(this, v, `Para qué sirve ${VISTAS[v].titulo}`, AYUDAS[v], EXTRA_AYUDA[v]?.()) : null;
     // Con la carpeta sincronizada no hace falta recordar el respaldo manual
@@ -320,14 +345,19 @@ function renderNavegacion() {
     h('div', { class: 'nav-proyecto' }, selectorProyecto),
     h('button', { type: 'button', class: 'nav-buscar', onclick: () => abrirBuscador(app, VISTAS), title: 'Buscar (Ctrl + K)' }, 'Buscar…', h('kbd', {}, 'Ctrl K')),
     h('nav', { 'aria-label': 'Secciones' },
-      h('ul', {}, Object.entries(VISTAS).filter(([clave]) => clave === app.vista || !(app.modoSimple && AVANZADAS.has(clave))).map(([clave, v]) => h('li', { class: clave === 'comentar' ? 'nav-comentar' : null },
+      h('ul', {}, GRUPOS.flatMap(([grupo, claves]) => {
+        const visibles = claves.filter((clave) => clave === app.vista || !(app.modoSimple && AVANZADAS.has(clave)));
+        if (!visibles.length) return [];
+        return [grupo ? h('li', { class: 'nav-grupo', 'aria-hidden': 'true' }, grupo) : h('li', { class: 'nav-separador', 'aria-hidden': 'true' }),
+          ...visibles.map((clave) => [clave, VISTAS[clave]])];
+      }).map((x) => (x instanceof Node ? x : (([clave, v]) => h('li', { class: clave === 'comentar' ? 'nav-comentar' : null },
         h('a', {
           href: `#${clave}`,
           title: AYUDAS[clave] || null,
           'aria-current': app.vista === clave ? 'page' : null,
           onclick: (e) => { e.preventDefault(); app.ir(clave); },
         }, v.titulo, conteos[clave] ? h('span', { class: 'nav-conteo', title: clave === 'sprint' ? `${activo.nombre}: ${r.hechos} de ${r.puntos} puntos terminados` : null }, String(conteos[clave])) : null,
-        clave === 'sprint' && r ? h('span', { class: 'nav-avance', 'aria-hidden': 'true' }, h('span', { class: `nav-avance-${Math.min(10, Math.round(avanceSprint / 10))}` })) : null))))),
+        clave === 'sprint' && r ? h('span', { class: 'nav-avance', 'aria-hidden': 'true' }, h('span', { class: `nav-avance-${Math.min(10, Math.round(avanceSprint / 10))}` })) : null)))(x))))),
     h('p', { class: 'nav-estado', id: 'estado-guardado', 'aria-live': 'polite' }, 'Guardado en este navegador'),
     h('p', { class: 'nav-estado nav-equipo', id: 'estado-equipo', 'aria-live': 'polite' }, estadoEquipo()));
 }
