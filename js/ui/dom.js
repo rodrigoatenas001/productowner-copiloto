@@ -144,7 +144,7 @@ export function selector(opciones, valor, atributos = {}) {
  * Diálogo propio (reemplaza confirm/prompt del navegador). Devuelve una promesa:
  * con `campo` resuelve el texto escrito (o null si cancela); sin `campo`, true/false.
  */
-function dialogoPregunta(pregunta, { detalle = '', aceptar = 'Aceptar', peligro = false, campo: conCampo = false, valor = '', placeholder = '' } = {}) {
+function dialogoPregunta(pregunta, { detalle = '', aceptar = 'Aceptar', cancelar = 'Cancelar', peligro = false, campo: conCampo = false, valor = '', placeholder = '' } = {}) {
   return new Promise((resolver) => {
     let respuesta = conCampo ? null : false;
     const entrada = conCampo ? h('input', { type: 'text', value: valor, placeholder, 'aria-label': pregunta, maxlength: 300 }) : null;
@@ -161,7 +161,7 @@ function dialogoPregunta(pregunta, { detalle = '', aceptar = 'Aceptar', peligro 
       entrada,
       h('div', { class: 'acciones' },
         h('button', { type: 'submit', class: peligro ? 'btn btn-peligro-solido' : 'btn' }, aceptar),
-        h('button', { type: 'button', class: 'btn-texto', onclick: () => dialogo.close() }, 'Cancelar'))));
+        h('button', { type: 'button', class: 'btn-texto', onclick: () => dialogo.close() }, cancelar))));
     document.body.append(dialogo);
     dialogo.showModal();
     (entrada || dialogo.querySelector('[type=submit]')).focus();

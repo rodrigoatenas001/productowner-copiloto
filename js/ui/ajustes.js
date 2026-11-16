@@ -8,6 +8,7 @@ import { repoGithub } from '../nucleo/issues.js';
 import { flujoDe } from '../nucleo/flujo.js';
 import { botonesMarkdown } from './compartir.js';
 import { imprimirDocumento } from './imprimir.js';
+import { seccionCarpeta, carpetaLista, nombreCarpeta } from './carpeta.js';
 import { excelBacklog, excelProyecto, documentoProyecto } from '../nucleo/informe.js';
 import { documentoWord } from '../nucleo/docx.js';
 import { reporteEpicas, notasDeVersion, informeCliente } from '../nucleo/reportes.js';
@@ -25,6 +26,7 @@ export function vistaAjustes(app) {
     seccionProyecto(app),
     seccionDefiniciones(app),
     seccionFlujo(app),
+    seccionCarpeta(app),
     seccionRespaldo(app),
     seccionIa(app),
     iaConfigurada(app.ia) ? seccionIa(app, 'iaRevisor') : null,
@@ -57,7 +59,10 @@ function seccionProyecto(app) {
       h('button', {
         type: 'button', class: 'btn-texto btn-peligro',
         onclick: async () => {
-          if (!(await confirmar(`¿Eliminar el proyecto "${p.nombre}" de este navegador?`, { detalle: 'Descarga un respaldo antes si lo quieres conservar.', aceptar: 'Eliminar proyecto', peligro: true }))) return;
+          const detalle = carpetaLista() && p.id !== 'ejemplo-pasteleria'
+            ? `Su archivo pasa a la carpeta «papelera» dentro de «${nombreCarpeta()}»: puedes recuperarlo desde ahí.`
+            : 'Descarga un respaldo antes si lo quieres conservar.';
+          if (!(await confirmar(`¿Eliminar el proyecto "${p.nombre}"?`, { detalle, aceptar: 'Eliminar proyecto', peligro: true }))) return;
           await app.borrarProyectoActual();
           app.avisar('Proyecto eliminado.');
         },

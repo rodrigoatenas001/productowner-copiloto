@@ -72,6 +72,7 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - Con el ejemplo abierto, **«Crear mi proyecto»** parte tu propio proyecto, para no mezclar tu trabajo con el de Carla.
 - Funciona **sin IA**; si quieres, conecta la tuya (Ollama en tu equipo o tu propia clave).
 - **Deshacer**, recordatorio de **respaldo** y todo guardado en tu navegador.
+- **Usar en varios equipos** (Chrome y Edge de escritorio): elige en Ajustes una carpeta que tu nube sincronice (OneDrive, Google Drive o Dropbox). Cada proyecto queda como un archivo; en el otro equipo eliges la misma carpeta y aparecen todos. Si editaste el mismo proyecto en los dos lados, te pregunta cuál conservar y la otra versión queda en la carpeta `papelera`; los proyectos borrados también van ahí.
 
 ## Así se ve
 
@@ -89,7 +90,7 @@ Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/
 Lo que viene depende de quienes lo usen; estas son las ideas evaluadas y su estado.
 
 **Ideas a evaluar más adelante**
-- **Trabajo en equipo**: combinar respaldos de varias personas, o un proyecto en un archivo compartido (OneDrive o Drive). Hoy se usa en una pantalla compartida. Se evaluará si aparece la necesidad, sin agregar servidores ni cuentas.
+- **Trabajo en equipo**: que varias personas editen el mismo proyecto a la vez. Hoy se usa en una pantalla compartida, y la carpeta sincronizada sirve para una persona en varios equipos. Se evaluará si aparece la necesidad, sin agregar servidores ni cuentas.
 - **Modo Kanban completo**, sin sprints, con métricas de flujo y diagrama de flujo acumulado. Hoy la base es Scrum, con lo mejor de Kanban dentro del sprint.
 - **Personas**: un catálogo de roles con sus objetivos y frustraciones, para usarlos en historias y en la IA.
 
@@ -102,14 +103,14 @@ Lo que viene depende de quienes lo usen; estas son las ideas evaluadas y su esta
 
 ## Con equipos
 
-Está pensado para una persona, o para un equipo **mirando la misma pantalla** (presencial o compartiendo pantalla): planificar, estimar, la retro y la trivia funcionan así. No sincroniza entre equipos distintos porque no hay servidor; para pasar un proyecto, se descarga el respaldo y se importa en el otro navegador.
+Está pensado para una persona, o para un equipo **mirando la misma pantalla** (presencial o compartiendo pantalla): planificar, estimar, la retro y la trivia funcionan así. Para usar tus proyectos en varios computadores, elige en Ajustes una carpeta sincronizada por tu nube (Chrome y Edge de escritorio); en otros navegadores, descarga el respaldo e impórtalo en el otro equipo. No está pensado para que dos personas editen el mismo proyecto al mismo tiempo.
 
 ## Privacidad
 
-- **Copiloto PO no recopila datos.** No tiene servidor, cuentas, cookies ni analítica: todo lo que escribes se guarda en tu navegador (IndexedDB) y no se envía a nadie.
+- **Copiloto PO no recopila datos.** No tiene servidor, cuentas, cookies ni analítica: todo lo que escribes se guarda en tu navegador (IndexedDB) y no se envía a nadie. Si eliges una carpeta sincronizada, los archivos van a esa carpeta y de ahí solo a tu propia nube.
 - La única excepción es la IA, si tú la conectas: tus notas viajan **solo** al servicio que configuraste y solo cuando usas una función con IA. La clave queda guardada en tu navegador. Con Ollama, nada sale de tu equipo.
 - Quien publica la página (GitHub Pages, tu propio GitHub o tu servidor) puede registrar visitas técnicas, como cualquier sitio web, bajo sus propias políticas. Usarlo desde el ZIP en tu equipo evita incluso eso.
-- Los datos del navegador se pueden borrar (limpieza, otro equipo, modo privado): descarga un respaldo desde Ajustes de vez en cuando.
+- Los datos del navegador se pueden borrar (limpieza, otro equipo, modo privado): usa la carpeta sincronizada o descarga un respaldo desde Ajustes de vez en cuando.
 
 ## Usarlo
 

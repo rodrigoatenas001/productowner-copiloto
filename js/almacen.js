@@ -34,7 +34,15 @@ async function operar(almacen, modo, accion) {
 }
 
 export const listarProyectos = () => operar('proyectos', 'readonly', (s) => s.getAll());
-export const guardarProyecto = (p) => operar('proyectos', 'readwrite', (s) => s.put({ ...p, actualizado: new Date().toISOString() }));
+/**
+ * Guarda el proyecto con la fecha de ahora y lo devuelve con esa fecha (la carpeta sincronizada la compara).
+ * Con `conservarFecha` guarda la fecha que trae: un proyecto que llega desde la carpeta no es un cambio de aquí.
+ */
+export async function guardarProyecto(p, { conservarFecha = false } = {}) {
+  const guardado = conservarFecha && p.actualizado ? p : { ...p, actualizado: new Date().toISOString() };
+  await operar('proyectos', 'readwrite', (s) => s.put(guardado));
+  return guardado;
+}
 export const borrarProyecto = (id) => operar('proyectos', 'readwrite', (s) => s.delete(id));
 export const leerAjuste = (clave) => operar('ajustes', 'readonly', (s) => s.get(clave));
 export const guardarAjuste = (clave, valor) => operar('ajustes', 'readwrite', (s) => s.put(valor, clave));

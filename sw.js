@@ -1,6 +1,6 @@
 // Service worker: guarda la aplicación para usarla sin conexión.
 // Al publicar una versión nueva, cambia VERSION para que los navegadores la actualicen.
-const VERSION = 'copiloto-v28';
+const VERSION = 'copiloto-v29';
 const ARCHIVOS = [
   './',
   './index.html',
@@ -30,6 +30,8 @@ const ARCHIVOS = [
   './js/nucleo/informe.js',
   './js/ui/imprimir.js',
   './js/nucleo/markdownBloques.js',
+  './js/nucleo/carpeta.js',
+  './js/ui/carpeta.js',
   './js/nucleo/retro.js',
   './js/ui/retro.js',
   './js/nucleo/definiciones.js',

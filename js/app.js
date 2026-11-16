@@ -16,6 +16,7 @@ import { vistaComentar } from './ui/comentar.js';
 import { cajaRecorrido, avisoEjemplo, cajaInfo, PASOS_RECORRIDO } from './ui/ayuda.js';
 import { normalizarProyecto, resumenSprint } from './nucleo/proyecto.js';
 import { activarAtajos, abrirBuscador } from './ui/buscador.js';
+import { iniciarCarpeta, alGuardarEnCarpeta, alBorrarEnCarpeta, avisoCarpeta, carpetaLista, nombreCarpeta, sincronizar } from './ui/carpeta.js';
 
 const VISTAS = {
   inicio: { titulo: 'Inicio', render: vistaBienvenida },
@@ -141,10 +142,10 @@ const app = {
   },
 
   async crearProyecto(nombre) {
-    const p = nuevoProyecto(nombre);
-    await guardarProyecto(p);
+    const p = await guardarProyecto(nuevoProyecto(nombre));
     this.proyectos.push(p);
     await this.abrir(p.id);
+    alGuardarEnCarpeta(this, p);
   },
 
   /** Pide un nombre y crea el proyecto. Devuelve false si la persona cancela. */
@@ -176,12 +177,14 @@ const app = {
 
   async importarProyecto(p) {
     if (this.proyectos.some((x) => x.id === p.id)) p.id = `${p.id}-${Date.now().toString(36)}`;
-    await guardarProyecto(p);
-    this.proyectos.push(p);
-    await this.abrir(p.id);
+    const guardado = await guardarProyecto(p);
+    this.proyectos.push(guardado);
+    await this.abrir(guardado.id);
+    alGuardarEnCarpeta(this, guardado);
   },
 
   async borrarProyectoActual() {
+    await alBorrarEnCarpeta(this.proyecto.id);
     await borrarProyecto(this.proyecto.id);
     this.proyectos = this.proyectos.filter((p) => p.id !== this.proyecto.id);
     if (!this.proyectos.length) {
@@ -239,7 +242,8 @@ const app = {
     principal.classList.toggle('principal--ancho', ['sprint', 'guia'].includes(this.vista) || (this.vista === 'backlog' && VISTAS_ANCHAS_BACKLOG.has(modoBacklog())));
     const v = this.vista;
     const caja = AYUDAS[v] && v !== 'comentar' && this.recorrido === null ? cajaInfo(this, v, `Para qué sirve ${VISTAS[v].titulo}`, AYUDAS[v], EXTRA_AYUDA[v]?.()) : null;
-    vaciar(principal, avisoEjemplo(this), cajaRecorrido(this), caja, this.proyecto.id === ID_EJEMPLO ? null : avisoRespaldo(this), VISTAS[this.vista].render(this));
+    // Con la carpeta sincronizada no hace falta recordar el respaldo manual
+    vaciar(principal, avisoEjemplo(this), avisoCarpeta(this), cajaRecorrido(this), caja, this.proyecto.id === ID_EJEMPLO || carpetaLista() ? null : avisoRespaldo(this), VISTAS[this.vista].render(this));
     document.title = `${VISTAS[this.vista].titulo} · ${this.proyecto.nombre} · Copiloto PO`;
   },
 };
@@ -270,8 +274,11 @@ async function guardarAhora() {
   if (!pendiente || !app.proyecto) return;
   pendiente = false;
   try {
-    await guardarProyecto(app.proyecto);
-    marcarEstadoGuardado('Guardado en este navegador');
+    const guardado = await guardarProyecto(app.proyecto);
+    // La fecha de guardado es la que se compara con la carpeta: el proyecto en memoria debe tenerla
+    app.proyecto.actualizado = guardado.actualizado;
+    marcarEstadoGuardado(carpetaLista() ? `Guardado aquí y en «${nombreCarpeta()}»` : 'Guardado en este navegador');
+    alGuardarEnCarpeta(app, app.proyecto);
   } catch (e) {
     marcarEstadoGuardado('No se pudo guardar');
     avisar(`No se pudo guardar: ${e.message}. Descarga un respaldo desde Ajustes.`, 'error');
@@ -341,9 +348,7 @@ async function iniciar() {
     app.modoSimple = Boolean(await leerAjuste('modoSimple'));
     const primeraVez = !(await leerAjuste('bienvenidaVista'));
     if (!app.proyectos.length) {
-      const p = nuevoProyecto('Mi proyecto');
-      await guardarProyecto(p);
-      app.proyectos = [p];
+      app.proyectos = [await guardarProyecto(nuevoProyecto('Mi proyecto'))];
     }
     const activo = await leerAjuste('proyectoActivo');
     app.proyecto = app.proyectos.find((p) => p.id === activo) || app.proyectos[0];
@@ -354,6 +359,7 @@ async function iniciar() {
     app.render();
     if (primeraVez) await guardarAjuste('bienvenidaVista', true);
     pedirPersistencia();
+    iniciarCarpeta(app);
   } catch (e) {
     vaciar(document.getElementById('principal'),
       h('div', { class: 'vacio' },
@@ -368,7 +374,15 @@ window.addEventListener('beforeunload', (e) => {
     e.preventDefault();
   }
 });
-document.addEventListener('visibilitychange', () => { if (document.hidden) guardarAhora(); });
+// Al volver a la pestaña se revisa la carpeta: la nube pudo traer cambios de otro equipo
+let ultimaRevision = 0;
+document.addEventListener('visibilitychange', async () => {
+  if (document.hidden) { guardarAhora(); return; }
+  if (Date.now() - ultimaRevision < 10000) return;
+  ultimaRevision = Date.now();
+  await guardarAhora();
+  sincronizar(app);
+});
 // Enlaces con #vista (el logo, atrás/adelante del navegador)
 window.addEventListener('hashchange', () => {
   const vista = location.hash.slice(1);
