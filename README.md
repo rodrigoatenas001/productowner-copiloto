@@ -22,8 +22,10 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - **Hipótesis de valor** por épica ("Creemos que al… lograremos… lo sabremos cuando…") y su **resultado medido**: se cumplió, en parte o no.
 
 **Del caos al backlog**
-- **Mapa del proceso (BPMN liviano)**: el circuito real del cliente en carriles por actor, con inicio, tareas, decisiones y fin. Cada tarea se enlaza con sus historias y la revisión avisa qué falta: decisiones con una sola salida, pasos sueltos, tareas sin historias e historias que no están en ningún paso. Se exporta a **BPMN 2.0** (`.bpmn`) para abrirlo en bpmn.io, Camunda Modeler o Bizagi.
-- **Notas → historias** "Como… quiero… para…", con reglas o con IA; **importar** desde CSV de Jira o Excel.
+- **Mapa del proceso (BPMN liviano)**: el circuito real del cliente en carriles por actor, con inicio, tareas, decisiones y fin. Cada tarea se enlaza con sus historias y la revisión avisa qué falta: decisiones con una sola salida, pasos sueltos, tareas sin historias e historias que no están en ningún paso. Si olvidaste un paso, **«+ Tarea después»** lo inserta en su lugar y lo deja conectado entre el anterior y el siguiente. Los carriles se renombran y reordenan. Se exporta a **BPMN 2.0** (`.bpmn`) para abrirlo en bpmn.io, Camunda Modeler o Bizagi.
+- **Notas → historias** "Como… quiero… para…", con reglas o con IA; **importar** desde CSV de Jira o Excel. Sin IA entiende notas escritas como se toman en una reunión: «el mecánico necesita ver la agenda» queda como «Como mecánico, quiero ver la agenda». El encabezado de la reunión se marca como contexto y no se agrega; las preguntas abiertas pasan a spike, y las líneas que describen un problema piden reescribirse como necesidad.
+- **Sin falsos «Lista»**: no inventa criterios de aceptación de relleno, y una historia sin criterios reales, una pregunta o un problema nunca aparece como lista.
+- Avisa las **historias sin épica** y permite seleccionarlas para asignarles una de una vez.
 - **Reglas de negocio** en cada historia (políticas, excepciones y controles), aparte de los criterios de aceptación; viajan en todas las exportaciones.
 - **Tipos de ítem** (historia, bug, spike, deuda técnica) y **dependencias** sin ciclos.
 - **Feedback de la Sprint Review** que pasa directo al backlog.
@@ -34,12 +36,12 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - **Cotización** en UF o pesos: horas por ítem (o por puntos), valor hora y margen de imprevistos.
 - **Hitos de pago** con sus entregables y **acta de aceptación** para que el cliente firme y se libere el pago.
 - **Solicitudes de cambio** con su impacto en horas, valor y plazo, y una **respuesta lista para enviar**.
-- Todo sale como documento: **propuesta**, actas y respuestas. Son borradores; no reemplazan un contrato ni asesoría legal.
+- Todo sale como documento, en **Word, PDF o Markdown**: **propuesta**, actas de aceptación y respuestas a cambios. Son borradores; no reemplazan un contrato ni asesoría legal.
 
 **Refinamiento**
 - **Revisión INVEST** por tipo, **casos borde** automáticos y **métricas** sugeridas para palabras vagas.
 - **Dividir** historias, **mejorar criterios** con IA y **revisión en dos voces** (una IA revisa como QA, otra corrige como PO).
-- **Definition of Ready**, **mapa de historias** y **planning poker** en una pantalla.
+- **Definition of Ready** (avisa «no lista» solo cuando el equipo empieza a usarla), **mapa de historias** y **planning poker** en una pantalla.
 
 **Priorizar y pronosticar**
 - MoSCoW, **WSJF**, **RICE** y **matriz valor/esfuerzo**.
@@ -66,6 +68,8 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 **Siempre**
 - **Cómo funciona**: el mapa del flujo en seis etapas (levantar, acordar, ordenar, construir, entregar y aprender), con el estado de tu proyecto en cada una y un atajo a la sección donde se hace.
 - **Glosario**: un botón **?** junto a cada término (INVEST, MoSCoW, WSJF, Definition of Ready, BPMN…) con su definición y un ejemplo.
+- **Pantallas anchas**: el mapa de historias, el proceso, el roadmap y el tablero usan todo el ancho; los textos quedan a un ancho cómodo de leer.
+- Con el ejemplo abierto, **«Crear mi proyecto»** parte tu propio proyecto, para no mezclar tu trabajo con el de Carla.
 - Funciona **sin IA**; si quieres, conecta la tuya (Ollama en tu equipo o tu propia clave).
 - **Deshacer**, recordatorio de **respaldo** y todo guardado en tu navegador.
 
