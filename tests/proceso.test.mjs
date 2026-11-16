@@ -217,3 +217,50 @@ test('el ejemplo de Carla trae VSM con cuello de botella, stakeholders y KPIs me
   assert.ok(p.objetivos[0].resultados.every((r) => avanceResultado(r).avance > 0), 'los resultados clave avanzan');
   assert.ok(p.historias.every((h) => !h.terminada || h.creada <= h.terminada), 'ninguna historia termina antes de crearse');
 });
+
+test('plantillas por industria: procesos completos, sin errores, con tiempos y dolores sin confirmar', async () => {
+  const { PLANTILLAS_PROCESO, INDUSTRIAS, procesoDesdePlantilla, plantillasDe } = await import('../js/nucleo/plantillasProceso.js');
+  const { flujoDeValor } = await import('../js/nucleo/proceso.js');
+  assert.equal(plantillasDe('agro').length, 3);
+  assert.equal(plantillasDe('construccion').length, 3);
+  for (const pl of PLANTILLAS_PROCESO) {
+    assert.ok(INDUSTRIAS[pl.industria], pl.clave);
+    const pr = normalizarProceso(JSON.parse(JSON.stringify(procesoDesdePlantilla(pl))));
+    const errores = revisarProceso(pr).avisos.filter((a) => a.nivel !== 'info');
+    assert.deepEqual(errores, [], `${pl.nombre}: ${errores.map((a) => a.texto).join('; ')}`);
+    assert.ok(flujoDeValor(pr).cuello, `${pl.nombre}: tiene cuello de botella`);
+    assert.ok(pr.pasos.some((x) => x.dolores.length) && pr.pasos.every((x) => x.dolores.every((d) => !d.confirmado)), `${pl.nombre}: dolores sin confirmar`);
+    assert.ok(pr.pasos.filter((x) => x.tipo === 'tarea').every((x) => x.valor), `${pl.nombre}: cada tarea dice para qué sirve`);
+  }
+});
+
+test('del proceso al backlog: rol del carril, para qué, criterios de las decisiones, dolores y esperas', async () => {
+  const { PLANTILLAS_PROCESO, procesoDesdePlantilla } = await import('../js/nucleo/plantillasProceso.js');
+  const { historiasDesdeProceso, enlazarConPasos } = await import('../js/nucleo/derivar.js');
+  const { revisarInvest } = await import('../js/nucleo/historias.js');
+  const pl = PLANTILLAS_PROCESO.find((x) => x.clave === 'agro-recepcion');
+  const proceso = procesoDesdePlantilla(pl);
+  const muestra = proceso.pasos.find((x) => x.texto.startsWith('Tomar muestras'));
+  muestra.dolores[0].confirmado = true;
+  const proyecto = { ...nuevoProyecto('Planta'), proceso };
+  const hs = historiasDesdeProceso(proyecto);
+  assert.equal(hs.length, proceso.pasos.filter((x) => x.tipo === 'tarea').length);
+  const h = hs.find((x) => x.pasoId === muestra.id);
+  assert.equal(h.rol, 'encargado de control de calidad', 'un área se lee como su encargado');
+  assert.equal(h.epica, 'Control de calidad');
+  assert.equal(h.quiero, 'tomar muestras y registrar el análisis de calidad');
+  assert.equal(h.para, 'liberar o retener el lote con datos');
+  assert.ok(h.criterios.some((c) => c.includes('«Cumple la especificación» es «No»') && c.includes('«Retener o rechazar')), 'la decisión que sigue da un criterio por salida');
+  assert.ok(h.criterios.some((c) => c.includes('el resultado del laboratorio llega horas después')), 'el dolor confirmado es un criterio');
+  assert.ok(h.criterios.some((c) => c.includes('espera 4 h')), 'la espera del flujo de valor es un criterio');
+  assert.equal(h.prioridad, 'must', 'es el cuello de botella');
+  assert.deepEqual(h.reglas, ['Toda partida queda retenida hasta tener el resultado']);
+  const ingreso = hs.find((x) => x.quiero.startsWith('ingresar el lote'));
+  assert.equal(ingreso.rol, 'encargado de control de calidad', 'un carril de sistema toma el rol de la persona anterior');
+  assert.ok(hs.every((x) => !revisarInvest(x).some((a) => a.codigo === 'criterios' || a.codigo === 'valor')), 'todas con criterios y para qué');
+
+  const enlazado = enlazarConPasos({ ...proyecto, historias: hs }, hs);
+  assert.ok(enlazado.proceso.pasos.find((x) => x.id === muestra.id).historiaIds.includes(h.id));
+  assert.equal(historiasDesdeProceso(enlazado).length, 0, 'las tareas con historias no se repiten');
+  assert.equal(historiasDesdeProceso(enlazado, { todas: true }).length, hs.length);
+});

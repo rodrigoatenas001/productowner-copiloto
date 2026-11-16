@@ -1,6 +1,7 @@
 // Notas: se escribe libremente y se convierte en historias candidatas, que se revisan antes de pasar al backlog.
 import { h } from './dom.js';
 import { notasAHistorias } from '../nucleo/historias.js';
+import { enlazarConPasos } from '../nucleo/derivar.js';
 import { editorHistoria, insigniaCalidad } from './historia.js';
 import { generarConIa, iaConfigurada, nombreProveedor } from '../ia.js';
 
@@ -96,9 +97,11 @@ function candidatas(app) {
   pintarBoton();
 
   function agregar() {
-    const nuevas = app.candidatos.filter((c) => c.incluir).map(({ incluir, nota, ...resto }) => resto);
+    const elegidas = app.candidatos.filter((c) => c.incluir);
+    const nuevas = elegidas.map(({ incluir, nota, pasoId, ...resto }) => resto);
     app.candidatos = [];
-    app.cambiar((x) => ({ ...x, historias: [...x.historias, ...nuevas] }), { redibujar: false });
+    // Las que vienen del proceso quedan enlazadas a su paso
+    app.cambiar((x) => enlazarConPasos({ ...x, historias: [...x.historias, ...nuevas] }, elegidas), { redibujar: false });
     app.avisar(`${nuevas.length} historias agregadas al backlog.`);
     app.ir('backlog');
   }

@@ -473,6 +473,23 @@ const PRUEBAS = [
     verdad(ventana().getComputedStyle(uno('#barra-inferior')).display !== 'none', 'en el celular se ve la barra inferior');
     marco.style.width = '';
   }],
+  // Al final: reemplaza el proceso del ejemplo, que el mapa por recorrido necesita
+  ['Plantilla por industria y del proceso al backlog, con revisión y enlace a los pasos', async () => {
+    await ir('backlog');
+    await pestana('Proceso');
+    await clic('Plantilla por industria');
+    await pestana('Construcción y obras');
+    const tarjeta = todos('.plantilla-proceso').find((t) => t.textContent.includes('Control de avance diario'));
+    tarjeta.querySelector('button').click(); await pausa(200); // el diálogo de reemplazo se responde solo
+    await esperar(() => todos('.proceso-resumen').some((r) => r.textContent.startsWith('Registrar avance')), 'aplicó la plantilla de obra');
+    await clic('Generar historias del flujo');
+    await esperar(() => ventana().location.hash === '#notas' && todos('.candidata').length > 0, 'propone historias para revisar');
+    verdad(todos('.enunciado').some((e) => e.textContent.startsWith('Como capataz, quiero registrar avance')), 'el rol sale del carril');
+    await clic(todos('button').find((b) => /^Agregar \d+ al backlog$/.test(b.textContent)).textContent);
+    await ir('backlog');
+    await pestana('Proceso');
+    verdad(todos('.proceso-paso .chip--ok').length > 0, 'las tareas quedan enlazadas a sus historias');
+  }],
   // Al final: pasar a Kanban cierra el sprint del ejemplo, que las pruebas de sprint necesitan abierto
   ['Kanban continuo: se activa, se trae trabajo del backlog y se vuelve a sprints', async () => {
     await ir('ajustes');

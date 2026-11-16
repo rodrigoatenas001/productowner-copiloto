@@ -29,6 +29,12 @@ export function normalizarProceso(datos, idsHistoria = new Set()) {
     historiaIds: (Array.isArray(p?.historiaIds) ? p.historiaIds : []).filter((id) => idsHistoria.has(id)).slice(0, 30),
     trabajo: minutos(p?.trabajo),
     espera: minutos(p?.espera),
+    // Puntos de dolor del paso: los de una plantilla parten sin confirmar hasta verlos en terreno
+    dolores: (Array.isArray(p?.dolores) ? p.dolores : []).slice(0, 8)
+      .map((d) => ({ texto: texto(d?.texto, 200), confirmado: d?.confirmado === true })).filter((d) => d.texto),
+    // Para qué sirve el paso (el «para» de sus historias) y sus reglas, si vienen de una plantilla
+    valor: texto(p?.valor, 200),
+    reglas: (Array.isArray(p?.reglas) ? p.reglas : []).map((r) => texto(r, 200)).filter(Boolean).slice(0, 8),
   }));
   return { carriles, pasos };
 }

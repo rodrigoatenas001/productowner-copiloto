@@ -1,13 +1,17 @@
 // Pestaña «Proceso» del backlog: el circuito del cliente en carriles (BPMN liviano),
 // enlazado a las historias, con revisión de cobertura y exportación a BPMN 2.0.
-import { h, campo, selector, descargar, vacio, termino, pedirTexto, avisar } from './dom.js';
+import { h, campo, selector, descargar, vacio, termino, pedirTexto, avisar, confirmar } from './dom.js';
 import {
   TIPOS_PASO, procesoDe, flujoDeValor, leerDuracion, formatoDuracion, agregarCarril, quitarCarril, renombrarCarril, moverCarril, agregarPaso, insertarPasoDespues,
   editarPaso, eliminarPaso, moverPaso, conectar, desconectar, revisarProceso, disposicion, aBpmn,
 } from '../nucleo/proceso.js';
 import { nombreArchivo } from '../nucleo/exportar.js';
+import { INDUSTRIAS, plantillasDe, procesoDesdePlantilla } from '../nucleo/plantillasProceso.js';
+import { historiasDesdeProceso } from '../nucleo/derivar.js';
 
 let abierto = null; // paso con el editor desplegado
+let verPlantillas = false; // selector de plantillas por industria abierto
+let industria = 'agro';
 let enfocar = null; // tras redibujar: 'actor' (el campo para agregar otro) o el id de un paso nuevo
 
 /** Cada cambio redibuja la vista: devuelve el foco donde la persona seguía escribiendo. */
@@ -43,12 +47,18 @@ export function vistaProceso(app) {
     return h('div', { class: 'proceso' },
       vacio('Dibuja el circuito antes de escribir historias.',
         'Anota quién hace qué y en qué orden, con sus decisiones. Valídalo con tu cliente: si el circuito está bien, las historias salen solas, y verás qué pasos no tienen historias.',
-        ['Partir con Cliente, Negocio y Sistema', () => cambiar((p) => ['Cliente', 'Negocio', 'Sistema'].reduce(agregarCarril, p))]));
+        ['Partir de una plantilla por industria', () => { verPlantillas = true; app.render(); }],
+        ['Partir con Cliente, Negocio y Sistema', () => cambiar((p) => ['Cliente', 'Negocio', 'Sistema'].reduce(agregarCarril, p))]),
+      verPlantillas ? selectorPlantillas(app, proceso) : null);
   }
 
   devolverFoco();
   return h('div', { class: 'proceso' },
     h('p', { class: 'ayuda' }, 'El circuito real del cliente, con un subconjunto de BPMN: inicio, tarea, decisión y fin, en carriles por actor. Enlaza cada tarea con sus historias para ver qué falta levantar. ', termino('bpmn')),
+    h('div', { class: 'acciones proceso-barra' },
+      h('button', { type: 'button', class: 'btn btn--secundario', 'aria-expanded': String(verPlantillas), onclick: () => { verPlantillas = !verPlantillas; app.render(); } }, 'Plantilla por industria'),
+      h('button', { type: 'button', class: 'btn', disabled: !proceso.pasos.some((x) => x.tipo === 'tarea'), onclick: () => generarHistorias(app) }, 'Generar historias del flujo')),
+    verPlantillas ? selectorPlantillas(app, proceso) : null,
     seccionCarriles(proceso, cambiar),
     proceso.pasos.length ? diagrama(proceso) : null,
     proceso.pasos.length ? panelFlujo(proceso) : null,
@@ -73,6 +83,51 @@ export function vistaProceso(app) {
         onclick: () => descargar(nombreArchivo(proyecto, 'bpmn'), aBpmn(proceso, proyecto.nombre, proyecto.historias), 'application/xml'),
       }, 'Descargar BPMN 2.0 (.bpmn)'),
       h('p', { class: 'ayuda' }, 'Se abre ya dibujado en bpmn.io, Camunda Modeler o Bizagi.')));
+}
+
+/**
+ * Del proceso al backlog: propone una historia por cada tarea sin historias y las lleva a revisión
+ * (en Notas, como cualquier propuesta). Al agregarlas quedan enlazadas a su paso.
+ */
+function generarHistorias(app) {
+  const candidatas = historiasDesdeProceso(app.proyecto);
+  if (!candidatas.length) { app.avisar('Todas las tareas del proceso ya tienen historias.'); return; }
+  app.candidatos = candidatas.map((x) => ({ ...x, incluir: true }));
+  app.ir('notas');
+  app.avisar(`${candidatas.length} historias propuestas desde el proceso. Revísalas antes de agregarlas: quedarán enlazadas a sus pasos.`);
+}
+
+/** Selector en dos pasos: industria y proceso, con vista previa de carriles, pasos y dolores típicos. */
+function selectorPlantillas(app, proceso) {
+  const usar = async (pl) => {
+    if (proceso.pasos.length && !(await confirmar('¿Reemplazar el proceso actual por la plantilla?', {
+      detalle: 'Los carriles y pasos de ahora se reemplazan. Las historias del backlog no se tocan, pero dejan de estar enlazadas a los pasos.',
+      aceptar: 'Usar la plantilla',
+    }))) return;
+    verPlantillas = false;
+    app.cambiarConDeshacer(`Plantilla «${pl.nombre}» aplicada. Ajusta carriles y pasos a tu cliente, y confirma los dolores que veas en terreno.`, (x) => ({ ...x, proceso: procesoDesdePlantilla(pl) }));
+  };
+  return h('section', { class: 'panel plantillas-proceso', 'aria-labelledby': 'pl-titulo' },
+    h('h2', { id: 'pl-titulo' }, 'Partir de una plantilla'),
+    h('p', { class: 'ayuda' }, 'Un punto de partida, no un modelo cerrado: el camino feliz, sus decisiones, tiempos sugeridos y dolores típicos para confirmar con el cliente.'),
+    h('div', { class: 'pestanas pestanas--chicas', role: 'tablist', 'aria-label': 'Industria' },
+      Object.entries(INDUSTRIAS).map(([clave, ind]) => h('button', {
+        type: 'button', role: 'tab', class: 'pestana', 'aria-selected': String(industria === clave),
+        onclick: () => { industria = clave; app.render(); },
+      }, ind.nombre))),
+    h('p', { class: 'ayuda' }, INDUSTRIAS[industria].descripcion),
+    h('ul', { class: 'plantillas-lista' }, plantillasDe(industria).map((pl) => {
+      const tareas = pl.pasos.filter(([, tipo]) => tipo === 'tarea');
+      const decisiones = pl.pasos.filter(([, tipo]) => tipo === 'decision');
+      const dolores = pl.pasos.flatMap(([, , , , o]) => o?.dolores || []);
+      return h('li', { class: 'plantilla-proceso' },
+        h('h3', {}, pl.nombre),
+        h('p', { class: 'ayuda' }, pl.descripcion),
+        h('p', { class: 'tarjeta-meta' }, `${pl.carriles.join(' · ')}`),
+        h('p', { class: 'tarjeta-meta' }, `${tareas.length} tareas · ${decisiones.map(([, , t]) => t).join(' ')}`),
+        h('details', {}, h('summary', {}, `Dolores típicos (${dolores.length})`), h('ul', {}, dolores.map((d) => h('li', {}, d)))),
+        h('button', { type: 'button', class: 'btn btn--secundario btn--chico', onclick: () => usar(pl) }, 'Usar esta plantilla'));
+    })));
 }
 
 function seccionCarriles(proceso, cambiar) {
@@ -124,6 +179,15 @@ function filaPaso(app, proceso, paso, i, cambiar) {
           campoDuracion('Tiempo de trabajo', paso.trabajo, 'Ej.: 30 min, 2 h', (min) => editar({ trabajo: min })),
           campoDuracion('Espera antes de este paso', paso.espera, 'Ej.: 1 d, 4 h', (min) => editar({ espera: min }),
             'Lo que el trabajo queda detenido antes de empezar este paso: una aprobación, un repuesto, una firma.')) : null,
+        paso.tipo === 'tarea' ? campo('Para qué sirve este paso', h('input', {
+          type: 'text', value: paso.valor || '', maxlength: 200, placeholder: 'Ej.: saber cuánto llegó y de qué proveedor',
+          onchange: (e) => editar({ valor: e.target.value.trim() }),
+        }), 'Es el «para» de las historias que salen de este paso.') : null,
+        paso.tipo === 'tarea' ? editorDolores(paso, editar) : null,
+        paso.tipo === 'tarea' ? campo('Reglas de este paso', h('textarea', {
+          rows: 2, placeholder: 'Una por línea. Ej.: la guía debe calzar con la orden de compra',
+          onchange: (e) => editar({ reglas: e.target.value.split('\n').map((x) => x.trim()).filter(Boolean) }),
+        }, (paso.reglas || []).join('\n')), 'Pasan a las historias generadas desde el paso.') : null,
 
         paso.tipo === 'fin' ? null : h('fieldset', { class: 'proceso-salidas' },
           h('legend', {}, paso.tipo === 'decision' ? 'Salidas (una por respuesta)' : 'Va a'),
@@ -185,6 +249,22 @@ function filaPaso(app, proceso, paso, i, cambiar) {
         h('span', { class: 'proceso-meta' }, carril),
         paso.tipo === 'tarea' ? h('span', { class: `chip${paso.historiaIds.length ? ' chip--ok' : ' chip--aviso'}` }, `${paso.historiaIds.length} hist.`) : null),
       abierto === paso.id ? crearEditor() : null));
+}
+
+/** Dolores del paso: los de la plantilla son sospechas; se confirman con lo que se ve en terreno. */
+function editorDolores(paso, editar) {
+  const dolores = paso.dolores || [];
+  const nuevo = h('input', { type: 'text', maxlength: 200, placeholder: 'Ej.: doble digitación entre la planilla y el ERP', 'aria-label': 'Nuevo dolor del paso' });
+  const agregar = () => { if (nuevo.value.trim()) editar({ dolores: [...dolores, { texto: nuevo.value.trim(), confirmado: true }] }); };
+  return h('fieldset', { class: 'proceso-dolores' },
+    h('legend', {}, 'Puntos de dolor'),
+    dolores.length ? h('ul', {}, dolores.map((d, i) => h('li', {},
+      h('label', { class: 'opcion' },
+        h('input', { type: 'checkbox', checked: d.confirmado, onchange: (e) => editar({ dolores: dolores.map((x, k) => (k === i ? { ...x, confirmado: e.target.checked } : x)) }) }),
+        d.texto),
+      h('button', { type: 'button', class: 'icono', 'aria-label': `Quitar el dolor: ${d.texto}`, onclick: () => editar({ dolores: dolores.filter((_, k) => k !== i) }) }, '×')))) : null,
+    h('p', { class: 'ayuda' }, 'Marca los que confirmaste en terreno: se vuelven criterios de aceptación y suben la prioridad de la historia.'),
+    h('div', { class: 'fila-accion fila-accion--dos' }, nuevo, h('button', { type: 'button', class: 'btn btn--secundario btn--chico', onclick: agregar }, 'Agregar dolor')));
 }
 
 /** Campo de duración: acepta «45 min», «2 h», «1,5 d»; vacío borra el dato. */
@@ -294,7 +374,10 @@ function diagrama(proceso) {
           // Bajo la tarea: trabajo y espera, como la línea de tiempo de un VSM
           conTiempo ? svg('text', { x: n.cx, y: n.y + n.alto + 15, 'text-anchor': 'middle', class: 'proceso-tiempo' },
             `${formatoDuracion(paso.trabajo || 0)} · espera ${formatoDuracion(paso.espera || 0)}`) : null,
-          n.id === vsm.cuello ? svg('text', { x: n.cx, y: n.y - 6, 'text-anchor': 'middle', class: 'proceso-cuello' }, 'Cuello de botella') : null);
+          n.id === vsm.cuello ? svg('text', { x: n.cx, y: n.y - 6, 'text-anchor': 'middle', class: 'proceso-cuello' }, 'Cuello de botella') : null,
+          (paso.dolores || []).length ? svg('text', {
+            x: n.x + 6, y: n.y + 13, class: `proceso-dolor${paso.dolores.some((d) => d.confirmado) ? ' is-confirmado' : ''}`,
+          }, `⚠ ${paso.dolores.filter((d) => d.confirmado).length || paso.dolores.length}${paso.dolores.some((d) => d.confirmado) ? '' : '?'}`) : null);
       }
       if (n.tipo === 'decision') {
         const r = n.ancho / 2;

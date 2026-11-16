@@ -899,3 +899,16 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .kanban-barra { width: 100%; min-height: 2px; background: var(--tinta-2); border-radius: 3px 3px 0 0; }
 .kanban-valor { font: 500 .72rem var(--f-mono); color: var(--pizarra); }
 @media (max-width: 760px) { .kanban-metricas { grid-template-columns: 1fr; } }
+
+/* ── Plantillas de proceso por industria y dolores ── */
+.proceso-barra { margin: 0; }
+.plantillas-lista { list-style: none; margin: 10px 0 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 280px), 1fr)); gap: 12px; }
+.plantilla-proceso { border: 1px solid var(--niebla); border-top: 4px solid var(--cobre); border-radius: var(--radio); padding: 12px 14px; background: var(--superficie); display: grid; gap: 6px; align-content: start; }
+.plantilla-proceso h3 { margin: 0; font-size: 1rem; }
+.plantilla-proceso p { margin: 0; }
+.plantilla-proceso details ul { margin: 6px 0 0; padding-left: 18px; font-size: .88rem; }
+.plantilla-proceso > button { justify-self: start; margin-top: 4px; }
+.proceso-dolores ul { list-style: none; margin: 0 0 6px; padding: 0; display: grid; gap: 4px; }
+.proceso-dolores li { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.proceso-dolor { fill: var(--ambar-texto); font: 700 11px var(--f-mono); }
+.proceso-dolor.is-confirmado { fill: var(--alerta); }
