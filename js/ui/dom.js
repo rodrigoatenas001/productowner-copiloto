@@ -40,7 +40,8 @@ export function vaciar(el, ...hijos) {
 
 /** Descarga un texto como archivo, sin servidor. */
 export function descargar(nombre, contenido, tipo = 'text/plain') {
-  const url = URL.createObjectURL(new Blob([contenido], { type: `${tipo};charset=utf-8` }));
+  // Los .xlsx y .docx son binarios (Uint8Array): solo el texto lleva charset
+  const url = URL.createObjectURL(new Blob([contenido], { type: typeof contenido === 'string' ? `${tipo};charset=utf-8` : tipo }));
   const a = h('a', { href: url, download: nombre });
   document.body.append(a);
   a.click();

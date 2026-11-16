@@ -735,3 +735,36 @@ h2 .termino { font-size: .78rem; }
 .proceso-aviso--error .chip { background: var(--alerta-suave); color: var(--alerta); }
 .proceso-aviso--aviso .chip { background: var(--ambar-suave); color: var(--ambar-texto); }
 @media (prefers-color-scheme: dark) { .proceso-tipo--fin, .proceso-aviso--error .chip { color: #f3a39b; } .proceso-nodo--fin circle { stroke: #f3a39b; } }
+
+/* ── Documento del proyecto para imprimir o guardar como PDF ── */
+#documento-impresion { display: none; }
+@media print {
+  @page { size: letter; margin: 2.2cm 2cm 2.4cm; @bottom-right { content: "Página " counter(page) " de " counter(pages); font: 9pt "IBM Plex Sans", "Segoe UI", sans-serif; color: #5a6b82; } }
+  html.imprimiendo body > *:not(#documento-impresion) { display: none !important; }
+  html.imprimiendo, html.imprimiendo body { background: #fff; color: #10213a; }
+  html.imprimiendo #documento-impresion { display: block; font: 10.5pt/1.45 var(--f-texto); color: #10213a; }
+  .documento { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .doc-titulo { font: 700 26pt/1.15 var(--f-display); margin: 5cm 0 6pt; padding-bottom: 10pt; border-bottom: 2pt solid #b8642e; }
+  .doc-subtitulo { color: #5a6b82; font-size: 13pt; margin: 0 0 22pt; }
+  .doc-salto { break-before: page; }
+  .doc-h1 { font: 700 18pt var(--f-display); margin: 22pt 0 10pt; break-after: avoid; }
+  .doc-salto + .doc-h1 { margin-top: 0; }
+  .doc-h2 { font: 700 14pt var(--f-display); color: #9a4f1d; margin: 18pt 0 6pt; break-after: avoid; }
+  .doc-h3 { font-weight: 700; font-size: 11.5pt; margin: 14pt 0 3pt; break-after: avoid; }
+  .doc-cita { margin: 0 0 4pt; padding-left: 9pt; border-left: 3pt solid #b8642e; font-style: italic; color: #1d3557; break-after: avoid; }
+  .doc-nota { color: #5a6b82; font-size: 9.5pt; margin: 0 0 6pt; }
+  .doc-fuerte { font-weight: 700; margin: 6pt 0 2pt; break-after: avoid; }
+  .documento p { margin: 0 0 6pt; }
+  .doc-lista, .doc-check { margin: 0 0 6pt; padding-left: 18pt; }
+  .doc-lista li { margin: 0 0 2pt; }
+  .doc-lista li::marker { color: #b8642e; }
+  .doc-check { list-style: none; padding-left: 4pt; }
+  .doc-check li { position: relative; padding-left: 16pt; margin: 0 0 3pt; break-inside: avoid; }
+  .doc-check li::before { content: ""; position: absolute; left: 0; top: 2.5pt; width: 8pt; height: 8pt; border: 1pt solid #10213a; border-radius: 1.5pt; }
+  .doc-tabla { width: 100%; border-collapse: collapse; table-layout: fixed; margin: 4pt 0 12pt; font-size: 9pt; }
+  .doc-tabla th, .doc-tabla td { border: 0.75pt solid #d0d7e2; padding: 3pt 5pt; text-align: left; vertical-align: top; overflow-wrap: anywhere; white-space: pre-line; }
+  .doc-tabla thead th { background: #10213a; color: #fff; }
+  .doc-tabla thead { display: table-header-group; }
+  .doc-tabla tr { break-inside: avoid; }
+  .doc-datos th { width: 28%; background: #f5f7fa; }
+}

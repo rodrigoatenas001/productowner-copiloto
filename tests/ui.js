@@ -225,6 +225,21 @@ const PRUEBAS = [
     todos('.ficha-bloqueo').find((b) => b.textContent === 'Bloquear').click(); await pausa(80);
     verdad(uno('.ficha.is-bloqueada') && uno('.aviso-bloqueos'), 'la ficha queda bloqueada con aviso');
   }],
+  ['Documentos con formato: Excel, Word y PDF', async () => {
+    await ir('ajustes');
+    const w = ventana();
+    const descargas = [];
+    const clicAntes = w.HTMLAnchorElement.prototype.click;
+    w.HTMLAnchorElement.prototype.click = function () { descargas.push(this.download); };
+    let documento = null;
+    w.print = () => { documento = doc().getElementById('documento-impresion'); w.dispatchEvent(new Event('afterprint')); };
+    try {
+      for (const texto of ['Backlog en Excel', 'Proyecto en Excel', 'Proyecto en Word', 'Proyecto en PDF']) await clic(texto);
+    } finally { w.HTMLAnchorElement.prototype.click = clicAntes; }
+    igual(descargas.map((n) => n.split('.').pop()).join(','), 'xlsx,xlsx,docx', 'descarga dos Excel y un Word');
+    verdad(documento && documento.querySelector('.doc-titulo'), 'arma el documento para imprimir');
+    verdad(!doc().getElementById('documento-impresion') && !doc().documentElement.classList.contains('imprimiendo'), 'después de imprimir deja la página como estaba');
+  }],
   ['Proceso: carriles, pasos conectados, diagrama y revisión', async () => {
     await ir('backlog');
     await pestana('Proceso');

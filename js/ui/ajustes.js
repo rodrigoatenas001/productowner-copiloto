@@ -7,8 +7,14 @@ import { importarCsv } from '../nucleo/importar.js';
 import { repoGithub } from '../nucleo/issues.js';
 import { flujoDe } from '../nucleo/flujo.js';
 import { botonesMarkdown } from './compartir.js';
+import { imprimirDocumento } from './imprimir.js';
+import { excelBacklog, excelProyecto, documentoProyecto } from '../nucleo/informe.js';
+import { documentoWord } from '../nucleo/docx.js';
 import { reporteEpicas, notasDeVersion, informeCliente } from '../nucleo/reportes.js';
 import { definicionesDe, listaDesdeTexto, NOMBRES, DEFINICIONES_INICIALES } from '../nucleo/definiciones.js';
+
+const XLSX = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+const DOCX = 'application/vnd.openxmlformats-officedocument.wordprocessingml.document';
 
 export function vistaAjustes(app) {
   const p = app.proyecto;
@@ -88,6 +94,14 @@ function seccionRespaldo(app) {
     h('h3', {}, 'Traer un backlog que ya tienes'),
     h('p', { class: 'ayuda' }, 'Desde un CSV de Jira, Excel u otra herramienta. Reconocemos columnas como Summary, Título, Description, Story Points, Priority, Labels o Épica. Lo terminado no se importa.'),
     entradaCsv(app),
+    h('h3', {}, 'Documentos con formato'),
+    h('p', { class: 'ayuda' }, 'Excel para trabajar y filtrar; Word o PDF para presentar al cliente. Incluyen historias, criterios, reglas de negocio, proceso, cotización, hitos y sprints.'),
+    h('div', { class: 'acciones' },
+      h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'backlog.xlsx'), excelBacklog(app.proyecto), XLSX) }, 'Backlog en Excel'),
+      h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'xlsx'), excelProyecto(app.proyecto), XLSX) }, 'Proyecto en Excel'),
+      h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'docx'), documentoWord(documentoProyecto(app.proyecto), { titulo: p.nombre, pie: p.nombre }), DOCX) }, 'Proyecto en Word'),
+      h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => imprimirDocumento(documentoProyecto(app.proyecto), nombreArchivo(p, 'pdf').replace(/\.pdf$/, '')) }, 'Proyecto en PDF')),
+    h('p', { class: 'ayuda' }, 'PDF: en el diálogo de impresión elige «Guardar como PDF» como destino.'),
     h('h3', {}, 'Exportar el backlog'),
     h('div', { class: 'acciones' },
       h('button', { type: 'button', class: 'btn btn--secundario', onclick: () => descargar(nombreArchivo(p, 'md'), aMarkdown(p), 'text/markdown') }, 'Markdown'),
