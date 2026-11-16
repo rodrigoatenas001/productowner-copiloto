@@ -53,7 +53,7 @@ test('Excel del backlog: encabezado fijo, filtros, prioridad con color y una fil
 test('Excel del proyecto: hojas de resumen, backlog, épicas, proceso, sprints, hitos y cambios', async () => {
   const libro = leerZip(excelProyecto(await carla()))['xl/workbook.xml'];
   const hojas = [...libro.matchAll(/<sheet name="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(hojas, ['Resumen', 'Backlog', 'Épicas', 'Resultados clave', 'Proceso', 'Sprints', 'Hitos de pago', 'Cambios']);
+  assert.deepEqual(hojas, ['Resumen', 'Backlog', 'Épicas', 'Resultados clave', 'Stakeholders', 'Proceso', 'Sprints', 'Hitos de pago', 'Cambios']);
   assert.match(libro, /_xlnm.Print_Titles/);
 });
 
@@ -61,7 +61,7 @@ test('documento del proyecto: secciones numeradas, códigos de historia, criteri
   const p = await carla();
   const bloques = documentoProyecto(p, new Date('2026-11-16T12:00:00'));
   const secciones = bloques.filter((b) => b.t === 'h1').map((b) => b.texto);
-  assert.deepEqual(secciones, ['1. Alcance', '2. Proceso', '3. Backlog', '4. Cotización e hitos de pago', '5. Sprints', '6. Solicitudes de cambio', '7. Mejoras acordadas en las retrospectivas']);
+  assert.deepEqual(secciones, ['1. Stakeholders', '2. Alcance', '3. Proceso', '4. Backlog', '5. Cotización e hitos de pago', '6. Sprints', '7. Solicitudes de cambio', '8. Resultados medidos', '9. Mejoras acordadas en las retrospectivas']);
   assert.equal(bloques[0].texto, p.nombre);
   const cod = codigos(p);
   assert.ok(bloques.some((b) => b.t === 'h3' && b.texto === `${cod.get(p.historias[0].id)} · ${p.historias[0].titulo}`));

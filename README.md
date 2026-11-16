@@ -20,9 +20,11 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 **Visión y rumbo**
 - Visión y **Objetivo del Producto** (Guía Scrum 2020), **OKR** y **roadmap Ahora / Siguiente / Después** que se arma solo con lo que está en curso y el pronóstico (y que puedes ajustar a mano).
 - **Hipótesis de valor** por épica ("Creemos que al… lograremos… lo sabremos cuando…") y su **resultado medido**: se cumplió, en parte o no.
+- **KPIs de producto y adopción**: cada resultado clave tiene unidad, línea base, meta y **mediciones fechadas**, con su avance hacia la meta (sirve si la meta es subir o bajar), la tendencia y un gráfico pequeño. «Agregar KPIs de adopción» propone uso real, tiempo de ciclo y errores: entregar a tiempo no basta si nadie lo usa.
 
 **Del caos al backlog**
 - **Mapa del proceso (BPMN liviano)**: el circuito real del cliente en carriles por actor, con inicio, tareas, decisiones y fin. Cada tarea se enlaza con sus historias y la revisión avisa qué falta: decisiones con una sola salida, pasos sueltos, tareas sin historias e historias que no están en ningún paso. Si olvidaste un paso, **«+ Tarea después»** lo inserta en su lugar y lo deja conectado entre el anterior y el siguiente. Los carriles se renombran y reordenan. Se exporta a **BPMN 2.0** (`.bpmn`) para abrirlo en bpmn.io, Camunda Modeler o Bizagi.
+- **Flujo de valor (VSM)**: en cada tarea del proceso anotas cuánto se trabaja y cuánto se espera antes («45 min», «2 h», «1,5 d»). Ves el tiempo total del circuito, la eficiencia (trabajo sobre total) y el **cuello de botella** marcado en el diagrama, para no automatizar algo que no era el problema.
 - **Notas → historias** "Como… quiero… para…", con reglas o con IA; **importar** desde CSV de Jira o Excel. Sin IA entiende notas escritas como se toman en una reunión: «el mecánico necesita ver la agenda» queda como «Como mecánico, quiero ver la agenda». El encabezado de la reunión se marca como contexto y no se agrega; las preguntas abiertas pasan a spike, y las líneas que describen un problema piden reescribirse como necesidad.
 - **Sin falsos «Lista»**: no inventa criterios de aceptación de relleno, y una historia sin criterios reales, una pregunta o un problema nunca aparece como lista.
 - Avisa las **historias sin épica** y permite seleccionarlas para asignarles una de una vez.
@@ -32,6 +34,7 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 
 **Acordar con el cliente**
 - **Plantillas por tipo de proyecto** (tienda en línea, sitio corporativo, integración API/ERP, dashboard, MVP móvil, consultoría) con historias, exclusiones y supuestos típicos.
+- **Stakeholders**: matriz poder / interés con la estrategia para cada cuadrante, el rol de cada persona (aprueba, opera en terreno, mantiene el sistema) y el actor del proceso que representa. Avisa si falta quien aprueba, quien opera o quien mantiene, y quién opera con poco interés (riesgo de rechazo).
 - **Alcance**: qué incluye, qué NO incluye, supuestos y lo que el cliente debe entregar.
 - **Cotización** en UF o pesos: horas por ítem (o por puntos), valor hora y margen de imprevistos.
 - **Hitos de pago** con sus entregables y **acta de aceptación** para que el cliente firme y se libere el pago.
@@ -50,7 +53,9 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 
 **Sprint**
 - Capacidad, sugerencia automática, **objetivo del sprint** (reglas o IA), tablero, burndown y **Definition of Done**.
-- **Kanban liviano**: columna "En revisión" opcional, **límites de trabajo en curso**, **bloqueos** con motivo y **tiempo de ciclo**.
+- **Kanban liviano** dentro del sprint: columna "En revisión" opcional, **límites de trabajo en curso**, **bloqueos** con motivo y **tiempo de ciclo**.
+- **Daily**: para los 15 minutos, lo terminado desde la última Daily, lo que está en curso (y la pregunta «¿sigue avanzando?» pasados 3 días), lo bloqueado y si el sprint va a tiempo; el resumen se copia para el chat del equipo.
+- **Kanban continuo**, sin sprints, para soporte e incidencias: se trae trabajo del backlog cuando hay capacidad, con límite por columna, y se mide el flujo (terminadas por semana, tiempo de entrega y de ciclo al percentil 85 y **diagrama de flujo acumulado**). Se activa en Ajustes › Flujo del tablero.
 - **Retrospectiva** con votos y acciones que se revisan en la siguiente.
 
 **Comunicar**
@@ -78,7 +83,7 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 
 ## Así se ve
 
-Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/ejemplo/pasteleria-carla.json), que puedes abrir desde Inicio → Ver el ejemplo (o importarlo desde Ajustes → Importar respaldo). Es la tienda en línea de una pastelería, levantada de punta a punta: el circuito del pedido en tres carriles, historias con criterios «Dado… cuando… entonces…» y reglas de negocio, prioridad MoSCoW y WSJF, cotización en UF, hitos, sprints y una retrospectiva. Sirve para mostrar el método sin exponer datos de clientes reales.
+Capturas con el proyecto de ejemplo [`docs/ejemplo/pasteleria-carla.json`](docs/ejemplo/pasteleria-carla.json), que puedes abrir desde Inicio → Ver el ejemplo (o importarlo desde Ajustes → Importar respaldo). Es la tienda en línea de una pastelería, levantada de punta a punta: sus stakeholders, el circuito del pedido en tres carriles con su flujo de valor (el cuello de botella es la espera al despacho), historias con criterios «Dado… cuando… entonces…» y reglas de negocio, prioridad MoSCoW y WSJF, cotización en UF, hitos, sprints, una retrospectiva y los resultados clave medidos. Sirve para mostrar el método sin exponer datos de clientes reales.
 
 | | |
 |---|---|
@@ -93,7 +98,6 @@ Lo que viene depende de quienes lo usen; estas son las ideas evaluadas y su esta
 
 **Ideas a evaluar más adelante**
 - **Trabajo en equipo**: que varias personas editen el mismo proyecto a la vez. Hoy se usa en una pantalla compartida, y la carpeta sincronizada sirve para una persona en varios equipos. Se evaluará si aparece la necesidad, sin agregar servidores ni cuentas.
-- **Modo Kanban completo**, sin sprints, con métricas de flujo y diagrama de flujo acumulado. Hoy la base es Scrum, con lo mejor de Kanban dentro del sprint.
 - **Personas**: un catálogo de roles con sus objetivos y frustraciones, para usarlos en historias y en la IA.
 
 **Decidido no hacer**

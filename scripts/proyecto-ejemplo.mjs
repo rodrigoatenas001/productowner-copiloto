@@ -158,7 +158,27 @@ for (const [inicio, prioridad, [valor, urgencia, riesgo], criterios, reglas] of 
   const [, elegir, carro, cupo, pagar, aprobado, correo] = pr.pasos.map((x) => x.id);
   pr = conectar(conectar(pr, cupo, pagar, 'Sí'), cupo, carro, 'No: otra fecha');
   pr = conectar(conectar(pr, aprobado, correo, 'Sí'), aprobado, pagar, 'No: reintenta');
+  // Flujo de valor medido con Carla (minutos): el pedido espera casi un día al bloque de despacho
+  const TIEMPOS = {
+    'Elige productos y ve el detalle': [15, 0],
+    'Arma el carro y elige día y bloque de entrega': [5, 0],
+    'Paga con tarjeta o transferencia': [5, 0],
+    'Confirma el pedido por correo': [1, 0],
+    'Planifica la producción del día': [30, 720],
+    'Hornea y registra mermas': [240, 120],
+    'Despacha o entrega en tienda': [60, 1320],
+  };
+  pr.pasos = pr.pasos.map((x) => (TIEMPOS[x.texto] ? { ...x, trabajo: TIEMPOS[x.texto][0], espera: TIEMPOS[x.texto][1] } : x));
   p.proceso = pr;
+  // Quiénes participan, según su poder y su interés
+  const [clientaC, tiendaC, duenaC] = pr.carriles.map((c) => c.id);
+  p.stakeholders = [
+    { id: 'st-carla', nombre: 'Carla Rojas', cargo: 'Dueña de la pastelería', rol: 'aprueba', poder: 'alto', interes: 'alto', carril: duenaC, notas: '' },
+    { id: 'st-valentina', nombre: 'Valentina', cargo: 'Clienta frecuente', rol: 'usa', poder: 'bajo', interes: 'alto', carril: clientaC, notas: 'Probó el prototipo del carro.' },
+    { id: 'st-matias', nombre: 'Matías', cargo: 'Repartidor', rol: 'opera', poder: 'bajo', interes: 'alto', carril: null, notas: '' },
+    { id: 'st-ignacio', nombre: 'Ignacio', cargo: 'Sobrino; administra la tienda en línea', rol: 'mantiene', poder: 'bajo', interes: 'bajo', carril: tiendaC, notas: '' },
+    { id: 'st-rosa', nombre: 'Rosa', cargo: 'Contadora externa', rol: 'otro', poder: 'alto', interes: 'bajo', carril: null, notas: 'Decide cómo se emiten las boletas.' },
+  ];
   void elegir;
 }
 
@@ -167,6 +187,10 @@ p = agregarObjetivo(p, 'Vender más en línea');
 p = agregarResultado(p, p.objetivos[0].id, 'Pedidos por la tienda: del 0% al 40%');
 p = agregarResultado(p, p.objetivos[0].id, 'Mensajes de consulta: bajar a la mitad');
 const [kr1, kr2] = p.objetivos[0].resultados.map((r) => r.id);
+// Los resultados clave se miden: adopción de la tienda y consultas por mensaje
+p.objetivos[0].resultados = p.objetivos[0].resultados.map((r) => (r.id === kr1
+  ? { ...r, unidad: '%', base: 0, meta: 40, mediciones: [[-28, 6], [-14, 15], [-1, 24]].map(([d, valor]) => ({ fecha: fechaISO(dias(d)), valor })) }
+  : { ...r, unidad: 'por semana', base: 200, meta: 100, mediciones: [[-28, 180], [-14, 130], [-1, 95]].map(([d, valor]) => ({ fecha: fechaISO(dias(d)), valor })) }));
 p = editarEpica(p, 'Catálogo', { creemos: 'mostrar precio y stock', lograremos: 'menos consultas por mensaje', veremos: 'los mensajes bajen a la mitad', resultados: [kr2], resultadoHipotesis: 'cumplida', datoReal: 'de 200 a 95 mensajes por semana' });
 p = editarEpica(p, 'Boletas', { horizonte: 'despues' });
 p = editarEpica(p, 'Compra', { creemos: 'permitir pagar en línea', lograremos: 'que más visitas terminen comprando', veremos: 'el 40% de los pedidos llegue por la tienda', resultados: [kr1] });
@@ -201,6 +225,8 @@ p.retros = [r];
 p.hitos = sugerirHitos(p, 3).map((x, i) => ({ ...x, fecha: fechaISO(dias(14 * (i + 1) - 1)) }));
 p.hitos[0] = { ...p.hitos[0], estado: 'aceptado', aceptacion: { nombre: 'Carla Rojas', fecha: fechaISO(dias(-1)) } };
 p = registrarCambio(p, 'Agregar un blog de recetas en la tienda', 12);
+// Las historias se levantaron antes del primer sprint (para que los tiempos de entrega tengan sentido)
+for (const x of p.historias) x.creada = dias(-35).toISOString();
 p.respaldado = new Date().toISOString();
 
 const destino = fileURLToPath(new URL('../docs/ejemplo/', import.meta.url));

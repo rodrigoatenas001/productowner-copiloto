@@ -36,7 +36,7 @@ const AVANZADAS = new Set(['retro', 'taller']);
 const VISTAS_ANCHAS_BACKLOG = new Set(['mapa', 'proceso', 'priorizar', 'roadmap']);
 export const ID_EJEMPLO = 'ejemplo-pasteleria';
 // Súbela cuando cambie docs/ejemplo/pasteleria-carla.json, para reemplazar copias antiguas
-const VERSION_EJEMPLO = 2;
+const VERSION_EJEMPLO = 3;
 
 // Para qué sirve cada sección: tooltip del menú y caja informativa (se puede cerrar)
 const AYUDA_SPRINT = 'El trabajo de las próximas semanas en un tablero, con el avance y el informe para el cliente. Arrastra las tarjetas o usa las flechas ← →; doble clic o Enter abre la ficha.';

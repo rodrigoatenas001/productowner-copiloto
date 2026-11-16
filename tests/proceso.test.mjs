@@ -202,3 +202,18 @@ test('stakeholders: cuadrantes poder/interés y avisos de lo que falta', async (
   const proyecto = normalizarProyecto(JSON.parse(JSON.stringify({ ...nuevoProyecto('X'), proceso: p, stakeholders: [supervisora] })));
   assert.equal(proyecto.stakeholders[0].carril, p.carriles[0].id, 'conserva el enlace al carril');
 });
+
+test('el ejemplo de Carla trae VSM con cuello de botella, stakeholders y KPIs medidos', async () => {
+  const { readFile } = await import('node:fs/promises');
+  const { flujoDeValor } = await import('../js/nucleo/proceso.js');
+  const { revisarStakeholders } = await import('../js/nucleo/stakeholders.js');
+  const { avanceResultado } = await import('../js/nucleo/okr.js');
+  const p = normalizarProyecto(JSON.parse(await readFile(new URL('../docs/ejemplo/pasteleria-carla.json', import.meta.url), 'utf8')));
+  const vsm = flujoDeValor(p.proceso);
+  assert.equal(vsm.faltan, 0, 'todas las tareas tienen tiempos');
+  assert.equal(p.proceso.pasos.find((x) => x.id === vsm.cuello).texto, 'Despacha o entrega en tienda');
+  assert.equal(p.stakeholders.length, 5);
+  assert.ok(!revisarStakeholders(p.stakeholders, p.proceso).some((a) => /Nadie/.test(a.texto)), 'aprueba, opera y mantiene están cubiertos');
+  assert.ok(p.objetivos[0].resultados.every((r) => avanceResultado(r).avance > 0), 'los resultados clave avanzan');
+  assert.ok(p.historias.every((h) => !h.terminada || h.creada <= h.terminada), 'ninguna historia termina antes de crearse');
+});

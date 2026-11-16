@@ -6,7 +6,7 @@
   "notas": "Reunión con Carla (pastelería, Ñuñoa)\n- Hoy todo llega por Instagram y WhatsApp, se le pierden pedidos\n- Quiere que vean las tortas con precio y si quedan\n- Que paguen en línea, con tarjeta, y si se puede en cuotas para eventos\n- Despacho solo en Ñuñoa y Providencia, o retiro en tienda\n- Le gustaría premiar a las clientas frecuentes\n- Necesita saber qué se vende más para hornear mejor\n- Pregunta por boletas electrónicas automáticas (no sabe cómo)\n- Presupuesto acotado, quiere partir antes de fiestas patrias",
   "historias": [
     {
-      "id": "h-mwj623vv-2mf5l",
+      "id": "h-mwjdkju3-26d07",
       "titulo": "Ver el detalle de cada producto antes de…",
       "rol": "clienta",
       "quiero": "ver el detalle de cada producto antes de comprarlo",
@@ -22,7 +22,7 @@
       "estado": "done",
       "sprintId": "s1",
       "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 8,
         "urgencia": 8,
@@ -32,12 +32,12 @@
         "Todo producto debe declarar sus alérgenos antes de publicarse.",
         "El precio se muestra siempre con IVA incluido."
       ],
-      "iniciada": "2026-10-20T11:14:38.248Z",
-      "terminada": "2026-10-23T11:14:38.248Z",
+      "iniciada": "2026-10-20T14:44:56.040Z",
+      "terminada": "2026-10-23T14:44:56.040Z",
       "bloqueo": null
     },
     {
-      "id": "h-mwj623vv-3ovjr",
+      "id": "h-mwjdkju4-3rzht",
       "titulo": "Buscar y filtrar por categoría",
       "rol": "clienta",
       "quiero": "buscar y filtrar por categoría",
@@ -52,19 +52,19 @@
       "estado": "done",
       "sprintId": "s1",
       "notaOriginal": "Como clienta, quiero buscar y filtrar por categoría, para encontrar rápido lo que busco",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 5,
         "urgencia": 3,
         "riesgo": 1
       },
       "reglas": [],
-      "iniciada": "2026-10-23T11:14:38.248Z",
-      "terminada": "2026-10-30T11:14:38.248Z",
+      "iniciada": "2026-10-23T14:44:56.040Z",
+      "terminada": "2026-10-30T14:44:56.040Z",
       "bloqueo": null
     },
     {
-      "id": "h-mwj623vv-4aklb",
+      "id": "h-mwjdkju4-4ylgj",
       "titulo": "Agregar productos al carro y ver el total…",
       "rol": "clienta",
       "quiero": "agregar productos al carro y ver el total con despacho",
@@ -80,7 +80,7 @@
       "estado": "done",
       "sprintId": "s2",
       "notaOriginal": "Como clienta, quiero agregar productos al carro y ver el total con despacho, para saber cuánto pagaré",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 13,
         "urgencia": 8,
@@ -91,12 +91,12 @@
         "Monto mínimo con despacho: $15.000.",
         "Despacho gratis sobre $40.000."
       ],
-      "iniciada": "2026-11-03T11:14:38.248Z",
-      "terminada": "2026-11-07T11:14:38.248Z",
+      "iniciada": "2026-11-03T14:44:56.040Z",
+      "terminada": "2026-11-07T14:44:56.040Z",
       "bloqueo": null
     },
     {
-      "id": "h-mwj623vv-5stfa",
+      "id": "h-mwjdkju4-5ap03",
       "titulo": "Pagar con tarjeta o transferencia",
       "rol": "clienta",
       "quiero": "pagar con tarjeta o transferencia",
@@ -112,7 +112,7 @@
       "estado": "doing",
       "sprintId": "s3",
       "notaOriginal": "Como clienta, quiero pagar con tarjeta o transferencia, para comprar sin salir de la tienda",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 20,
         "urgencia": 13,
@@ -122,12 +122,12 @@
         "Un pedido no se produce hasta tener el pago confirmado.",
         "Las transferencias se confirman a mano y vencen a las 24 horas."
       ],
-      "iniciada": "2026-11-16T11:14:38.248Z",
+      "iniciada": "2026-11-16T14:44:56.040Z",
       "terminada": null,
       "bloqueo": null
     },
     {
-      "id": "h-mwj623vv-6vugy",
+      "id": "h-mwjdkju4-68i6r",
       "titulo": "Recibir un correo con el detalle de mi…",
       "rol": "clienta",
       "quiero": "recibir un correo con el detalle de mi compra",
@@ -141,7 +141,7 @@
       "estado": "doing",
       "sprintId": "s3",
       "notaOriginal": "Como clienta, quiero recibir un correo con el detalle de mi compra, para tener un respaldo",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 5,
         "urgencia": 5,
@@ -150,15 +150,15 @@
       "reglas": [
         "El correo nunca incluye datos de la tarjeta."
       ],
-      "iniciada": "2026-11-16T11:14:38.248Z",
+      "iniciada": "2026-11-16T14:44:56.040Z",
       "terminada": null,
       "bloqueo": {
         "motivo": "Falta la cuenta de la pasarela de pago a nombre de Carla",
-        "desde": "2026-11-15T11:14:38.248Z"
+        "desde": "2026-11-15T14:44:56.040Z"
       }
     },
     {
-      "id": "h-mwj623vv-7o7q6",
+      "id": "h-mwjdkju4-7fs5o",
       "titulo": "Cargar y editar productos",
       "rol": "dueña",
       "quiero": "cargar y editar productos",
@@ -173,7 +173,7 @@
       "estado": "todo",
       "sprintId": "s3",
       "notaOriginal": "Como dueña, quiero cargar y editar productos, para mantener el catálogo al día",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 8,
         "urgencia": 8,
@@ -184,7 +184,7 @@
       ]
     },
     {
-      "id": "h-mwj623vv-8ts3h",
+      "id": "h-mwjdkju4-8s9ol",
       "titulo": "Ver los pedidos del día con su estado",
       "rol": "dueña",
       "quiero": "ver los pedidos del día con su estado",
@@ -199,7 +199,7 @@
       "estado": "done",
       "sprintId": "s2",
       "notaOriginal": "Como dueña, quiero ver los pedidos del día con su estado, para despacharlos a tiempo",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 13,
         "urgencia": 13,
@@ -208,8 +208,8 @@
       "reglas": [
         "Estados posibles: Confirmado → En producción → Listo → En camino o Retirado → Entregado."
       ],
-      "iniciada": "2026-11-07T11:14:38.248Z",
-      "terminada": "2026-11-13T11:14:38.248Z",
+      "iniciada": "2026-11-07T14:44:56.040Z",
+      "terminada": "2026-11-13T14:44:56.040Z",
       "bloqueo": null
     },
     {
@@ -228,7 +228,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como clienta, quiero ver el detalle de cada producto antes de comprarlo, para decidir con toda la información",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 5,
         "urgencia": 2,
@@ -238,11 +238,11 @@
         "Las cuotas sin interés las asume la pastelería: solo sobre $30.000 y hasta 3 cuotas."
       ],
       "dependeDe": [
-        "h-mwj623vv-5stfa"
+        "h-mwjdkju4-5ap03"
       ]
     },
     {
-      "id": "h-mwj623vv-93ode",
+      "id": "h-mwjdkju4-9r2ni",
       "titulo": "Acumular puntos por cada compra",
       "rol": "clienta frecuente",
       "quiero": "acumular puntos por cada compra",
@@ -257,7 +257,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como clienta frecuente, quiero acumular puntos por cada compra, para obtener descuentos",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 5,
         "urgencia": 1,
@@ -269,7 +269,7 @@
       ]
     },
     {
-      "id": "h-mwj623vv-a06oq",
+      "id": "h-mwjdkju4-aogne",
       "titulo": "Crear cupones de descuento",
       "rol": "dueña",
       "quiero": "crear cupones de descuento",
@@ -283,7 +283,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero crear cupones de descuento, para atraer clientas en fechas especiales",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 3,
         "urgencia": 1,
@@ -295,7 +295,7 @@
       ]
     },
     {
-      "id": "h-mwj623vv-b5mub",
+      "id": "h-mwjdkju5-bfvez",
       "titulo": "Ver las ventas del mes por producto",
       "rol": "dueña",
       "quiero": "ver las ventas del mes por producto",
@@ -309,7 +309,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero ver las ventas del mes por producto, para saber qué hornear más",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 8,
         "urgencia": 3,
@@ -320,7 +320,7 @@
       ]
     },
     {
-      "id": "h-mwj623vv-csno9",
+      "id": "h-mwjdkju5-cvxbc",
       "titulo": "Comparar las ventas con el mes anterior",
       "rol": "dueña",
       "quiero": "comparar las ventas con el mes anterior",
@@ -334,7 +334,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero comparar las ventas con el mes anterior, para medir si la tienda funciona",
-      "creada": "2026-11-16T11:14:38.251Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 3,
         "urgencia": 1,
@@ -343,7 +343,7 @@
       "reglas": []
     },
     {
-      "id": "h-mwj623vw-dvpfv",
+      "id": "h-mwjdkju6-dckwm",
       "titulo": "Investigar en 2 días cómo emitir boletas electrónicas…",
       "rol": "usuario",
       "quiero": "investigar en 2 días cómo emitir boletas electrónicas automáticamente",
@@ -357,7 +357,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Investigar en 2 días cómo emitir boletas electrónicas automáticamente",
-      "creada": "2026-11-16T11:14:38.252Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "tipo": "spike",
       "priorizacion": {
         "valor": 3,
@@ -369,7 +369,7 @@
       ]
     },
     {
-      "id": "h-mwj623vx-eguyc",
+      "id": "h-mwjdkju6-er6gn",
       "titulo": "Ver cuánto hornear mañana según los pedidos confirmados",
       "rol": "dueña",
       "quiero": "ver cuánto hornear mañana según los pedidos confirmados",
@@ -384,7 +384,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero ver cuánto hornear mañana según los pedidos confirmados, para no producir de más ni de menos",
-      "creada": "2026-11-16T11:14:38.253Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 13,
         "urgencia": 13,
@@ -397,7 +397,7 @@
       ]
     },
     {
-      "id": "h-mwj623vx-fzstm",
+      "id": "h-mwjdkju7-fw8nh",
       "titulo": "Marcar un producto como agotado cuando se acaba",
       "rol": "dueña",
       "quiero": "marcar un producto como agotado cuando se acaba",
@@ -412,7 +412,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero marcar un producto como agotado cuando se acaba, para no vender lo que no hay",
-      "creada": "2026-11-16T11:14:38.253Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 8,
         "urgencia": 13,
@@ -423,7 +423,7 @@
       ]
     },
     {
-      "id": "h-mwj623vx-gxxtr",
+      "id": "h-mwjdkju7-g88xl",
       "titulo": "Registrar las mermas del día con su motivo",
       "rol": "dueña",
       "quiero": "registrar las mermas del día con su motivo",
@@ -438,7 +438,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como dueña, quiero registrar las mermas del día con su motivo, para saber cuánto pierdo y por qué",
-      "creada": "2026-11-16T11:14:38.253Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 5,
         "urgencia": 2,
@@ -450,7 +450,7 @@
       ]
     },
     {
-      "id": "h-mwj623vx-hoe2f",
+      "id": "h-mwjdkju7-h2p18",
       "titulo": "Elegir el día y el bloque horario de…",
       "rol": "clienta",
       "quiero": "elegir el día y el bloque horario de entrega",
@@ -466,7 +466,7 @@
       "estado": "backlog",
       "sprintId": null,
       "notaOriginal": "Como clienta, quiero elegir el día y el bloque horario de entrega, para recibir la torta cuando estoy en casa",
-      "creada": "2026-11-16T11:14:38.253Z",
+      "creada": "2026-10-12T14:44:56.040Z",
       "priorizacion": {
         "valor": 13,
         "urgencia": 8,
@@ -512,25 +512,25 @@
   ],
   "retros": [
     {
-      "id": "r-mwj623vy-zex8z",
+      "id": "r-mwjdkju8-z7afb",
       "titulo": "Retro de Sprint 2",
       "sprintId": "s2",
       "fecha": "2026-11-16",
       "notas": [
         {
-          "id": "n-mwj623vy-10pajs",
+          "id": "n-mwjdkju8-10um89",
           "columna": "bien",
           "texto": "Carla respondió las dudas el mismo día",
           "votos": 0
         },
         {
-          "id": "n-mwj623vy-11c8w2",
+          "id": "n-mwjdkju8-11yytt",
           "columna": "mejorar",
           "texto": "Las fotos llegaron tarde y atrasaron el catálogo",
           "votos": 2
         },
         {
-          "id": "n-mwj623vy-12q4ez",
+          "id": "n-mwjdkju8-12cy45",
           "columna": "ideas",
           "texto": "Pedir fotos y textos con una semana de anticipación",
           "votos": 0
@@ -538,7 +538,7 @@
       ],
       "acciones": [
         {
-          "id": "a-mwj623vz-13rmfg",
+          "id": "a-mwjdkju8-13v95u",
           "texto": "Pedir los materiales del siguiente sprint en la Review",
           "responsable": "Rodrigo",
           "hecha": false
@@ -564,16 +564,50 @@
   },
   "objetivos": [
     {
-      "id": "o-mwj623vx-w98nd",
+      "id": "o-mwjdkju7-wm7ud",
       "objetivo": "Vender más en línea",
       "resultados": [
         {
-          "id": "kr-mwj623vx-x8nqi",
-          "texto": "Pedidos por la tienda: del 0% al 40%"
+          "id": "kr-mwjdkju7-xzjq1",
+          "texto": "Pedidos por la tienda: del 0% al 40%",
+          "unidad": "%",
+          "base": 0,
+          "meta": 40,
+          "mediciones": [
+            {
+              "fecha": "2026-10-19",
+              "valor": 6
+            },
+            {
+              "fecha": "2026-11-02",
+              "valor": 15
+            },
+            {
+              "fecha": "2026-11-15",
+              "valor": 24
+            }
+          ]
         },
         {
-          "id": "kr-mwj623vx-ycp1d",
-          "texto": "Mensajes de consulta: bajar a la mitad"
+          "id": "kr-mwjdkju7-y9090",
+          "texto": "Mensajes de consulta: bajar a la mitad",
+          "unidad": "por semana",
+          "base": 200,
+          "meta": 100,
+          "mediciones": [
+            {
+              "fecha": "2026-10-19",
+              "valor": 180
+            },
+            {
+              "fecha": "2026-11-02",
+              "valor": 130
+            },
+            {
+              "fecha": "2026-11-15",
+              "valor": 95
+            }
+          ]
         }
       ]
     }
@@ -584,7 +618,7 @@
       "lograremos": "menos consultas por mensaje",
       "veremos": "los mensajes bajen a la mitad",
       "resultados": [
-        "kr-mwj623vx-ycp1d"
+        "kr-mwjdkju7-y9090"
       ],
       "horizonte": "",
       "resultadoHipotesis": "cumplida",
@@ -604,7 +638,7 @@
       "lograremos": "que más visitas terminen comprando",
       "veremos": "el 40% de los pedidos llegue por la tienda",
       "resultados": [
-        "kr-mwj623vx-x8nqi"
+        "kr-mwjdkju7-xzjq1"
       ],
       "horizonte": "",
       "resultadoHipotesis": "pendiente",
@@ -653,15 +687,15 @@
   },
   "hitos": [
     {
-      "id": "hi-mwj623vz-146lwv",
+      "id": "hi-mwjdkju8-14giqe",
       "nombre": "Hito 1: Compra",
       "porcentaje": 30,
       "historiaIds": [
-        "h-mwj623vv-2mf5l",
-        "h-mwj623vv-3ovjr",
-        "h-mwj623vv-4aklb",
-        "h-mwj623vv-5stfa",
-        "h-mwj623vv-6vugy"
+        "h-mwjdkju3-26d07",
+        "h-mwjdkju4-3rzht",
+        "h-mwjdkju4-4ylgj",
+        "h-mwjdkju4-5ap03",
+        "h-mwjdkju4-68i6r"
       ],
       "fecha": "2026-11-29",
       "estado": "aceptado",
@@ -671,31 +705,31 @@
       }
     },
     {
-      "id": "hi-mwj623vz-15fy9b",
+      "id": "hi-mwjdkju9-153qyq",
       "nombre": "Hito 2: Administración",
       "porcentaje": 40,
       "historiaIds": [
-        "h-mwj623vv-7o7q6",
-        "h-mwj623vv-8ts3h",
+        "h-mwjdkju4-7fs5o",
+        "h-mwjdkju4-8s9ol",
         "h-extra-1",
-        "h-mwj623vv-93ode"
+        "h-mwjdkju4-9r2ni"
       ],
       "fecha": "2026-12-13",
       "estado": "pendiente",
       "aceptacion": null
     },
     {
-      "id": "hi-mwj623vz-16rpvb",
+      "id": "hi-mwjdkju9-163srw",
       "nombre": "Hito 3: Pedidos y producción",
       "porcentaje": 30,
       "historiaIds": [
-        "h-mwj623vv-b5mub",
-        "h-mwj623vv-csno9",
-        "h-mwj623vw-dvpfv",
-        "h-mwj623vx-eguyc",
-        "h-mwj623vx-fzstm",
-        "h-mwj623vx-gxxtr",
-        "h-mwj623vx-hoe2f"
+        "h-mwjdkju5-bfvez",
+        "h-mwjdkju5-cvxbc",
+        "h-mwjdkju6-dckwm",
+        "h-mwjdkju6-er6gn",
+        "h-mwjdkju7-fw8nh",
+        "h-mwjdkju7-g88xl",
+        "h-mwjdkju7-h2p18"
       ],
       "fecha": "2026-12-27",
       "estado": "pendiente",
@@ -704,7 +738,7 @@
   ],
   "cambios": [
     {
-      "id": "cr-mwj623vz-173pjn",
+      "id": "cr-mwjdkju9-17uxh1",
       "fecha": "2026-11-16",
       "descripcion": "Agregar un blog de recetas en la tienda",
       "horas": 12,
@@ -714,186 +748,252 @@
   "proceso": {
     "carriles": [
       {
-        "id": "ca-mwj623vx-iw21l",
+        "id": "ca-mwjdkju7-ifewm",
         "nombre": "Clienta"
       },
       {
-        "id": "ca-mwj623vx-jmmgp",
+        "id": "ca-mwjdkju7-j649u",
         "nombre": "Tienda en línea"
       },
       {
-        "id": "ca-mwj623vx-kdxn9",
+        "id": "ca-mwjdkju7-k5qyv",
         "nombre": "Carla (dueña)"
       }
     ],
     "pasos": [
       {
-        "id": "pa-mwj623vx-luiqk",
+        "id": "pa-mwjdkju7-lfjls",
         "tipo": "inicio",
         "texto": "Quiere una torta",
-        "carril": "ca-mwj623vx-iw21l",
+        "carril": "ca-mwjdkju7-ifewm",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-m30cd",
+            "a": "pa-mwjdkju7-m9s5b",
             "etiqueta": ""
           }
         ],
         "historiaIds": []
       },
       {
-        "id": "pa-mwj623vx-m30cd",
+        "id": "pa-mwjdkju7-m9s5b",
         "tipo": "tarea",
         "texto": "Elige productos y ve el detalle",
-        "carril": "ca-mwj623vx-iw21l",
+        "carril": "ca-mwjdkju7-ifewm",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-n6vqi",
+            "a": "pa-mwjdkju7-no5v6",
             "etiqueta": ""
           }
         ],
         "historiaIds": [
-          "h-mwj623vv-2mf5l",
-          "h-mwj623vv-3ovjr"
-        ]
+          "h-mwjdkju3-26d07",
+          "h-mwjdkju4-3rzht"
+        ],
+        "trabajo": 15,
+        "espera": 0
       },
       {
-        "id": "pa-mwj623vx-n6vqi",
+        "id": "pa-mwjdkju7-no5v6",
         "tipo": "tarea",
         "texto": "Arma el carro y elige día y bloque de entrega",
-        "carril": "ca-mwj623vx-iw21l",
+        "carril": "ca-mwjdkju7-ifewm",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-oqzmn",
+            "a": "pa-mwjdkju7-olx49",
             "etiqueta": ""
           }
         ],
         "historiaIds": [
-          "h-mwj623vv-4aklb",
-          "h-mwj623vx-hoe2f"
-        ]
+          "h-mwjdkju4-4ylgj",
+          "h-mwjdkju7-h2p18"
+        ],
+        "trabajo": 5,
+        "espera": 0
       },
       {
-        "id": "pa-mwj623vx-oqzmn",
+        "id": "pa-mwjdkju7-olx49",
         "tipo": "decision",
         "texto": "¿Hay cupo y stock?",
-        "carril": "ca-mwj623vx-jmmgp",
+        "carril": "ca-mwjdkju7-j649u",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-pzqua",
+            "a": "pa-mwjdkju7-pyup0",
             "etiqueta": "Sí"
           },
           {
-            "a": "pa-mwj623vx-n6vqi",
+            "a": "pa-mwjdkju7-no5v6",
             "etiqueta": "No: otra fecha"
           }
         ],
         "historiaIds": []
       },
       {
-        "id": "pa-mwj623vx-pzqua",
+        "id": "pa-mwjdkju7-pyup0",
         "tipo": "tarea",
         "texto": "Paga con tarjeta o transferencia",
-        "carril": "ca-mwj623vx-iw21l",
+        "carril": "ca-mwjdkju7-ifewm",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-qhm2i",
+            "a": "pa-mwjdkju7-qbsv2",
             "etiqueta": ""
           }
         ],
         "historiaIds": [
-          "h-mwj623vv-5stfa",
+          "h-mwjdkju4-5ap03",
           "h-extra-1"
-        ]
+        ],
+        "trabajo": 5,
+        "espera": 0
       },
       {
-        "id": "pa-mwj623vx-qhm2i",
+        "id": "pa-mwjdkju7-qbsv2",
         "tipo": "decision",
         "texto": "¿Pago aprobado?",
-        "carril": "ca-mwj623vx-jmmgp",
+        "carril": "ca-mwjdkju7-j649u",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-rkxos",
+            "a": "pa-mwjdkju7-rsigg",
             "etiqueta": "Sí"
           },
           {
-            "a": "pa-mwj623vx-pzqua",
+            "a": "pa-mwjdkju7-pyup0",
             "etiqueta": "No: reintenta"
           }
         ],
         "historiaIds": []
       },
       {
-        "id": "pa-mwj623vx-rkxos",
+        "id": "pa-mwjdkju7-rsigg",
         "tipo": "tarea",
         "texto": "Confirma el pedido por correo",
-        "carril": "ca-mwj623vx-jmmgp",
+        "carril": "ca-mwjdkju7-j649u",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-sg0s4",
+            "a": "pa-mwjdkju7-slpcw",
             "etiqueta": ""
           }
         ],
         "historiaIds": [
-          "h-mwj623vv-6vugy"
-        ]
+          "h-mwjdkju4-68i6r"
+        ],
+        "trabajo": 1,
+        "espera": 0
       },
       {
-        "id": "pa-mwj623vx-sg0s4",
+        "id": "pa-mwjdkju7-slpcw",
         "tipo": "tarea",
         "texto": "Planifica la producción del día",
-        "carril": "ca-mwj623vx-kdxn9",
+        "carril": "ca-mwjdkju7-k5qyv",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-twguo",
+            "a": "pa-mwjdkju7-tk7ij",
             "etiqueta": ""
           }
         ],
         "historiaIds": [
-          "h-mwj623vx-eguyc",
-          "h-mwj623vx-fzstm"
-        ]
+          "h-mwjdkju6-er6gn",
+          "h-mwjdkju7-fw8nh"
+        ],
+        "trabajo": 30,
+        "espera": 720
       },
       {
-        "id": "pa-mwj623vx-twguo",
+        "id": "pa-mwjdkju7-tk7ij",
         "tipo": "tarea",
         "texto": "Hornea y registra mermas",
-        "carril": "ca-mwj623vx-kdxn9",
+        "carril": "ca-mwjdkju7-k5qyv",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-uo779",
+            "a": "pa-mwjdkju7-ur0z7",
             "etiqueta": ""
           }
         ],
         "historiaIds": [
-          "h-mwj623vx-gxxtr"
-        ]
+          "h-mwjdkju7-g88xl"
+        ],
+        "trabajo": 240,
+        "espera": 120
       },
       {
-        "id": "pa-mwj623vx-uo779",
+        "id": "pa-mwjdkju7-ur0z7",
         "tipo": "tarea",
         "texto": "Despacha o entrega en tienda",
-        "carril": "ca-mwj623vx-kdxn9",
+        "carril": "ca-mwjdkju7-k5qyv",
         "siguientes": [
           {
-            "a": "pa-mwj623vx-vucre",
+            "a": "pa-mwjdkju7-vw3js",
             "etiqueta": ""
           }
         ],
         "historiaIds": [
-          "h-mwj623vv-8ts3h"
-        ]
+          "h-mwjdkju4-8s9ol"
+        ],
+        "trabajo": 60,
+        "espera": 1320
       },
       {
-        "id": "pa-mwj623vx-vucre",
+        "id": "pa-mwjdkju7-vw3js",
         "tipo": "fin",
         "texto": "Recibe su pedido",
-        "carril": "ca-mwj623vx-iw21l",
+        "carril": "ca-mwjdkju7-ifewm",
         "siguientes": [],
         "historiaIds": []
       }
     ]
   },
-  "respaldado": "2026-11-16T11:14:38.255Z",
-  "creado": "2026-11-16T11:14:38.248Z",
-  "actualizado": "2026-11-16T11:14:38.248Z"
+  "stakeholders": [
+    {
+      "id": "st-carla",
+      "nombre": "Carla Rojas",
+      "cargo": "Dueña de la pastelería",
+      "rol": "aprueba",
+      "poder": "alto",
+      "interes": "alto",
+      "carril": "ca-mwjdkju7-k5qyv",
+      "notas": ""
+    },
+    {
+      "id": "st-valentina",
+      "nombre": "Valentina",
+      "cargo": "Clienta frecuente",
+      "rol": "usa",
+      "poder": "bajo",
+      "interes": "alto",
+      "carril": "ca-mwjdkju7-ifewm",
+      "notas": "Probó el prototipo del carro."
+    },
+    {
+      "id": "st-matias",
+      "nombre": "Matías",
+      "cargo": "Repartidor",
+      "rol": "opera",
+      "poder": "bajo",
+      "interes": "alto",
+      "carril": null,
+      "notas": ""
+    },
+    {
+      "id": "st-ignacio",
+      "nombre": "Ignacio",
+      "cargo": "Sobrino; administra la tienda en línea",
+      "rol": "mantiene",
+      "poder": "bajo",
+      "interes": "bajo",
+      "carril": "ca-mwjdkju7-j649u",
+      "notas": ""
+    },
+    {
+      "id": "st-rosa",
+      "nombre": "Rosa",
+      "cargo": "Contadora externa",
+      "rol": "otro",
+      "poder": "alto",
+      "interes": "bajo",
+      "carril": null,
+      "notas": "Decide cómo se emiten las boletas."
+    }
+  ],
+  "respaldado": "2026-11-16T14:44:56.049Z",
+  "creado": "2026-11-16T14:44:56.040Z",
+  "actualizado": "2026-11-16T14:44:56.040Z"
 }

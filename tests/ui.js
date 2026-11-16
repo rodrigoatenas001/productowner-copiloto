@@ -349,7 +349,7 @@ const PRUEBAS = [
     escribir(nombre, 'Supervisor de prueba'); rol.value = 'opera'; poder.value = 'bajo'; interes.value = 'alto';
     f.requestSubmit(); await pausa(120);
     verdad(todos('.matriz-pi-cuadrante--informar li').some((li) => li.textContent.includes('Supervisor de prueba')), 'queda en «Mantener informados»');
-    verdad(todos('.stakeholders .proceso-aviso').some((a) => a.textContent.includes('Nadie aprueba')), 'avisa que falta quien aprueba');
+    verdad(todos('.matriz-pi-cuadrante--gestionar li').some((li) => li.textContent.includes('Carla Rojas')), 'Carla, que aprueba y está muy interesada, se gestiona de cerca');
   }],
   ['Daily: lo terminado, en curso y bloqueado, y «Daily hecha» marca el corte', async () => {
     await ir('sprint');
