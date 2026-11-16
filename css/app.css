@@ -305,7 +305,7 @@ button:disabled, .btn:disabled { opacity: .45; cursor: not-allowed; }
 .mapa-scroll { overflow-x: auto; border: 1px solid var(--niebla); border-radius: var(--radio); background: var(--superficie); }
 .mapa { border-collapse: separate; border-spacing: 0; min-width: 100%; }
 .mapa th, .mapa td { border-bottom: 1px solid var(--niebla); border-right: 1px solid var(--niebla); vertical-align: top; padding: 10px; }
-.mapa thead th { background: var(--tinta); color: #fff; font: 600 .9rem var(--f-display); text-align: left; min-width: 180px; position: sticky; top: 0; }
+.mapa thead th { background: var(--tinta); color: #fff; font: 600 .9rem var(--f-display); text-align: left; min-width: 150px; position: sticky; top: 0; }
 .mapa thead th:first-child { background: var(--tinta-2); min-width: 150px; }
 .mapa tbody th { text-align: left; font-size: .85rem; background: var(--papel); display: table-cell; }
 .mapa tbody th .tarjeta-meta { display: block; font-weight: 400; }
@@ -767,4 +767,14 @@ h2 .termino { font-size: .78rem; }
   .doc-tabla thead { display: table-header-group; }
   .doc-tabla tr { break-inside: avoid; }
   .doc-datos th { width: 28%; background: #f5f7fa; }
+}
+
+/* ── Pantallas anchas: mapas, diagramas y tableros usan todo el ancho disponible ── */
+main.principal--ancho { max-width: none; }
+/* Los textos siguen en un ancho cómodo de leer */
+main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.principal--ancho .aviso-ejemplo, main.principal--ancho .recorrido, main.principal--ancho .vista > .ayuda, main.principal--ancho .proceso > .ayuda { max-width: 1100px; }
+@media (min-width: 1500px) { main.principal--ancho .tablero.tablero--4 { gap: 18px; } }
+@media (min-width: 1700px) {
+  main.principal--ancho .guia-flujo { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+  main.principal--ancho .guia-etapa:nth-child(3n):not(:last-child)::after { content: "→"; }
 }

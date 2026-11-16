@@ -4,7 +4,7 @@ import { nuevoProyecto, necesitaRespaldo } from './nucleo/proyecto.js';
 import { nombreArchivo } from './nucleo/exportar.js';
 import { h, vaciar, avisar, descargar, pedirTexto } from './ui/dom.js';
 import { vistaNotas } from './ui/notas.js';
-import { vistaBacklog } from './ui/backlog.js';
+import { vistaBacklog, modoBacklog } from './ui/backlog.js';
 import { vistaSprint } from './ui/sprint.js';
 import { vistaAjustes } from './ui/ajustes.js';
 import { vistaTaller } from './ui/taller.js';
@@ -31,6 +31,7 @@ const VISTAS = {
 };
 // Con el modo simple se ocultan del menú (siguen accesibles por enlace)
 const AVANZADAS = new Set(['retro', 'taller']);
+const VISTAS_ANCHAS_BACKLOG = new Set(['mapa', 'proceso', 'priorizar', 'roadmap']);
 export const ID_EJEMPLO = 'ejemplo-pasteleria';
 // Súbela cuando cambie docs/ejemplo/pasteleria-carla.json, para reemplazar copias antiguas
 const VERSION_EJEMPLO = 2;
@@ -207,6 +208,8 @@ const app = {
     renderNavegacion();
     renderBarraInferior();
     const principal = document.getElementById('principal');
+    // Mapas, tableros y diagramas usan todo el ancho; el resto queda en un ancho cómodo de leer
+    principal.classList.toggle('principal--ancho', ['sprint', 'guia'].includes(this.vista) || (this.vista === 'backlog' && VISTAS_ANCHAS_BACKLOG.has(modoBacklog())));
     const v = this.vista;
     const caja = AYUDAS[v] && v !== 'comentar' && this.recorrido === null ? cajaInfo(this, v, `Para qué sirve ${VISTAS[v].titulo}`, AYUDAS[v], EXTRA_AYUDA[v]?.()) : null;
     vaciar(principal, avisoEjemplo(this), cajaRecorrido(this), caja, this.proyecto.id === ID_EJEMPLO ? null : avisoRespaldo(this), VISTAS[this.vista].render(this));

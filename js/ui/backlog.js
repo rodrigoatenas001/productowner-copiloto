@@ -28,6 +28,9 @@ const seleccion = new Set(); // historias marcadas para cambios en grupo
 /** Abre una pestaña del backlog (lo usa la guía «Cómo funciona»). */
 export function abrirModo(m) { modo = m; abierta = null; }
 
+/** Pestaña abierta del backlog (la app la usa para dar más ancho a las vistas que lo necesitan). */
+export const modoBacklog = () => modo;
+
 /** Deja una historia abierta en la lista (lo usan el mapa y el buscador). */
 export function enfocarHistoria(id) {
   abierta = id; modo = 'lista'; filtros.texto = ''; filtros.epica = '';
