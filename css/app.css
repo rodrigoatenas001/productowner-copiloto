@@ -789,3 +789,11 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .aviso-suave .btn-texto { color: inherit; font-weight: 700; padding: 0 2px; }
 .ver-mas { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 12px 0 0; }
 .ver-mas .ayuda { margin: 0; }
+
+/* Mapa clásico por recorrido: actores arriba (columna vertebral), pasos debajo */
+.mapa-contenedor > .pestanas { margin-bottom: 10px; }
+.mapa--recorrido thead th { position: static; }
+.mapa--recorrido .mapa-actores th { background: var(--tinta-2); font: 600 .74rem var(--f-mono); letter-spacing: .05em; text-transform: uppercase; padding: 6px 10px; border-right: 2px solid var(--superficie); }
+.mapa--recorrido .mapa-actores th:empty { background: var(--tinta-2); }
+.mapa thead th.mapa-soporte { background: var(--pizarra); }
+.mapa-celda--soporte { background: var(--papel); }

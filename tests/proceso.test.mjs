@@ -142,3 +142,25 @@ test('dos flechas que vuelven al mismo paso llegan por puntos distintos', () => 
   assert.notEqual(vueltas[0].puntos[3][0], vueltas[1].puntos[3][0]);
   assert.notEqual(vueltas[0].puntos[1][1], vueltas[1].puntos[1][1]);
 });
+
+test('mapa clásico: columnas en el orden del recorrido, con su actor, y soporte al final', async () => {
+  const { mapaPorProceso, moverEnMapaProceso } = await import('../js/nucleo/proyecto.js');
+  const { p: proceso, ids } = pedido();
+  const proyecto = { ...nuevoProyecto('X'), historias: [
+    { id: 'h1', titulo: 'Elegir', prioridad: 'must', estado: 'backlog', puntos: 3 },
+    { id: 'h2', titulo: 'Pagar', prioridad: 'should', estado: 'backlog', puntos: 5 },
+    { id: 'h3', titulo: 'Reportes', prioridad: 'must', estado: 'backlog', puntos: 2 },
+  ], proceso: { ...proceso, pasos: proceso.pasos.map((x) => (x.id === ids.elegir ? { ...x, historiaIds: ['h1'] } : x.id === ids.pagar ? { ...x, historiaIds: ['h2', 'h1'] } : x)) } };
+  const m = mapaPorProceso(proyecto);
+  assert.deepEqual(m.columnas.map((c) => c.nombre), ['Elige productos', 'Paga', 'Soporte (fuera del recorrido)']);
+  assert.equal(m.columnas[0].actor, 'Clienta');
+  const must = m.filas.find((f) => f.prioridad === 'must');
+  assert.deepEqual(must.celdas[ids.elegir].map((h) => h.id), ['h1'], 'una historia en dos pasos aparece en el primero');
+  assert.deepEqual(must.celdas[''].map((h) => h.id), ['h3']);
+  const movido = moverEnMapaProceso(proyecto, 'h3', ids.pagar, 'could');
+  assert.equal(movido.historias.find((h) => h.id === 'h3').prioridad, 'could');
+  assert.ok(movido.proceso.pasos.find((x) => x.id === ids.pagar).historiaIds.includes('h3'));
+  const aSoporte = moverEnMapaProceso(proyecto, 'h1', '', 'must');
+  assert.ok(aSoporte.proceso.pasos.every((x) => !x.historiaIds.includes('h1')), 'a soporte = sin paso');
+  assert.equal(mapaPorProceso({ ...nuevoProyecto('Y'), historias: [] }).hayProceso, false);
+});

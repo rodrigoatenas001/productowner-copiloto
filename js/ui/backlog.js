@@ -1,6 +1,6 @@
 // Backlog priorizado: el orden es la prioridad. Se reordena arrastrando o con los botones.
 import { h, selector, vacio, pedirTexto } from './dom.js';
-import { mover, puntosDe, resumenEpicas, mapaHistorias, moverEnMapa } from '../nucleo/proyecto.js';
+import { mover, puntosDe, resumenEpicas, mapaHistorias, moverEnMapa, mapaPorProceso, moverEnMapaProceso } from '../nucleo/proyecto.js';
 import { calidad, nuevoId, PRIORIDADES, ESCALA_PUNTOS, sugerirCriterios, dividirHistoria, reemplazarPorPartes, revisarInvest, enunciado, TIPOS } from '../nucleo/historias.js';
 import { iaConfigurada, criteriosConIa, dividirConIa, revisarConIa, redactarConIa, nombreProveedor } from '../ia.js';
 import { revisarEnDosVoces, llamadasMaximas } from '../nucleo/dosvoces.js';
@@ -367,37 +367,73 @@ function vistaEpicas(app) {
 }
 
 /** Mapa de historias: arrastra una tarjeta a otra celda para cambiar su épica o su versión. */
+// Columnas del mapa: el recorrido (pasos del proceso, como en el mapa clásico de Jeff Patton) o las épicas
+let columnasMapa = null;
+
 function vistaMapa(app) {
-  const { epicas, filas } = mapaHistorias(app.proyecto);
   if (!app.proyecto.historias.length) return vacio('Aún no hay historias.', 'Pega lo que te pidió el cliente en Notas y conviértelo en historias.', ['Ir a Notas', () => app.ir('notas')]);
+  const recorrido = mapaPorProceso(app.proyecto);
+  const modoMapa = columnasMapa || (recorrido.hayProceso ? 'recorrido' : 'epicas');
+  const porEpicas = modoMapa === 'epicas' ? mapaHistorias(app.proyecto) : null;
+  const columnas = porEpicas ? porEpicas.epicas.map((e) => ({ clave: e, nombre: e || 'Sin épica', actor: '' })) : recorrido.columnas;
+  const filas = porEpicas ? porEpicas.filas : recorrido.filas;
   let arrastrada = null;
 
-  const celda = (fila, epica) => h('td', {
-    class: 'mapa-celda',
+  const mover = (id, clave, prioridad) => (porEpicas
+    ? app.cambiar((x) => ({ ...x, historias: moverEnMapa(x.historias, id, clave, prioridad) }))
+    : app.cambiar((x) => moverEnMapaProceso(x, id, clave, prioridad)));
+
+  const celda = (fila, clave) => h('td', {
+    class: `mapa-celda${clave === '' && !porEpicas ? ' mapa-celda--soporte' : ''}`,
     ondragover: (e) => { if (arrastrada) { e.preventDefault(); e.currentTarget.classList.add('is-destino'); } },
     ondragleave: (e) => e.currentTarget.classList.remove('is-destino'),
     ondrop: (e) => {
       e.preventDefault();
       const id = arrastrada;
       arrastrada = null;
-      if (id) app.cambiar((x) => ({ ...x, historias: moverEnMapa(x.historias, id, epica, fila.prioridad) }));
+      if (id) mover(id, clave, fila.prioridad);
     },
-  }, fila.celdas[epica].map((x) => h('button', {
+  }, fila.celdas[clave].map((x) => h('button', {
     type: 'button', draggable: 'true',
     class: `mapa-tarjeta${x.estado === 'done' ? ' is-hecha' : ''}`,
-    title: 'Arrastra para cambiar épica o versión; clic para editar',
+    title: porEpicas ? 'Arrastra para cambiar épica o versión; clic para editar' : 'Arrastra para cambiar de paso o de versión; clic para editar',
     ondragstart: (e) => { arrastrada = x.id; e.dataTransfer.effectAllowed = 'move'; },
     onclick: () => { enfocarHistoria(x.id); app.render(); },
   }, x.titulo, x.puntos ? h('span', { class: 'tarjeta-meta' }, ` · ${x.puntos}`) : null)));
 
+  // Columna vertebral del recorrido: los actores agrupan sus pasos seguidos (como las actividades del mapa clásico)
+  const grupos = [];
+  for (const c of columnas) {
+    const ultimo = grupos[grupos.length - 1];
+    if (ultimo && ultimo.actor === c.actor && c.clave !== '') ultimo.ancho += 1;
+    else grupos.push({ actor: c.clave === '' ? '' : c.actor, ancho: 1 });
+  }
+
+  const selector = h('div', { class: 'pestanas pestanas--chicas', role: 'tablist', 'aria-label': 'Columnas del mapa' },
+    [['recorrido', 'Recorrido (proceso)'], ['epicas', 'Épicas']].map(([clave, texto]) => h('button', {
+      type: 'button', role: 'tab', class: 'pestana', 'aria-selected': String(modoMapa === clave),
+      onclick: () => { columnasMapa = clave; app.render(); },
+    }, texto)));
+
+  if (!porEpicas && !recorrido.hayProceso) {
+    return h('div', { class: 'mapa-contenedor' }, selector,
+      vacio('El mapa por recorrido sale del proceso.', 'Dibuja el circuito del cliente en la pestaña Proceso y enlaza cada tarea con sus historias: el mapa las ordena como el recorrido de la persona, de izquierda a derecha.',
+        ['Ir a Proceso', () => { abrirModo('proceso'); app.render(); }], ['Ver por épicas', () => { columnasMapa = 'epicas'; app.render(); }]));
+  }
+
   return h('div', { class: 'mapa-contenedor' },
-    h('p', { class: 'ayuda' }, 'Cada columna es una épica y cada fila una versión. La primera fila es lo mínimo para salir: si no cabe en un sprint o dos, recórtala. Arrastra tarjetas para mover; clic para editar.'),
+    selector,
+    h('p', { class: 'ayuda' }, porEpicas
+      ? 'Cada columna es una épica y cada fila una versión. La primera fila es lo mínimo para salir: si no cabe en un sprint o dos, recórtala. Arrastra tarjetas para mover; clic para editar.'
+      : 'De izquierda a derecha, el recorrido de la persona según el proceso; arriba, quién hace cada paso. Cada fila es una versión: la primera es lo mínimo para recorrer el circuito completo. Arrastra para cambiar de paso o de versión.'),
     h('div', { class: 'mapa-scroll' },
-      h('table', { class: 'mapa' },
-        h('thead', {}, h('tr', {}, h('th', { scope: 'col' }, ''), epicas.map((e) => h('th', { scope: 'col' }, e || 'Sin épica')))),
+      h('table', { class: `mapa${porEpicas ? '' : ' mapa--recorrido'}` },
+        h('thead', {},
+          porEpicas ? null : h('tr', { class: 'mapa-actores' }, h('th', { scope: 'col' }, ''), grupos.map((g) => h('th', { scope: 'colgroup', colspan: g.ancho }, g.actor))),
+          h('tr', {}, h('th', { scope: 'col' }, ''), columnas.map((c) => h('th', { scope: 'col', class: c.clave === '' && !porEpicas ? 'mapa-soporte' : null }, c.nombre)))),
         h('tbody', {}, filas.map((fila) => h('tr', { class: `mapa-fila mapa-fila--${fila.prioridad}` },
           h('th', { scope: 'row' }, fila.nombre, h('span', { class: 'tarjeta-meta' }, `${fila.puntos} pts pendientes`)),
-          epicas.map((e) => celda(fila, e))))))));
+          columnas.map((c) => celda(fila, c.clave))))))));
 }
 
 async function iniciarRevision(app, historia) {

@@ -41,7 +41,8 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 **Refinamiento**
 - **Revisión INVEST** por tipo, **casos borde** automáticos y **métricas** sugeridas para palabras vagas.
 - **Dividir** historias, **mejorar criterios** con IA y **revisión en dos voces** (una IA revisa como QA, otra corrige como PO).
-- **Definition of Ready** (avisa «no lista» solo cuando el equipo empieza a usarla), **mapa de historias** y **planning poker** en una pantalla.
+- **Definition of Ready** (avisa «no lista» solo cuando el equipo empieza a usarla) y **planning poker** en una pantalla.
+- **Mapa de historias** clásico (Jeff Patton): de izquierda a derecha, el recorrido según los pasos del proceso, con quién hace cada uno arriba; debajo, las historias de cada paso por versión, y la primera fila es lo mínimo para recorrer el circuito completo. Lo que no está en el proceso queda en «Soporte». También se puede ver por épicas. Arrastrar una tarjeta cambia su paso o su versión.
 
 **Priorizar y pronosticar**
 - MoSCoW, **WSJF**, **RICE** y **matriz valor/esfuerzo**.

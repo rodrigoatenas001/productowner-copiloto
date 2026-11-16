@@ -340,6 +340,20 @@ const PRUEBAS = [
     escribir(selector, 'ejemplo-pasteleria', 'change');
     await esperar(() => uno('.aviso-ejemplo'), 'volvió al ejemplo');
   }],
+  ['Mapa clásico: el recorrido del proceso como columnas, con sus actores arriba', async () => {
+    await ir('backlog');
+    await pestana('Mapa');
+    verdad(uno('.mapa--recorrido'), 'con proceso, el mapa parte por el recorrido');
+    const actores = todos('.mapa-actores th').map((t) => t.textContent).filter(Boolean);
+    igual(actores[0], 'Clienta', 'el primer actor es quien inicia el recorrido');
+    const pasos = todos('.mapa thead tr:last-child th').map((t) => t.textContent);
+    igual(pasos[1], 'Elige productos y ve el detalle', 'el primer paso del proceso es la primera columna');
+    igual(pasos.at(-1), 'Soporte (fuera del recorrido)', 'lo que no está en el proceso va al final');
+    const enMapa = (texto) => todos('.mapa-contenedor .pestana').find((b) => b.textContent === texto).click();
+    enMapa('Épicas'); await pausa(80);
+    verdad(uno('.mapa') && !uno('.mapa-actores'), 'por épicas, sin la fila de actores');
+    enMapa('Recorrido (proceso)'); await pausa(80);
+  }],
   ['Comentar: arma el texto y el enlace a GitHub', async () => {
     await ir('comentar');
     todos('input[name="nota"]')[3].click();

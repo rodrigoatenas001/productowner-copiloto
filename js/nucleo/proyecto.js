@@ -8,7 +8,7 @@ import { normalizarOkr } from './okr.js';
 import { repoGithub } from './issues.js';
 import { FLUJO_INICIAL, normalizarFlujo, normalizarBloqueo } from './flujo.js';
 import { ALCANCE_VACIO, COMERCIAL_INICIAL, normalizarComercial } from './comercial.js';
-import { normalizarProceso, PROCESO_VACIO } from './proceso.js';
+import { normalizarProceso, PROCESO_VACIO, procesoDe } from './proceso.js';
 
 export const VERSION_DATOS = 1;
 export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', review: 'En revisión', done: 'Hecho' };
@@ -301,6 +301,45 @@ export function mapaHistorias(proyecto) {
 }
 
 /** Mueve una historia a otra celda del mapa. */
+/**
+ * Mapa de historias clásico (Jeff Patton): las columnas son el recorrido, es decir, las tareas del
+ * proceso en su orden, agrupadas por actor como columna vertebral; debajo, las historias de cada paso
+ * por versión. Una historia enlazada a varios pasos aparece en el primero. Las que no están en ningún
+ * paso van al final, en «Soporte».
+ * @returns {{columnas: {clave: string, nombre: string, actor: string}[], filas: object[], hayProceso: boolean}}
+ */
+export function mapaPorProceso(proyecto) {
+  const proceso = procesoDe(proyecto);
+  const actor = Object.fromEntries(proceso.carriles.map((c) => [c.id, c.nombre]));
+  const tareas = proceso.pasos.filter((p) => p.tipo === 'tarea');
+  const pasoDe = new Map();
+  for (const t of tareas) for (const id of t.historiaIds) if (!pasoDe.has(id)) pasoDe.set(id, t.id);
+  const columnas = tareas.map((t) => ({ clave: t.id, nombre: t.texto || 'Paso sin nombre', actor: actor[t.carril] || '' }));
+  if (proyecto.historias.some((h) => !pasoDe.has(h.id))) columnas.push({ clave: '', nombre: 'Soporte (fuera del recorrido)', actor: '' });
+  const filas = Object.entries(VERSIONES).map(([prioridad, nombre]) => {
+    const celdas = Object.fromEntries(columnas.map((c) => [c.clave, []]));
+    for (const h of proyecto.historias) if (h.prioridad === prioridad) celdas[pasoDe.get(h.id) || '']?.push(h);
+    return { prioridad, nombre, celdas, puntos: puntosDe(proyecto.historias.filter((h) => h.prioridad === prioridad && h.estado !== 'done')) };
+  });
+  return { columnas, filas, hayProceso: tareas.length > 0 };
+}
+
+/** Mover una tarjeta en el mapa por recorrido: cambia su versión y el paso al que queda enlazada. */
+export function moverEnMapaProceso(proyecto, id, pasoId, prioridad) {
+  const proceso = procesoDe(proyecto);
+  return {
+    ...proyecto,
+    historias: proyecto.historias.map((h) => (h.id === id ? { ...h, prioridad } : h)),
+    proceso: {
+      ...proceso,
+      pasos: proceso.pasos.map((p) => {
+        const sin = p.historiaIds.filter((x) => x !== id);
+        return { ...p, historiaIds: p.id === pasoId ? [...sin, id] : sin };
+      }),
+    },
+  };
+}
+
 export function moverEnMapa(historias, id, epica, prioridad) {
   return historias.map((h) => (h.id === id ? { ...h, epica, prioridad } : h));
 }
