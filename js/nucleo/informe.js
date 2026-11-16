@@ -4,7 +4,7 @@ import { enunciado, PRIORIDADES, TIPOS } from './historias.js';
 import { ESTADOS, resumenSprint, resumenEpicas, puntosDe } from './proyecto.js';
 import { alcanceDe, cotizacion, formatoMonto, montoHito, comercialDe } from './comercial.js';
 import { wsjf } from './priorizacion.js';
-import { procesoDe, TIPOS_PASO, revisarProceso } from './proceso.js';
+import { procesoDe, TIPOS_PASO, revisarProceso, flujoDeValor, formatoDuracion } from './proceso.js';
 import { libroExcel } from './xlsx.js';
 import { hipotesis } from './okr.js';
 
@@ -101,8 +101,9 @@ export function excelProyecto(proyecto) {
     const actor = Object.fromEntries(ctx.proceso.carriles.map((ca) => [ca.id, ca.nombre]));
     const n = new Map(ctx.proceso.pasos.map((p, i) => [p.id, i + 1]));
     hojas.push({ nombre: 'Proceso', titulo: 'Proceso', nota: 'Pasos en orden; «Va a» indica la salida (y su respuesta, en las decisiones).',
-      columnas: [{ titulo: 'N°', ancho: 5 }, { titulo: 'Tipo', ancho: 11 }, { titulo: 'Actor', ancho: 18 }, { titulo: 'Paso', ancho: 40 }, { titulo: 'Va a', ancho: 30 }, { titulo: 'Historias', ancho: 50 }],
+      columnas: [{ titulo: 'N°', ancho: 5 }, { titulo: 'Tipo', ancho: 11 }, { titulo: 'Actor', ancho: 18 }, { titulo: 'Paso', ancho: 40 }, { titulo: 'Trabajo', ancho: 11 }, { titulo: 'Espera antes', ancho: 12 }, { titulo: 'Va a', ancho: 30 }, { titulo: 'Historias', ancho: 50 }],
       filas: ctx.proceso.pasos.map((p, i) => [{ v: i + 1, estilo: 'centro' }, { v: TIPOS_PASO[p.tipo], estilo: 'centro' }, actor[p.carril] || '', p.texto,
+        { v: Number.isFinite(p.trabajo) ? formatoDuracion(p.trabajo) : '', estilo: 'centro' }, { v: Number.isFinite(p.espera) ? formatoDuracion(p.espera) : '', estilo: 'centro' },
         p.siguientes.map((s) => `→ ${n.get(s.a)}${s.etiqueta ? ` (${s.etiqueta})` : ''}`).join('\n'),
         p.historiaIds.map((id) => `${ctx.cod.get(id)} ${proyecto.historias.find((h) => h.id === id)?.titulo || ''}`).join('\n')]) });
   }
@@ -177,6 +178,18 @@ export function documentoProyecto(proyecto, hoy = new Date()) {
       filas: ctx.proceso.pasos.map((p, i) => [String(i + 1), TIPOS_PASO[p.tipo], actor[p.carril] || '', p.texto,
         p.siguientes.map((s) => `${num.get(s.a)}${s.etiqueta ? ` (${s.etiqueta})` : ''}`).join(', '),
         p.historiaIds.map((id) => ctx.cod.get(id)).join(', ')]) });
+    const vsm = flujoDeValor(ctx.proceso);
+    if (vsm.medidos) {
+      const cuello = ctx.proceso.pasos.find((p) => p.id === vsm.cuello);
+      b.push({ t: 'h2', texto: 'Flujo de valor' }, { t: 'datos', pares: [
+        ['Tiempo total del circuito', formatoDuracion(vsm.total)],
+        ['Trabajo', formatoDuracion(vsm.trabajo)],
+        ['Espera', formatoDuracion(vsm.espera)],
+        ['Eficiencia del flujo', `${vsm.eficiencia}% del tiempo se trabaja; el resto se espera`],
+        ['Cuello de botella', cuello ? `${cuello.texto} (${formatoDuracion(cuello.espera || 0)} de espera)` : '—'],
+      ] });
+      if (vsm.faltan) b.push({ t: 'p', nota: true, texto: `${vsm.faltan} ${vsm.faltan === 1 ? 'tarea no tiene' : 'tareas no tienen'} tiempos anotados y no suman.` });
+    }
     const { historiasFuera } = revisarProceso(ctx.proceso, proyecto.historias);
     if (historiasFuera.length) b.push({ t: 'p', nota: true, texto: `Historias de soporte, fuera del circuito: ${historiasFuera.map((h) => `${ctx.cod.get(h.id)} ${h.titulo}`).join('; ')}.` });
   }

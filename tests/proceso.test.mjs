@@ -164,3 +164,23 @@ test('mapa clásico: columnas en el orden del recorrido, con su actor, y soporte
   assert.ok(aSoporte.proceso.pasos.every((x) => !x.historiaIds.includes('h1')), 'a soporte = sin paso');
   assert.equal(mapaPorProceso({ ...nuevoProyecto('Y'), historias: [] }).hayProceso, false);
 });
+
+test('VSM: las duraciones se leen como las escribe una persona y se muestran legibles', async () => {
+  const { leerDuracion, formatoDuracion } = await import('../js/nucleo/proceso.js');
+  assert.deepEqual(['45 min', '2 h', '1,5 d', '3 días', '1 semana', '2', '', 'mucho'].map(leerDuracion), [45, 120, 2160, 4320, 10080, 120, null, null]);
+  assert.deepEqual([30, 90, 120, 2160, null].map(formatoDuracion), ['30 min', '1 h 30 min', '2 h', '1,5 d', '—']);
+});
+
+test('VSM: tiempo total, eficiencia y cuello de botella; las tareas sin tiempo no suman', async () => {
+  const { flujoDeValor } = await import('../js/nucleo/proceso.js');
+  const { p, ids } = pedido();
+  const conTiempos = { ...p, pasos: p.pasos.map((x) => (x.id === ids.elegir ? { ...x, trabajo: 30, espera: 0 } : x.id === ids.pagar ? { ...x, trabajo: 10, espera: 2880 } : x)) };
+  const v = flujoDeValor(conTiempos);
+  assert.equal(v.total, 2920);
+  assert.equal(v.trabajo, 40);
+  assert.equal(v.eficiencia, 1, 'casi todo el tiempo se espera');
+  assert.equal(v.cuello, ids.pagar);
+  assert.equal(v.faltan, 0);
+  assert.equal(flujoDeValor(p).medidos, 0, 'sin tiempos anotados no hay flujo que medir');
+  assert.equal(flujoDeValor(p).cuello, null);
+});

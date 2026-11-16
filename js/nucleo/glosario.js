@@ -2,6 +2,10 @@
 // Definiciones cortas, en lenguaje simple y con un ejemplo cuando ayuda.
 
 export const GLOSARIO = {
+  vsm: {
+    termino: 'Flujo de valor (VSM)',
+    texto: 'Mapa del proceso de punta a punta con el tiempo que se trabaja y el que se espera en cada paso. La eficiencia es trabajo dividido por tiempo total. Muestra el cuello de botella real antes de automatizar algo que no era el problema.',
+  },
   bpmn: {
     termino: 'BPMN (mapa del proceso)',
     texto: 'Notación estándar para dibujar procesos. Aquí usamos lo esencial: inicio (círculo), tarea (rectángulo), decisión (rombo), fin (círculo grueso) y un carril por cada actor. Sirve para validar el circuito con el cliente antes de escribir historias.',

@@ -797,3 +797,20 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .mapa--recorrido .mapa-actores th:empty { background: var(--tinta-2); }
 .mapa thead th.mapa-soporte { background: var(--pizarra); }
 .mapa-celda--soporte { background: var(--papel); }
+
+/* ── Flujo de valor (VSM) ── */
+.proceso-tiempo { fill: var(--pizarra); font: 500 10.5px var(--f-mono); }
+.proceso-cuello { fill: var(--alerta); font: 700 10.5px var(--f-texto); text-transform: uppercase; letter-spacing: .04em; }
+.proceso-nodo--cuello rect { stroke: var(--alerta); stroke-width: 3; stroke-dasharray: none; }
+.cifras--4 { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+@media (max-width: 640px) { .cifras--4 { grid-template-columns: 1fr 1fr; } }
+.vsm-barras { list-style: none; margin: 14px 0 6px; padding: 0; display: grid; gap: 6px; }
+.vsm-barras li { display: grid; grid-template-columns: minmax(120px, 2fr) minmax(0, 5fr) minmax(140px, 2fr); gap: 10px; align-items: center; font-size: .88rem; }
+.vsm-barras li.is-cuello .vsm-nombre { color: var(--alerta); font-weight: 700; }
+.vsm-nombre { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.vsm-pista { display: flex; height: 16px; background: var(--papel); border-radius: 4px; overflow: hidden; }
+.vsm-espera { background: repeating-linear-gradient(45deg, var(--niebla), var(--niebla) 4px, var(--superficie) 4px, var(--superficie) 8px); border-right: 1px solid var(--pizarra); }
+.vsm-trabajo { background: var(--cobre); }
+.vsm-valor { color: var(--pizarra); font: 500 .78rem var(--f-mono); }
+.vsm-muestra { display: inline-block; width: 14px; height: 10px; vertical-align: middle; border-radius: 2px; }
+@media (max-width: 640px) { .vsm-barras li { grid-template-columns: 1fr; gap: 2px; } }

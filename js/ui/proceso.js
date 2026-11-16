@@ -1,8 +1,8 @@
 // Pestaña «Proceso» del backlog: el circuito del cliente en carriles (BPMN liviano),
 // enlazado a las historias, con revisión de cobertura y exportación a BPMN 2.0.
-import { h, campo, selector, descargar, vacio, termino, pedirTexto } from './dom.js';
+import { h, campo, selector, descargar, vacio, termino, pedirTexto, avisar } from './dom.js';
 import {
-  TIPOS_PASO, procesoDe, agregarCarril, quitarCarril, renombrarCarril, moverCarril, agregarPaso, insertarPasoDespues,
+  TIPOS_PASO, procesoDe, flujoDeValor, leerDuracion, formatoDuracion, agregarCarril, quitarCarril, renombrarCarril, moverCarril, agregarPaso, insertarPasoDespues,
   editarPaso, eliminarPaso, moverPaso, conectar, desconectar, revisarProceso, disposicion, aBpmn,
 } from '../nucleo/proceso.js';
 import { nombreArchivo } from '../nucleo/exportar.js';
@@ -51,6 +51,7 @@ export function vistaProceso(app) {
     h('p', { class: 'ayuda' }, 'El circuito real del cliente, con un subconjunto de BPMN: inicio, tarea, decisión y fin, en carriles por actor. Enlaza cada tarea con sus historias para ver qué falta levantar. ', termino('bpmn')),
     seccionCarriles(proceso, cambiar),
     proceso.pasos.length ? diagrama(proceso) : null,
+    proceso.pasos.length ? panelFlujo(proceso) : null,
     h('section', { class: 'panel', 'aria-labelledby': 'proceso-pasos' },
       h('h2', { id: 'proceso-pasos' }, 'Pasos'),
       proceso.pasos.length
@@ -119,6 +120,10 @@ function filaPaso(app, proceso, paso, i, cambiar) {
           campo('Qué pasa', h('input', { type: 'text', value: paso.texto, maxlength: 160, placeholder: paso.tipo === 'decision' ? '¿Hay stock?' : 'Verbo + objeto: «Paga el pedido»', onchange: (e) => editar({ texto: e.target.value.trim() }) })),
           campo('Tipo', selector(TIPOS_PASO, paso.tipo, { onchange: (e) => editar({ tipo: e.target.value }) })),
           campo('Quién', selector(Object.fromEntries(proceso.carriles.map((c) => [c.id, c.nombre])), paso.carril, { onchange: (e) => editar({ carril: e.target.value }) }))),
+        paso.tipo === 'tarea' ? h('div', { class: 'editor-fila' },
+          campoDuracion('Tiempo de trabajo', paso.trabajo, 'Ej.: 30 min, 2 h', (min) => editar({ trabajo: min })),
+          campoDuracion('Espera antes de este paso', paso.espera, 'Ej.: 1 d, 4 h', (min) => editar({ espera: min }),
+            'Lo que el trabajo queda detenido antes de empezar este paso: una aprobación, un repuesto, una firma.')) : null,
 
         paso.tipo === 'fin' ? null : h('fieldset', { class: 'proceso-salidas' },
           h('legend', {}, paso.tipo === 'decision' ? 'Salidas (una por respuesta)' : 'Va a'),
@@ -182,6 +187,57 @@ function filaPaso(app, proceso, paso, i, cambiar) {
       abierto === paso.id ? crearEditor() : null));
 }
 
+/** Campo de duración: acepta «45 min», «2 h», «1,5 d»; vacío borra el dato. */
+function campoDuracion(etiqueta, valor, ejemplo, alGuardar, ayuda) {
+  return campo(etiqueta, h('input', {
+    type: 'text', inputmode: 'text', value: Number.isFinite(valor) ? formatoDuracion(valor) : '', placeholder: ejemplo,
+    onchange: (e) => {
+      const texto = e.target.value.trim();
+      if (!texto) { alGuardar(null); return; }
+      const min = leerDuracion(texto);
+      if (min === null) { avisar(`No entendí «${texto}». Escribe, por ejemplo, 45 min, 2 h o 1,5 d.`, 'error'); return; }
+      alGuardar(min);
+    },
+  }), ayuda);
+}
+
+/**
+ * Flujo de valor (VSM): cuánto del tiempo del circuito se trabaja y cuánto se espera, paso a paso.
+ * Muestra dónde está el cuello de botella antes de decidir qué automatizar.
+ */
+function panelFlujo(proceso) {
+  const v = flujoDeValor(proceso);
+  const titulo = h('h2', { id: 'proceso-flujo' }, 'Flujo de valor', termino('vsm'));
+  if (!v.medidos) {
+    return h('section', { class: 'panel', 'aria-labelledby': 'proceso-flujo' }, titulo,
+      h('p', { class: 'ayuda' }, 'Anota en cada tarea cuánto se trabaja y cuánto se espera antes de ella (abre el paso en la lista de abajo). Así ves dónde se pierde tiempo antes de decidir qué automatizar: muchas veces el problema no es el trabajo, es la espera.'));
+  }
+  const cuello = proceso.pasos.find((p) => p.id === v.cuello);
+  const mayor = Math.max(...v.pasos.map((p) => p.total), 1);
+  const cifra = (nombre, valor, extra) => h('div', { class: 'cifra' }, h('dt', {}, nombre), h('dd', {}, valor, extra ? h('span', { class: 'tarjeta-meta' }, extra) : null));
+  return h('section', { class: 'panel', 'aria-labelledby': 'proceso-flujo' }, titulo,
+    h('dl', { class: 'cifras cifras--4' },
+      cifra('Tiempo total', formatoDuracion(v.total)),
+      cifra('Trabajo', formatoDuracion(v.trabajo)),
+      cifra('Espera', formatoDuracion(v.espera)),
+      cifra('Eficiencia del flujo', `${v.eficiencia}%`, ' del tiempo se trabaja')),
+    cuello ? h('p', { class: 'aviso-suave' }, h('strong', {}, 'Cuello de botella: '), `«${cuello.texto}»`,
+      v.espera ? ` espera ${formatoDuracion(cuello.espera || 0)} antes de empezar. Antes de automatizar otros pasos, pregunta por qué se espera aquí.` : ` es el paso con más trabajo (${formatoDuracion(cuello.trabajo || 0)}).`) : null,
+    h('ol', { class: 'vsm-barras', 'aria-label': 'Trabajo y espera por paso' }, v.pasos.map((p) => {
+      const ancho = (min) => `${Math.max(min ? 1.5 : 0, (min / mayor) * 100)}%`;
+      const barra = (clase, min, texto) => { const el = h('span', { class: clase, title: texto }); el.style.width = ancho(min); return el; };
+      return h('li', { class: p.id === v.cuello ? 'is-cuello' : null },
+        h('span', { class: 'vsm-nombre', title: p.texto }, p.texto || 'Paso sin nombre'),
+        h('span', { class: 'vsm-pista' },
+          barra('vsm-espera', p.espera, `Espera: ${formatoDuracion(p.espera)}`),
+          barra('vsm-trabajo', p.trabajo, `Trabajo: ${formatoDuracion(p.trabajo)}`)),
+        h('span', { class: 'vsm-valor' }, `${formatoDuracion(p.trabajo)} + ${formatoDuracion(p.espera)} de espera`));
+    })),
+    h('p', { class: 'vsm-leyenda ayuda' }, h('span', { class: 'vsm-muestra vsm-espera' }), ' espera  ', h('span', { class: 'vsm-muestra vsm-trabajo' }), ' trabajo',
+      v.faltan ? ` · ${v.faltan} ${v.faltan === 1 ? 'tarea sin tiempos no suma' : 'tareas sin tiempos no suman'}` : '',
+      ' · Se suma el camino principal, en el orden del proceso; los días son de calendario.'));
+}
+
 function agrupar(lista) {
   const m = new Map();
   for (const x of lista) { const k = x.epica || 'Sin épica'; if (!m.has(k)) m.set(k, []); m.get(k).push(x); }
@@ -213,6 +269,8 @@ function etiquetaFlecha(f) {
 /** Diagrama dibujado a partir de la lista: no se arrastra, se ordena con la lista de pasos. */
 function diagrama(proceso) {
   const d = disposicion(proceso);
+  const vsm = flujoDeValor(proceso);
+  const tiempos = new Map(proceso.pasos.map((p) => [p.id, p]));
   const resumen = proceso.pasos.map((p, i) => `${i + 1}. ${p.texto || p.tipo}`).join('; ');
   const lienzo = svg('svg', { viewBox: `0 0 ${d.ancho} ${d.alto}`, width: d.ancho, height: d.alto, class: 'proceso-svg', role: 'img', 'aria-label': `Diagrama del proceso: ${resumen}` },
     svg('defs', {}, svg('marker', { id: 'punta', viewBox: '0 0 10 10', refX: 9, refY: 5, markerWidth: 7, markerHeight: 7, orient: 'auto-start-reverse' }, svg('path', { d: 'M0,0 L10,5 L0,10 z', class: 'proceso-punta' }))),
@@ -227,10 +285,16 @@ function diagrama(proceso) {
       const texto = (x, y0, ancla = 'middle') => svg('text', { x, y: y0, 'text-anchor': ancla, class: 'proceso-texto' },
         n.lineas.map((l, k) => svg('tspan', { x, dy: k ? '1.15em' : 0 }, l)));
       if (n.tipo === 'tarea') {
-        return svg('g', { class: `proceso-nodo${n.historias ? '' : ' proceso-nodo--sin'}` },
+        const paso = tiempos.get(n.id);
+        const conTiempo = Number.isFinite(paso.trabajo) || Number.isFinite(paso.espera);
+        return svg('g', { class: `proceso-nodo${n.historias ? '' : ' proceso-nodo--sin'}${n.id === vsm.cuello ? ' proceso-nodo--cuello' : ''}` },
           svg('rect', { x: n.x, y: n.y, width: n.ancho, height: n.alto, rx: 10 }),
           texto(n.cx, n.cy - (n.lineas.length - 1) * 7.5 + 4),
-          n.historias ? svg('text', { x: n.x + n.ancho - 6, y: n.y + n.alto - 6, 'text-anchor': 'end', class: 'proceso-cuenta' }, `${n.historias} h`) : null);
+          n.historias ? svg('text', { x: n.x + n.ancho - 6, y: n.y + n.alto - 6, 'text-anchor': 'end', class: 'proceso-cuenta' }, `${n.historias} h`) : null,
+          // Bajo la tarea: trabajo y espera, como la línea de tiempo de un VSM
+          conTiempo ? svg('text', { x: n.cx, y: n.y + n.alto + 15, 'text-anchor': 'middle', class: 'proceso-tiempo' },
+            `${formatoDuracion(paso.trabajo || 0)} · espera ${formatoDuracion(paso.espera || 0)}`) : null,
+          n.id === vsm.cuello ? svg('text', { x: n.cx, y: n.y - 6, 'text-anchor': 'middle', class: 'proceso-cuello' }, 'Cuello de botella') : null);
       }
       if (n.tipo === 'decision') {
         const r = n.ancho / 2;

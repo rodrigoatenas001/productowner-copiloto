@@ -27,8 +27,74 @@ export function normalizarProceso(datos, idsHistoria = new Set()) {
       .filter((s) => ids.has(s?.a)).slice(0, 6)
       .map((s) => ({ a: s.a, etiqueta: texto(s.etiqueta, 40) })),
     historiaIds: (Array.isArray(p?.historiaIds) ? p.historiaIds : []).filter((id) => idsHistoria.has(id)).slice(0, 30),
+    trabajo: minutos(p?.trabajo),
+    espera: minutos(p?.espera),
   }));
   return { carriles, pasos };
+}
+
+// ── Flujo de valor (VSM): cuánto se trabaja y cuánto se espera en cada paso ──────
+
+/** Minutos válidos (de 0 a un año) o null. */
+const minutos = (v) => (Number.isFinite(v) && v >= 0 && v <= 525600 ? Math.round(v) : null);
+
+const UNIDADES = [
+  [/^(?:min|mins|minutos?|m)$/, 1],
+  [/^(?:h|hr|hrs|horas?)$/, 60],
+  [/^(?:d|dias?|días?)$/, 1440],
+  [/^(?:sem|semanas?)$/, 10080],
+];
+
+/**
+ * Lee una duración escrita como la diría una persona: «45 min», «2 h», «1,5 d», «3 días», «1 semana».
+ * Sin unidad se entiende en horas. Devuelve minutos, o null si no se entiende.
+ */
+export function leerDuracion(texto) {
+  const t = String(texto ?? '').trim().toLowerCase().replace(',', '.');
+  if (!t) return null;
+  const m = t.match(/^(\d+(?:\.\d+)?)\s*([a-záéíóú]*)\.?$/);
+  if (!m) return null;
+  const valor = Number(m[1]);
+  const unidad = m[2] ? UNIDADES.find(([re]) => re.test(m[2]))?.[1] : 60;
+  return unidad ? minutos(valor * unidad) : null;
+}
+
+/** «45 min», «2 h», «1 h 30 min», «2,5 d». Los días son de calendario (24 h): las esperas corren aunque nadie trabaje. */
+export function formatoDuracion(min) {
+  if (min === null || min === undefined) return '—';
+  if (min < 60) return `${min} min`;
+  if (min < 1440) {
+    const h = Math.floor(min / 60);
+    const resto = min % 60;
+    return resto ? `${h} h ${resto} min` : `${h} h`;
+  }
+  const d = Math.round((min / 1440) * 10) / 10;
+  return `${String(d).replace('.', ',')} d`;
+}
+
+/**
+ * Resumen del flujo de valor: tiempo total (suma de trabajo y espera de las tareas en el orden del
+ * proceso, como el camino principal), eficiencia (trabajo / total) y el cuello de botella (el paso con
+ * más espera; si nadie anotó esperas, el de más trabajo).
+ */
+export function flujoDeValor(proceso) {
+  const tareas = proceso.pasos.filter((p) => p.tipo === 'tarea');
+  const conTiempo = tareas.filter((p) => Number.isFinite(p.trabajo) || Number.isFinite(p.espera));
+  const trabajo = conTiempo.reduce((t, p) => t + (p.trabajo || 0), 0);
+  const espera = conTiempo.reduce((t, p) => t + (p.espera || 0), 0);
+  const total = trabajo + espera;
+  const criterio = espera > 0 ? (p) => p.espera || 0 : (p) => p.trabajo || 0;
+  const cuello = conTiempo.length ? conTiempo.reduce((a, b) => (criterio(b) > criterio(a) ? b : a)) : null;
+  return {
+    pasos: conTiempo.map((p) => ({ id: p.id, texto: p.texto, trabajo: p.trabajo || 0, espera: p.espera || 0, total: (p.trabajo || 0) + (p.espera || 0) })),
+    trabajo,
+    espera,
+    total,
+    eficiencia: total ? Math.round((trabajo / total) * 100) : null,
+    cuello: cuello && criterio(cuello) > 0 ? cuello.id : null,
+    medidos: conTiempo.length,
+    faltan: tareas.length - conTiempo.length,
+  };
 }
 
 export const procesoDe = (proyecto) => proyecto.proceso || PROCESO_VACIO;
