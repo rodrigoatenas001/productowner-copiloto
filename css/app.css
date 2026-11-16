@@ -835,3 +835,27 @@ main.principal--ancho .vista-cabecera, main.principal--ancho .caja-info, main.pr
 .stakeholder-nuevo { margin-top: 14px; display: grid; gap: 4px; }
 .stakeholder-nuevo > button { justify-self: start; }
 @media (max-width: 640px) { .matriz-pi { grid-template-columns: 1fr; grid-template-rows: auto; } .matriz-pi-eje { display: none; } }
+
+/* ── Medición de resultados clave (KPIs) ── */
+.okr-kr { display: grid; gap: 4px; }
+.okr-kr-fila { display: flex; flex-wrap: wrap; align-items: center; gap: 6px; }
+.kr-medicion { margin: 0 0 6px 2px; }
+.kr-medicion > summary { display: flex; flex-wrap: wrap; align-items: center; gap: 10px; cursor: pointer; min-height: 32px; }
+.kr-resumen { display: inline-flex; align-items: center; gap: 8px; }
+.kr-flecha--mejora { color: var(--bosque); }
+.kr-flecha--empeora { color: var(--alerta); }
+.kr-flecha--igual { color: var(--pizarra); }
+.kr-tendencia { display: block; }
+.kr-linea { fill: none; stroke: var(--cobre); stroke-width: 2; }
+.kr-punto { fill: var(--cobre); }
+.kr-meta { stroke: var(--bosque); stroke-width: 1; stroke-dasharray: 3 3; }
+.kr-campos { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 14px; margin: 8px 0; font-size: .88rem; }
+.kr-campos label { display: inline-flex; align-items: center; gap: 6px; }
+.kr-numero { width: 7em; }
+.kr-mediciones { list-style: none; margin: 0; padding: 0; display: grid; gap: 2px; font-size: .86rem; color: var(--pizarra); }
+.kr-mediciones li { display: flex; align-items: center; gap: 6px; }
+.okr-kr::before { content: none; }
+.okr-kr-fila::before { content: "→"; color: var(--pizarra); }
+.kr-campos input { width: auto; max-width: 100%; margin: 0; }
+.kr-campos input.kr-numero { width: 7em; }
+.kr-campos input[type="date"] { width: 11em; }

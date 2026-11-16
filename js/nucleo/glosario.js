@@ -2,6 +2,10 @@
 // Definiciones cortas, en lenguaje simple y con un ejemplo cuando ayuda.
 
 export const GLOSARIO = {
+  adopcion: {
+    termino: 'KPIs de producto y adopción',
+    texto: 'Indicadores que dicen si el sistema cambió algo, no solo si se entregó: cuántas personas lo usan en vez del papel, cuánto bajó el tiempo de ciclo, cuántos errores menos hay. Se mide una línea base antes, una meta y mediciones periódicas.',
+  },
   stakeholders: {
     termino: 'Matriz de stakeholders (poder / interés)',
     texto: 'Ubica a cada persona según su poder sobre el proyecto y su interés en él. Alto y alto: gestionar de cerca. Alto poder y bajo interés: mantener satisfechos. Bajo poder y alto interés (muchas veces quienes operan): mantener informados y escucharlos.',

@@ -23,7 +23,7 @@ export function agregarResultado(proyecto, objetivoId, texto) {
   if (!resultado) return proyecto;
   return {
     ...proyecto,
-    objetivos: (proyecto.objetivos || []).map((o) => (o.id === objetivoId ? { ...o, resultados: [...o.resultados, { id: nuevoId('kr'), texto: resultado }] } : o)),
+    objetivos: (proyecto.objetivos || []).map((o) => (o.id === objetivoId ? { ...o, resultados: [...o.resultados, { id: nuevoId('kr'), texto: resultado, unidad: '', base: null, meta: null, mediciones: [] }] } : o)),
   };
 }
 
@@ -84,13 +84,95 @@ export function resultadosDeEpica(proyecto, epica) {
   return (proyecto.objetivos || []).flatMap((o) => o.resultados.filter((r) => ids.has(r.id)).map((r) => ({ objetivo: o.objetivo, texto: r.texto })));
 }
 
+// ── Medición de resultados clave (KPIs de producto y adopción) ─────────────
+
+const numero = (v) => (typeof v === 'number' && Number.isFinite(v) ? v : null);
+const fecha = (v) => (typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null);
+
+/** Unidad, línea base, meta y mediciones fechadas (ordenadas) de un resultado clave. */
+function normalizarMedicion(r) {
+  return {
+    unidad: txt(r?.unidad, 20),
+    base: numero(r?.base),
+    meta: numero(r?.meta),
+    mediciones: (Array.isArray(r?.mediciones) ? r.mediciones : [])
+      .map((m) => ({ fecha: fecha(m?.fecha), valor: numero(m?.valor) })).filter((m) => m.fecha && m.valor !== null)
+      .sort((a, b) => a.fecha.localeCompare(b.fecha)).slice(-60),
+  };
+}
+
+export function editarResultado(proyecto, resultadoId, cambios) {
+  return {
+    ...proyecto,
+    objetivos: (proyecto.objetivos || []).map((o) => ({ ...o, resultados: o.resultados.map((r) => (r.id === resultadoId ? { ...r, ...cambios } : r)) })),
+  };
+}
+
+/** Registra una medición; si ya hay una de esa fecha, la reemplaza. */
+export function agregarMedicion(proyecto, resultadoId, { fecha: f, valor }) {
+  if (!fecha(f) || numero(valor) === null) return proyecto;
+  return {
+    ...proyecto,
+    objetivos: (proyecto.objetivos || []).map((o) => ({
+      ...o,
+      resultados: o.resultados.map((r) => (r.id === resultadoId
+        ? { ...r, mediciones: [...(r.mediciones || []).filter((m) => m.fecha !== f), { fecha: f, valor }].sort((a, b) => a.fecha.localeCompare(b.fecha)) }
+        : r)),
+    })),
+  };
+}
+
+export function quitarMedicion(proyecto, resultadoId, f) {
+  return {
+    ...proyecto,
+    objetivos: (proyecto.objetivos || []).map((o) => ({ ...o, resultados: o.resultados.map((r) => (r.id === resultadoId ? { ...r, mediciones: (r.mediciones || []).filter((m) => m.fecha !== f) } : r)) })),
+  };
+}
+
+/**
+ * Avance de un resultado clave: de la línea base a la meta, con la última medición.
+ * Funciona si la meta es subir (adopción) o bajar (errores, tiempo de ciclo).
+ * @returns {{ultimo: number|null, avance: number|null, tendencia: 'mejora'|'empeora'|'igual'|null}}
+ */
+export function avanceResultado(r) {
+  const meds = r.mediciones || [];
+  const ultimo = meds.length ? meds[meds.length - 1].valor : null;
+  const anterior = meds.length > 1 ? meds[meds.length - 2].valor : r.base;
+  const sube = r.base !== null && r.meta !== null ? r.meta >= r.base : true;
+  let avance = null;
+  if (ultimo !== null && r.base !== null && r.meta !== null && r.meta !== r.base) {
+    avance = Math.round(Math.min(1, Math.max(0, (ultimo - r.base) / (r.meta - r.base))) * 100);
+  }
+  let tendencia = null;
+  if (ultimo !== null && anterior !== null && anterior !== undefined) {
+    tendencia = ultimo === anterior ? 'igual' : (ultimo > anterior) === sube ? 'mejora' : 'empeora';
+  }
+  return { ultimo, avance, tendencia };
+}
+
+/** Resultados clave típicos de adopción: no basta con entregar a tiempo, hay que ver si se usa. */
+export const KPIS_ADOPCION = [
+  { texto: 'Personas que usan el sistema en vez del método anterior', unidad: '%', base: 0, meta: 80 },
+  { texto: 'Tiempo de ciclo del proceso principal', unidad: 'h', base: null, meta: null },
+  { texto: 'Errores de digitación o reprocesos por semana', unidad: 'n°', base: null, meta: null },
+];
+
+export function agregarKpisAdopcion(proyecto, objetivoId) {
+  return {
+    ...proyecto,
+    objetivos: (proyecto.objetivos || []).map((o) => (o.id === objetivoId
+      ? { ...o, resultados: [...o.resultados, ...KPIS_ADOPCION.filter((k) => !o.resultados.some((r) => r.texto === k.texto)).map((k) => ({ id: nuevoId('kr'), ...k, mediciones: [] }))] }
+      : o)),
+  };
+}
+
 export function normalizarOkr(objetivos, epicasInfo) {
   const lista = (Array.isArray(objetivos) ? objetivos : []).slice(0, 30)
     .map((o) => ({
       id: txt(o?.id, 60) || nuevoId('o'),
       objetivo: txt(o?.objetivo, 200),
       resultados: (Array.isArray(o?.resultados) ? o.resultados : []).slice(0, 10)
-        .map((r) => ({ id: txt(r?.id, 60) || nuevoId('kr'), texto: txt(r?.texto, 200) })).filter((r) => r.texto),
+        .map((r) => ({ id: txt(r?.id, 60) || nuevoId('kr'), texto: txt(r?.texto, 200), ...normalizarMedicion(r) })).filter((r) => r.texto),
     }))
     .filter((o) => o.objetivo);
   const ids = new Set(lista.flatMap((o) => o.resultados.map((r) => r.id)));

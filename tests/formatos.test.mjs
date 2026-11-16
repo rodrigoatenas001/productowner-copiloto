@@ -53,7 +53,7 @@ test('Excel del backlog: encabezado fijo, filtros, prioridad con color y una fil
 test('Excel del proyecto: hojas de resumen, backlog, épicas, proceso, sprints, hitos y cambios', async () => {
   const libro = leerZip(excelProyecto(await carla()))['xl/workbook.xml'];
   const hojas = [...libro.matchAll(/<sheet name="([^"]+)"/g)].map((m) => m[1]);
-  assert.deepEqual(hojas, ['Resumen', 'Backlog', 'Épicas', 'Proceso', 'Sprints', 'Hitos de pago', 'Cambios']);
+  assert.deepEqual(hojas, ['Resumen', 'Backlog', 'Épicas', 'Resultados clave', 'Proceso', 'Sprints', 'Hitos de pago', 'Cambios']);
   assert.match(libro, /_xlnm.Print_Titles/);
 });
 

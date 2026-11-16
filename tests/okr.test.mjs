@@ -68,3 +68,26 @@ test('OKR sobreviven al respaldo y se limpian vínculos rotos', () => {
   assert.equal(n.objetivos.length, 1);
   assert.deepEqual(n.epicasInfo.Pagos.resultados, [p.objetivos[0].resultados[0].id]);
 });
+
+test('KPIs: avance de la línea base a la meta, al subir o al bajar, con tendencia', async () => {
+  const { avanceResultado, agregarMedicion, agregarKpisAdopcion, normalizarOkr, KPIS_ADOPCION } = await import('../js/nucleo/okr.js');
+  const adopcion = { base: 0, meta: 80, mediciones: [{ fecha: '2026-10-01', valor: 10 }, { fecha: '2026-11-01', valor: 40 }] };
+  assert.deepEqual(avanceResultado(adopcion), { ultimo: 40, avance: 50, tendencia: 'mejora' });
+  const errores = { base: 20, meta: 5, mediciones: [{ fecha: '2026-10-01', valor: 12 }, { fecha: '2026-11-01', valor: 14 }] };
+  assert.deepEqual(avanceResultado(errores), { ultimo: 14, avance: 40, tendencia: 'empeora' }, 'bajar es avanzar; subir, empeorar');
+  assert.equal(avanceResultado({ base: null, meta: null, mediciones: [] }).avance, null);
+
+  let p = agregarObjetivo({ objetivos: [], epicasInfo: {} }, 'Que el sistema se use');
+  p = agregarKpisAdopcion(p, p.objetivos[0].id);
+  assert.equal(p.objetivos[0].resultados.length, KPIS_ADOPCION.length);
+  assert.equal(agregarKpisAdopcion(p, p.objetivos[0].id).objetivos[0].resultados.length, KPIS_ADOPCION.length, 'no se duplican');
+  const kr = p.objetivos[0].resultados[0].id;
+  p = agregarMedicion(p, kr, { fecha: '2026-11-08', valor: 30 });
+  p = agregarMedicion(p, kr, { fecha: '2026-11-01', valor: 20 });
+  p = agregarMedicion(p, kr, { fecha: '2026-11-08', valor: 35 });
+  assert.deepEqual(p.objetivos[0].resultados[0].mediciones, [{ fecha: '2026-11-01', valor: 20 }, { fecha: '2026-11-08', valor: 35 }], 'ordenadas y una por fecha');
+  assert.equal(agregarMedicion(p, kr, { fecha: 'ayer', valor: 1 }), p, 'fecha inválida no cambia nada');
+  const limpio = normalizarOkr(JSON.parse(JSON.stringify(p.objetivos)), {});
+  assert.deepEqual(limpio.objetivos[0].resultados[0].mediciones.map((m) => m.valor), [20, 35]);
+  assert.equal(limpio.objetivos[0].resultados[0].unidad, '%');
+});

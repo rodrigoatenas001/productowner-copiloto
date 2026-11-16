@@ -6,7 +6,7 @@ import { alcanceDe, cotizacion, formatoMonto, montoHito, comercialDe } from './c
 import { wsjf } from './priorizacion.js';
 import { procesoDe, TIPOS_PASO, revisarProceso, flujoDeValor, formatoDuracion } from './proceso.js';
 import { libroExcel } from './xlsx.js';
-import { hipotesis } from './okr.js';
+import { hipotesis, avanceResultado } from './okr.js';
 import { stakeholdersDe, cuadranteDe, CUADRANTES_PI, ROLES_STAKEHOLDER, NIVELES } from './stakeholders.js';
 
 const ESTADO_SPRINT = { planificado: 'Planificado', activo: 'En curso', cerrado: 'Cerrado' };
@@ -98,6 +98,17 @@ export function excelProyecto(proyecto) {
         hipotesis(x) || ''];
     }) },
   ];
+  const krs = (proyecto.objetivos || []).flatMap((o) => o.resultados.map((r) => ({ o, r })));
+  if (krs.length) {
+    hojas.push({ nombre: 'Resultados clave', titulo: 'Objetivos y resultados clave', nota: 'Avance de la línea base a la meta con la última medición.',
+      columnas: [{ titulo: 'Objetivo', ancho: 30 }, { titulo: 'Resultado clave', ancho: 44 }, { titulo: 'Unidad', ancho: 8 }, { titulo: 'Línea base', ancho: 10 }, { titulo: 'Meta', ancho: 10 }, { titulo: 'Última medición', ancho: 13 }, { titulo: 'Fecha', ancho: 11 }, { titulo: 'Avance %', ancho: 10 }, { titulo: 'Mediciones', ancho: 50 }],
+      filas: krs.map(({ o, r }) => {
+        const a = avanceResultado(r);
+        const ult = (r.mediciones || []).at(-1);
+        return [o.objetivo, r.texto, { v: r.unidad || '', estilo: 'centro' }, r.base ?? '', r.meta ?? '', a.ultimo ?? '', fechaCorta(ult?.fecha), a.avance ?? '',
+          (r.mediciones || []).map((m) => `${fechaCorta(m.fecha)}: ${m.valor}`).join('\n')];
+      }) });
+  }
   const personas = stakeholdersDe(proyecto);
   if (personas.length) {
     const actorDe = Object.fromEntries(ctx.proceso.carriles.map((ca) => [ca.id, ca.nombre]));
@@ -274,6 +285,20 @@ export function documentoProyecto(proyecto, hoy = new Date()) {
     tras = false;
     b.push({ t: 'tabla', anchos: [16, 56, 12, 16], columnas: ['Fecha', 'Descripción', 'Horas', 'Estado'],
       filas: proyecto.cambios.map((x) => [fechaCorta(x.fecha), x.descripcion, x.horas ? String(x.horas) : '', ESTADO_CAMBIO[x.estado] || x.estado]) });
+  }
+
+  const medidos = (proyecto.objetivos || []).flatMap((o) => o.resultados.filter((r) => (r.mediciones || []).length || r.meta !== null).map((r) => ({ o, r })));
+  if (medidos.length) {
+    seccion('Resultados medidos', { nuevaPagina: tras });
+    tras = false;
+    b.push({ t: 'p', texto: 'No basta con entregar a tiempo: estos indicadores dicen si el sistema se usa y si mejoró el proceso.' });
+    b.push({ t: 'tabla', anchos: [40, 14, 14, 16, 16], columnas: ['Resultado clave', 'Línea base', 'Meta', 'Última medición', 'Avance'],
+      filas: medidos.map(({ r }) => {
+        const a = avanceResultado(r);
+        const u = r.unidad ? ` ${r.unidad}` : '';
+        const v = (n) => (n === null || n === undefined ? '—' : `${n.toLocaleString('es-CL')}${u}`);
+        return [r.texto, v(r.base), v(r.meta), v(a.ultimo), a.avance === null ? '—' : `${a.avance}%`];
+      }) });
   }
 
   const acciones = (proyecto.retros || []).flatMap((r) => (r.acciones || []).map((x) => `${x.texto}${x.responsable ? ` (${x.responsable})` : ''}${x.hecha ? ' ✓' : ''}`));

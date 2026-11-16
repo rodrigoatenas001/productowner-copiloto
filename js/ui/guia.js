@@ -61,8 +61,8 @@ export const ETAPAS = [
   },
   {
     nombre: 'Aprender', sub: 'y mejorar',
-    texto: 'Haces la retrospectiva, revisas si las hipótesis se cumplieron y practicas con el taller.',
-    destinos: [['Retro', 'retro'], ['Taller', 'taller', 'trivia']],
+    texto: 'Mides si el sistema se usa y mejoró el proceso (KPIs de adopción), revisas si las hipótesis se cumplieron, haces la retrospectiva y practicas con el taller.',
+    destinos: [['Resultados', 'backlog', 'epicas'], ['Retro', 'retro'], ['Taller', 'taller', 'trivia']],
     estado: (p) => ((p.retros || []).length ? ['hecho', n(p.retros.length, 'retrospectiva', 'retrospectivas')] : ['pendiente', 'Sin retrospectivas']),
   },
 ];
