@@ -2,6 +2,10 @@
 // Definiciones cortas, en lenguaje simple y con un ejemplo cuando ayuda.
 
 export const GLOSARIO = {
+  bpmn: {
+    termino: 'BPMN (mapa del proceso)',
+    texto: 'Notación estándar para dibujar procesos. Aquí usamos lo esencial: inicio (círculo), tarea (rectángulo), decisión (rombo), fin (círculo grueso) y un carril por cada actor. Sirve para validar el circuito con el cliente antes de escribir historias.',
+  },
   criterios: {
     termino: 'Criterios de aceptación',
     texto: 'Las condiciones que debe cumplir la historia para darla por terminada. Se escriben para poder probarlas con el cliente: «Dado… cuando… entonces…». Ej.: «Dado un producto agotado, cuando la clienta abre su ficha, entonces no puede agregarlo al carro».',

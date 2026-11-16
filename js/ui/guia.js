@@ -12,8 +12,8 @@ const n = (cantidad, singular, plural) => `${cantidad} ${cantidad === 1 ? singul
 export const ETAPAS = [
   {
     nombre: 'Levantar', sub: 'con el cliente',
-    texto: 'Pegas lo que te pidió el cliente y lo conviertes en historias con su valor (Como… quiero… para…), criterios de aceptación y reglas de negocio.',
-    destinos: [['Notas', 'notas'], ['Backlog', 'backlog', 'lista']],
+    texto: 'Dibujas el circuito del cliente por actores (BPMN liviano) y pegas lo que te pidió. Lo conviertes en historias con su valor (Como… quiero… para…), criterios de aceptación y reglas de negocio, enlazadas a cada paso.',
+    destinos: [['Proceso', 'backlog', 'proceso'], ['Notas', 'notas'], ['Backlog', 'backlog', 'lista']],
     estado: (p) => (p.historias.length ? ['hecho', n(p.historias.length, 'historia', 'historias')] : p.notas.trim() ? ['curso', 'Notas sin convertir'] : ['pendiente', 'Sin historias']),
   },
   {

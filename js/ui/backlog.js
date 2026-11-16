@@ -10,6 +10,7 @@ import { definicionesDe, marcar } from '../nucleo/definiciones.js';
 import { vistaEstimar } from './estimar.js';
 import { vistaPriorizar } from './priorizar.js';
 import { vistaRoadmap } from './roadmap.js';
+import { vistaProceso } from './proceso.js';
 import { panelObjetivos, detalleEpica } from './okr.js';
 import { pronosticar, textoPronostico } from '../nucleo/pronostico.js';
 import { agregarDependencia, quitarDependencia, dependenciasPendientes, creaCiclo } from '../nucleo/dependencias.js';
@@ -19,7 +20,7 @@ import { especificacionHistoria, especificacionEpica, reporteEpicas } from '../n
 
 const filtros = { texto: '', epica: '' };
 let revision = null; // { historiaId, pasos, estado: 'corriendo'|'lista'|'error', resultado, error }
-let modo = 'lista'; // 'lista' | 'priorizar' | 'roadmap' | 'epicas' | 'mapa' | 'estimar'
+let modo = 'lista'; // 'lista' | 'proceso' | 'priorizar' | 'roadmap' | 'epicas' | 'mapa' | 'estimar'
 let abierta = null;
 let arrastrando = null;
 const seleccion = new Set(); // historias marcadas para cambios en grupo
@@ -135,7 +136,7 @@ export function vistaBacklog(app) {
       h('h1', {}, 'Backlog'),
       h('p', { class: 'bajada' }, 'Arriba lo más importante. Arrastra para reordenar o usa las flechas.')),
     h('div', { class: 'pestanas', role: 'tablist', 'aria-label': 'Vista del backlog' },
-      Object.entries({ lista: 'Lista priorizada', priorizar: 'Priorizar', roadmap: 'Roadmap', epicas: 'Épicas', mapa: 'Mapa', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
+      Object.entries({ lista: 'Lista priorizada', proceso: 'Proceso', priorizar: 'Priorizar', roadmap: 'Roadmap', epicas: 'Épicas', mapa: 'Mapa', estimar: 'Estimar en equipo' }).map(([m, texto]) => h('button', {
         type: 'button', role: 'tab', 'aria-selected': String(modo === m), class: 'pestana',
         onclick: () => { modo = m; app.render(); },
       }, texto))),
@@ -144,6 +145,7 @@ export function vistaBacklog(app) {
     modo === 'mapa' ? vistaMapa(app) : null,
     modo === 'priorizar' ? vistaPriorizar(app) : null,
     modo === 'roadmap' ? vistaRoadmap(app) : null,
+    modo === 'proceso' ? vistaProceso(app) : null,
     modo !== 'lista' ? null : h('dl', { class: 'cifras' },
       cifra('Historias', backlog.length),
       cifra('Puntos estimados', puntosDe(backlog)),

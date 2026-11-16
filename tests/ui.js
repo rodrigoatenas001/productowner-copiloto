@@ -225,6 +225,24 @@ const PRUEBAS = [
     todos('.ficha-bloqueo').find((b) => b.textContent === 'Bloquear').click(); await pausa(80);
     verdad(uno('.ficha.is-bloqueada') && uno('.aviso-bloqueos'), 'la ficha queda bloqueada con aviso');
   }],
+  ['Proceso: carriles, pasos conectados, diagrama y revisión', async () => {
+    await ir('backlog');
+    await pestana('Proceso');
+    await clic('Partir con Cliente, Negocio y Sistema');
+    igual(todos('.proceso-carriles li').length, 3, 'crea tres carriles');
+    await clic('+ Inicio');
+    await clic('+ Tarea');
+    await clic('+ Fin');
+    igual(todos('.proceso-nodo').length, 3, 'el diagrama dibuja los tres pasos');
+    igual(todos('.proceso-flecha').length, 2, 'un circuito lineal se conecta solo');
+    verdad(!todos('.proceso-aviso--error').length, 'sin errores con el circuito cerrado');
+    await clic('+ Decisión');
+    verdad(todos('.proceso-aviso--error').some((a) => a.textContent.includes('al menos dos salidas')), 'una decisión sin salidas es un error');
+    const salida = uno(`#paso-${todos('.proceso-paso').at(-1).id.slice(5)} .proceso-salidas select`);
+    salida.value = salida.options[1].value;
+    salida.dispatchEvent(new Event('change', { bubbles: true })); await pausa(80);
+    igual(todos('.proceso-flecha').length, 3, 'la salida elegida se dibuja');
+  }],
   ['Cómo funciona: seis etapas con estado y atajos a cada sección', async () => {
     await ir('guia');
     igual(todos('.guia-etapa').length, 6, 'muestra las seis etapas');

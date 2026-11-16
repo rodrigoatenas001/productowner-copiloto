@@ -686,3 +686,52 @@ h2 .termino { font-size: .78rem; }
 .guia-ciclo p { margin: 0; }
 .guia-ciclo-flecha { font-size: 1.6rem; line-height: 1; color: var(--cobre-texto); }
 @media (prefers-color-scheme: dark) { .guia-estado--hecho { color: #8fd3bf; } }
+
+/* ── Proceso (BPMN liviano) ── */
+.proceso { display: grid; gap: 18px; min-width: 0; }
+/* Sin esto la grilla se estira al ancho del diagrama y la página entera se desplaza */
+.proceso > * { min-width: 0; }
+.proceso > .ayuda { margin: 0; }
+.proceso-carriles { list-style: none; display: flex; flex-wrap: wrap; gap: 8px; margin: 0 0 12px; padding: 0; }
+.chip-editable { display: inline-flex; align-items: center; gap: 4px; padding: 2px 4px 2px 12px; border: 1px solid var(--niebla); border-radius: 999px; background: var(--papel); font-weight: 600; font-size: .9rem; }
+.fila-agregar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 10px; }
+.fila-agregar .campo { margin: 0; flex: 1 1 240px; }
+.proceso-figura { margin: 0; }
+.proceso-figura figcaption { margin-top: 6px; }
+.proceso-svg { display: block; font-family: var(--f-texto); }
+.proceso-carril { fill: var(--superficie); stroke: var(--niebla); }
+.proceso-carril-cabecera { fill: var(--papel); stroke: var(--niebla); }
+.proceso-carril-nombre { fill: var(--tinta-2); font: 600 12.5px var(--f-texto); }
+.proceso-flecha { fill: none; stroke: var(--pizarra); stroke-width: 1.6; }
+.proceso-punta { fill: var(--pizarra); }
+.proceso-etiqueta { fill: var(--cobre-texto); font: 600 11.5px var(--f-texto); paint-order: stroke; stroke: var(--superficie); stroke-width: 4px; }
+.proceso-nodo rect { fill: var(--superficie); stroke: var(--tinta-2); stroke-width: 1.6; }
+.proceso-nodo--sin rect { stroke: var(--cobre); stroke-dasharray: 5 4; }
+.proceso-nodo--decision polygon { fill: var(--ambar-suave); stroke: var(--ambar-texto); stroke-width: 1.6; }
+.proceso-nodo--inicio circle { fill: var(--bosque-suave); stroke: var(--bosque); stroke-width: 2; }
+.proceso-nodo--fin circle { fill: var(--alerta-suave); stroke: var(--alerta); stroke-width: 4; }
+.proceso-texto { fill: var(--texto); font-size: 12px; }
+.proceso-x { fill: var(--ambar-texto); font-size: 18px; font-weight: 700; }
+.proceso-cuenta { fill: var(--bosque); font: 600 10.5px var(--f-mono); }
+.proceso-pasos { list-style: none; margin: 0 0 14px; padding: 0; display: grid; gap: 6px; }
+.proceso-paso details { border: 1px solid var(--niebla); border-radius: var(--radio); background: var(--superficie); }
+.proceso-paso summary { display: flex; align-items: center; gap: 10px; padding: 10px 12px; cursor: pointer; min-height: 44px; }
+.proceso-numero { flex: none; width: 24px; text-align: right; font: 600 .8rem var(--f-mono); color: var(--pizarra); }
+.proceso-tipo { flex: none; font: 600 .7rem var(--f-mono); text-transform: uppercase; letter-spacing: .04em; padding: 2px 8px; border-radius: 999px; background: var(--niebla); color: var(--tinta-2); }
+.proceso-tipo--inicio { background: var(--bosque-suave); color: var(--bosque); }
+.proceso-tipo--decision { background: var(--ambar-suave); color: var(--ambar-texto); }
+.proceso-tipo--fin { background: var(--alerta-suave); color: var(--alerta); }
+.proceso-resumen { flex: 1; min-width: 0; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.proceso-meta { color: var(--pizarra); font-size: .85rem; }
+.proceso-editor { padding: 4px 14px 14px; border-top: 1px solid var(--niebla); }
+.proceso-salidas ul { list-style: none; margin: 0 0 10px; padding: 0; display: grid; gap: 6px; }
+.proceso-salidas li { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.proceso-salidas input { width: 120px; }
+.proceso-historias { display: grid; gap: 10px; }
+.proceso-epica { display: grid; gap: 4px; }
+.proceso-epica .eyebrow { margin: 0; }
+.proceso-avisos { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; }
+.proceso-aviso .btn-texto { text-align: left; }
+.proceso-aviso--error .chip { background: var(--alerta-suave); color: var(--alerta); }
+.proceso-aviso--aviso .chip { background: var(--ambar-suave); color: var(--ambar-texto); }
+@media (prefers-color-scheme: dark) { .proceso-tipo--fin, .proceso-aviso--error .chip { color: #f3a39b; } .proceso-nodo--fin circle { stroke: #f3a39b; } }

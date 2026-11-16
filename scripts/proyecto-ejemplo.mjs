@@ -9,6 +9,7 @@ import { nuevaRetro, agregarNota, votar, agregarAccion } from '../js/nucleo/retr
 import { bloquear } from '../js/nucleo/flujo.js';
 import { agregarDependencia } from '../js/nucleo/dependencias.js';
 import { notasAHistorias } from '../js/nucleo/historias.js';
+import { PROCESO_VACIO, agregarCarril, agregarPaso, conectar } from '../js/nucleo/proceso.js';
 
 const DIA = 86400000;
 const hoy = new Date();
@@ -130,6 +131,35 @@ for (const [inicio, prioridad, [valor, urgencia, riesgo], criterios, reglas] of 
   const x = p.historias.find((y) => y.quiero.startsWith(inicio));
   if (!x) throw new Error(`No encontré la historia que empieza con «${inicio}»`);
   Object.assign(x, { prioridad, priorizacion: { valor, urgencia, riesgo }, reglas, ...(criterios ? { criterios } : {}) });
+}
+
+// El circuito del pedido, levantado con Carla: de «quiero una torta» a la entrega
+{
+  const id = (inicio) => p.historias.find((y) => y.quiero.startsWith(inicio)).id;
+  let pr = ['Clienta', 'Tienda en línea', 'Carla (dueña)'].reduce(agregarCarril, PROCESO_VACIO);
+  const [clienta, tienda, duena] = pr.carriles.map((c) => c.id);
+  const pasos = [
+    ['inicio', 'Quiere una torta', clienta, []],
+    ['tarea', 'Elige productos y ve el detalle', clienta, ['ver el detalle', 'buscar y filtrar']],
+    ['tarea', 'Arma el carro y elige día y bloque de entrega', clienta, ['agregar productos al carro', 'elegir el día y el bloque']],
+    ['decision', '¿Hay cupo y stock?', tienda, []],
+    ['tarea', 'Paga con tarjeta o transferencia', clienta, ['pagar con tarjeta', 'pagar en cuotas']],
+    ['decision', '¿Pago aprobado?', tienda, []],
+    ['tarea', 'Confirma el pedido por correo', tienda, ['recibir un correo']],
+    ['tarea', 'Planifica la producción del día', duena, ['ver cuánto hornear', 'marcar un producto como agotado']],
+    ['tarea', 'Hornea y registra mermas', duena, ['registrar las mermas']],
+    ['tarea', 'Despacha o entrega en tienda', duena, ['ver los pedidos del día']],
+    ['fin', 'Recibe su pedido', clienta, []],
+  ];
+  for (const [tipo, texto, carril, historias] of pasos) {
+    pr = agregarPaso(pr, { tipo, texto, carril });
+    pr.pasos[pr.pasos.length - 1].historiaIds = historias.map(id);
+  }
+  const [, elegir, carro, cupo, pagar, aprobado, correo] = pr.pasos.map((x) => x.id);
+  pr = conectar(conectar(pr, cupo, pagar, 'Sí'), cupo, carro, 'No: otra fecha');
+  pr = conectar(conectar(pr, aprobado, correo, 'Sí'), aprobado, pagar, 'No: reintenta');
+  p.proceso = pr;
+  void elegir;
 }
 
 // OKR e hipótesis

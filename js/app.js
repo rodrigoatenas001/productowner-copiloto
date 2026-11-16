@@ -32,6 +32,8 @@ const VISTAS = {
 // Con el modo simple se ocultan del menú (siguen accesibles por enlace)
 const AVANZADAS = new Set(['retro', 'taller']);
 export const ID_EJEMPLO = 'ejemplo-pasteleria';
+// Súbela cuando cambie docs/ejemplo/pasteleria-carla.json, para reemplazar copias antiguas
+const VERSION_EJEMPLO = 2;
 
 // Para qué sirve cada sección: tooltip del menú y caja informativa (se puede cerrar)
 const AYUDAS = {
@@ -90,13 +92,22 @@ const app = {
     this.render();
   },
 
-  /** Abre el proyecto de ejemplo; si no está, lo descarga de docs/ejemplo. */
+  /**
+   * Abre el proyecto de ejemplo; si no está o es de una versión anterior, lo descarga de docs/ejemplo.
+   * El ejemplo es desechable, así que se reemplaza para que todos vean las mejoras.
+   */
   async cargarEjemplo() {
-    if (this.proyectos.some((p) => p.id === ID_EJEMPLO)) return this.abrir(ID_EJEMPLO);
+    const guardado = this.proyectos.some((p) => p.id === ID_EJEMPLO);
+    if (guardado && (await leerAjuste('ejemploVersion')) === VERSION_EJEMPLO) return this.abrir(ID_EJEMPLO);
     try {
       const resp = await fetch('./docs/ejemplo/pasteleria-carla.json');
       if (!resp.ok) throw new Error(`respuesta ${resp.status}`);
       const p = normalizarProyecto({ ...(await resp.json()), id: ID_EJEMPLO });
+      if (guardado) {
+        await borrarProyecto(ID_EJEMPLO);
+        this.proyectos = this.proyectos.filter((x) => x.id !== ID_EJEMPLO);
+      }
+      await guardarAjuste('ejemploVersion', VERSION_EJEMPLO);
       await this.importarProyecto(p);
     } catch (e) {
       avisar(`No se pudo cargar el ejemplo (${e.message}). Revisa tu conexión e inténtalo de nuevo.`, 'error');

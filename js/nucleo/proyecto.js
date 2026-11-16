@@ -8,6 +8,7 @@ import { normalizarOkr } from './okr.js';
 import { repoGithub } from './issues.js';
 import { FLUJO_INICIAL, normalizarFlujo, normalizarBloqueo } from './flujo.js';
 import { ALCANCE_VACIO, COMERCIAL_INICIAL, normalizarComercial } from './comercial.js';
+import { normalizarProceso, PROCESO_VACIO } from './proceso.js';
 
 export const VERSION_DATOS = 1;
 export const ESTADOS = { backlog: 'Backlog', todo: 'Por hacer', doing: 'En curso', review: 'En revisión', done: 'Hecho' };
@@ -32,6 +33,7 @@ export function nuevoProyecto(nombre = 'Mi proyecto') {
     comercial: { ...COMERCIAL_INICIAL },
     hitos: [],
     cambios: [],
+    proceso: structuredClone(PROCESO_VACIO),
     respaldado: null,
     creado: ahora,
     actualizado: ahora,
@@ -136,6 +138,7 @@ export function normalizarProyecto(datos) {
     ...normalizarOkr(datos.objetivos, datos.epicasInfo),
     vision: { vision: texto(datos.vision?.vision, 600), objetivoProducto: texto(datos.vision?.objetivoProducto, 300) },
     flujo: normalizarFlujo(datos.flujo),
+    proceso: normalizarProceso(datos.proceso, new Set(historias.map((h) => h.id))),
     ...normalizarComercial(datos, new Set(historias.map((h) => h.id))),
     respaldado: texto(datos.respaldado, 40) || null,
     creado: texto(datos.creado, 40) || new Date().toISOString(),
