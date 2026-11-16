@@ -340,6 +340,17 @@ const PRUEBAS = [
     escribir(selector, 'ejemplo-pasteleria', 'change');
     await esperar(() => uno('.aviso-ejemplo'), 'volvió al ejemplo');
   }],
+  ['Stakeholders: la matriz ubica a cada persona y avisa lo que falta', async () => {
+    await ir('cliente');
+    await pestana('Stakeholders');
+    const f = uno('.stakeholder-nuevo');
+    const [nombre] = f.querySelectorAll('input');
+    const [rol, poder, interes] = f.querySelectorAll('select');
+    escribir(nombre, 'Supervisor de prueba'); rol.value = 'opera'; poder.value = 'bajo'; interes.value = 'alto';
+    f.requestSubmit(); await pausa(120);
+    verdad(todos('.matriz-pi-cuadrante--informar li').some((li) => li.textContent.includes('Supervisor de prueba')), 'queda en «Mantener informados»');
+    verdad(todos('.stakeholders .proceso-aviso').some((a) => a.textContent.includes('Nadie aprueba')), 'avisa que falta quien aprueba');
+  }],
   ['Mapa clásico: el recorrido del proceso como columnas, con sus actores arriba', async () => {
     await ir('backlog');
     await pestana('Mapa');

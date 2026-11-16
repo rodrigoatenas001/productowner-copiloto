@@ -7,10 +7,11 @@ import {
   aceptarHito, registrarCambio, impactoCambio, aprobarCambio, rechazarCambio,
 } from '../nucleo/comercial.js';
 import { propuestaAlcance, actaAceptacion, respuestaCambio, detalleHoras } from '../nucleo/documentos.js';
+import { vistaStakeholders } from './stakeholders.js';
 
 let pestana = 'alcance';
 
-const PESTANAS = { alcance: 'Alcance', cotizacion: 'Cotización', hitos: 'Hitos de pago', cambios: 'Cambios' };
+const PESTANAS = { stakeholders: 'Stakeholders', alcance: 'Alcance', cotizacion: 'Cotización', hitos: 'Hitos de pago', cambios: 'Cambios' };
 
 /** Abre una pestaña de esta sección (lo usa la guía «Cómo funciona»). */
 export function abrirPestana(clave) { pestana = clave; }
@@ -20,13 +21,13 @@ export function vistaCliente(app) {
     h('header', { class: 'vista-cabecera' },
       h('p', { class: 'eyebrow' }, app.proyecto.nombre),
       h('h1', {}, 'Cliente'),
-      h('p', { class: 'bajada' }, 'Lo que acuerdas con tu cliente: qué incluye y qué no, cuánto cuesta, cómo se paga y qué pasa cuando pide cambios. Todo queda aquí y se comparte como documento.')),
+      h('p', { class: 'bajada' }, 'Lo que acuerdas con tu cliente: quiénes participan, qué incluye y qué no, cuánto cuesta, cómo se paga y qué pasa cuando pide cambios. Todo queda aquí y se comparte como documento.')),
     h('div', { class: 'pestanas', role: 'tablist', 'aria-label': 'Secciones del cliente' },
       Object.entries(PESTANAS).map(([clave, texto]) => h('button', {
         type: 'button', role: 'tab', class: 'pestana', 'aria-selected': String(pestana === clave),
         onclick: () => { pestana = clave; app.render(); },
       }, texto))),
-    { alcance, cotizacion: vistaCotizacion, hitos, cambios }[pestana](app),
+    { stakeholders: vistaStakeholders, alcance, cotizacion: vistaCotizacion, hitos, cambios }[pestana](app),
     h('p', { class: 'ayuda aviso-legal' }, 'Los documentos son borradores para revisar y adaptar: no reemplazan un contrato ni asesoría legal.'));
 }
 

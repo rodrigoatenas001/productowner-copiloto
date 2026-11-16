@@ -184,3 +184,21 @@ test('VSM: tiempo total, eficiencia y cuello de botella; las tareas sin tiempo n
   assert.equal(flujoDeValor(p).medidos, 0, 'sin tiempos anotados no hay flujo que medir');
   assert.equal(flujoDeValor(p).cuello, null);
 });
+
+test('stakeholders: cuadrantes poder/interés y avisos de lo que falta', async () => {
+  const { nuevoStakeholder, cuadranteDe, revisarStakeholders, normalizarStakeholders } = await import('../js/nucleo/stakeholders.js');
+  const { p } = pedido();
+  const gerente = nuevoStakeholder({ nombre: 'Gerente', rol: 'aprueba', poder: 'alto', interes: 'bajo' });
+  const supervisora = nuevoStakeholder({ nombre: 'Supervisora', rol: 'opera', poder: 'bajo', interes: 'bajo', carril: p.carriles[0].id });
+  assert.equal(cuadranteDe(gerente), 'satisfacer');
+  assert.equal(cuadranteDe({ poder: 'alto', interes: 'alto' }), 'gestionar');
+  const textos = revisarStakeholders([gerente, supervisora], p).map((a) => a.texto).join('\n');
+  assert.match(textos, /Nadie mantiene el sistema/);
+  assert.match(textos, /¿Quién habla por «Tienda»/);
+  assert.match(textos, /Supervisora opera en terreno pero tiene interés bajo/);
+  assert.doesNotMatch(textos, /Nadie aprueba/);
+  assert.equal(normalizarStakeholders([{ nombre: 'X', carril: 'no-existe', rol: 'raro' }])[0].carril, null);
+  assert.deepEqual(revisarStakeholders([], p), [], 'sin stakeholders todavía, no hay avisos');
+  const proyecto = normalizarProyecto(JSON.parse(JSON.stringify({ ...nuevoProyecto('X'), proceso: p, stakeholders: [supervisora] })));
+  assert.equal(proyecto.stakeholders[0].carril, p.carriles[0].id, 'conserva el enlace al carril');
+});

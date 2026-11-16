@@ -7,6 +7,7 @@ import { wsjf } from './priorizacion.js';
 import { procesoDe, TIPOS_PASO, revisarProceso, flujoDeValor, formatoDuracion } from './proceso.js';
 import { libroExcel } from './xlsx.js';
 import { hipotesis } from './okr.js';
+import { stakeholdersDe, cuadranteDe, CUADRANTES_PI, ROLES_STAKEHOLDER, NIVELES } from './stakeholders.js';
 
 const ESTADO_SPRINT = { planificado: 'Planificado', activo: 'En curso', cerrado: 'Cerrado' };
 const ESTADO_HITO = { pendiente: 'Pendiente', entregado: 'Entregado', aceptado: 'Aceptado' };
@@ -97,6 +98,16 @@ export function excelProyecto(proyecto) {
         hipotesis(x) || ''];
     }) },
   ];
+  const personas = stakeholdersDe(proyecto);
+  if (personas.length) {
+    const actorDe = Object.fromEntries(ctx.proceso.carriles.map((ca) => [ca.id, ca.nombre]));
+    hojas.push({ nombre: 'Stakeholders', titulo: 'Stakeholders', nota: 'Matriz poder / interés: qué hacer con cada grupo.',
+      columnas: [{ titulo: 'Nombre', ancho: 22 }, { titulo: 'Cargo', ancho: 22 }, { titulo: 'Rol', ancho: 26 }, { titulo: 'Poder', ancho: 8 }, { titulo: 'Interés', ancho: 8 }, { titulo: 'Cuadrante', ancho: 20 }, { titulo: 'Estrategia', ancho: 60 }, { titulo: 'Actor del proceso', ancho: 18 }],
+      filas: personas.map((s) => {
+        const c = CUADRANTES_PI[cuadranteDe(s)];
+        return [s.nombre, s.cargo, ROLES_STAKEHOLDER[s.rol], { v: NIVELES[s.poder], estilo: 'centro' }, { v: NIVELES[s.interes], estilo: 'centro' }, c.nombre, c.estrategia, actorDe[s.carril] || ''];
+      }) });
+  }
   if (ctx.proceso.pasos.length) {
     const actor = Object.fromEntries(ctx.proceso.carriles.map((ca) => [ca.id, ca.nombre]));
     const n = new Map(ctx.proceso.pasos.map((p, i) => [p.id, i + 1]));
@@ -160,6 +171,18 @@ export function documentoProyecto(proyecto, hoy = new Date()) {
     ['Historias', `${proyecto.historias.length} (${hechas.length} terminadas)`],
     ['Avance', `${avance}% de los puntos estimados`],
   ] });
+
+  const personas = stakeholdersDe(proyecto);
+  if (personas.length) {
+    seccion('Stakeholders');
+    b.push({ t: 'p', texto: 'Quiénes participan, según su poder sobre el proyecto y su interés en él, y cómo se trabaja con cada grupo.' });
+    for (const [clave, c] of Object.entries(CUADRANTES_PI)) {
+      const aqui = personas.filter((s) => cuadranteDe(s) === clave);
+      if (!aqui.length) continue;
+      b.push({ t: 'h2', texto: c.nombre }, { t: 'p', nota: true, texto: c.estrategia },
+        { t: 'lista', items: aqui.map((s) => `${s.nombre}${s.cargo ? `, ${s.cargo}` : ''} (${ROLES_STAKEHOLDER[s.rol].toLowerCase()})`) });
+    }
+  }
 
   const a = alcanceDe(proyecto);
   if (a.incluye.length || a.noIncluye.length || a.supuestos.length || a.cliente.length) {

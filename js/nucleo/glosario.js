@@ -2,6 +2,10 @@
 // Definiciones cortas, en lenguaje simple y con un ejemplo cuando ayuda.
 
 export const GLOSARIO = {
+  stakeholders: {
+    termino: 'Matriz de stakeholders (poder / interés)',
+    texto: 'Ubica a cada persona según su poder sobre el proyecto y su interés en él. Alto y alto: gestionar de cerca. Alto poder y bajo interés: mantener satisfechos. Bajo poder y alto interés (muchas veces quienes operan): mantener informados y escucharlos.',
+  },
   vsm: {
     termino: 'Flujo de valor (VSM)',
     texto: 'Mapa del proceso de punta a punta con el tiempo que se trabaja y el que se espera en cada paso. La eficiencia es trabajo dividido por tiempo total. Muestra el cuello de botella real antes de automatizar algo que no era el problema.',
