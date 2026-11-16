@@ -69,10 +69,11 @@ Pensado para **Product Owners independientes**: una persona que trabaja con uno 
 - **Cómo funciona**: el mapa del flujo en seis etapas (levantar, acordar, ordenar, construir, entregar y aprender), con el estado de tu proyecto en cada una y un atajo a la sección donde se hace.
 - **Glosario**: un botón **?** junto a cada término (INVEST, MoSCoW, WSJF, Definition of Ready, BPMN…) con su definición y un ejemplo.
 - **Pantallas anchas**: el mapa de historias, el proceso, el roadmap y el tablero usan todo el ancho; los textos quedan a un ancho cómodo de leer.
+- **Proyectos grandes**: probado con 250 y 1000 historias. Con 250 todo responde en menos de 100 ms; la lista y Priorizar muestran de a 100 historias («Mostrar 100 más») y la búsqueda recorre todo el backlog.
 - Con el ejemplo abierto, **«Crear mi proyecto»** parte tu propio proyecto, para no mezclar tu trabajo con el de Carla.
 - Funciona **sin IA**; si quieres, conecta la tuya (Ollama en tu equipo o tu propia clave).
 - **Deshacer**, recordatorio de **respaldo** y todo guardado en tu navegador.
-- **Usar en varios equipos** (Chrome y Edge de escritorio): elige en Ajustes una carpeta que tu nube sincronice (OneDrive, Google Drive o Dropbox). Cada proyecto queda como un archivo; en el otro equipo eliges la misma carpeta y aparecen todos. Si editaste el mismo proyecto en los dos lados, te pregunta cuál conservar y la otra versión queda en la carpeta `papelera`; los proyectos borrados también van ahí.
+- **Usar en varios equipos** (Chrome y Edge de escritorio): elige en Ajustes una carpeta que tu nube sincronice (OneDrive, Google Drive o Dropbox). Cada proyecto queda como un archivo; en el otro equipo eliges la misma carpeta y aparecen todos. Si editaste el mismo proyecto en los dos lados, te pregunta cuál conservar y la otra versión queda en la carpeta `papelera`; los proyectos borrados también van ahí. Si la carpeta se mueve o se borra, avisa y te deja elegirla de nuevo; mientras tanto, los cambios quedan en el navegador.
 
 ## Así se ve
 
